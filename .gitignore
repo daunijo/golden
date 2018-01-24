@@ -1,0 +1,6 @@
+*.pyc
+*.py~
+*.com.js
+*.DS_Store
+*.swp
+*.egg-info
