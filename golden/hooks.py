@@ -10,12 +10,14 @@ app_icon = "fa fa-rocket"
 app_color = "#F39C12"
 app_email = "develop@ridhosribumi.com"
 app_license = "RSS"
+fixtures = ["Custom Script", "Custom Field"]
 
 # Includes in <head>
 # ------------------
 
 # include js, css files in header of desk.html
 # app_include_css = "/assets/golden/css/golden.css"
+app_include_css = "/files/custom.css"
 # app_include_js = "/assets/golden/js/golden.js"
 
 # include js, css files in header of web template
@@ -119,4 +121,3 @@ app_license = "RSS"
 # override_whitelisted_methods = {
 # 	"frappe.desk.doctype.event.event.get_events": "golden.event.get_events"
 # }
-
