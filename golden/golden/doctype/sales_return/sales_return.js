@@ -173,7 +173,7 @@ cur_frm.set_query("customer_address", function(frm) {
 		}
 	}
 });
-cur_frm.set_query("item_code", "items",  function (doc, cdt, cdn) {
+cur_frm.set_query("item_code", "items", function (doc, cdt, cdn) {
 	var c_doc= locals[cdt][cdn];
 	return {
 		query: "golden.golden.selling.item_query",
@@ -182,7 +182,7 @@ cur_frm.set_query("item_code", "items",  function (doc, cdt, cdn) {
 		}
 	}
 });
-cur_frm.set_query("reference_name", "references",  function (doc, cdt, cdn) {
+cur_frm.set_query("reference_name", "references", function (doc, cdt, cdn) {
 	var c_doc= locals[cdt][cdn];
 	return {
 		filters: {

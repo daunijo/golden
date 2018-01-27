@@ -4,7 +4,7 @@ from frappe import _
 def get_data():
 	return [
 		{
-			"label": _("Purchasing"),
+			"label": _("Buying"),
 			"items": [
 				{
 					"type": "doctype",
@@ -20,6 +20,21 @@ def get_data():
 					"type": "doctype",
 					"name": "Sales Return",
 					"description": _("Sales Return.")
+				},
+			]
+		},
+		{
+			"label": _("Stock"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Picking",
+					"description": _("Picking.")
+				},
+				{
+					"type": "doctype",
+					"name": "ITO",
+					"description": _("ITO.")
 				},
 			]
 		},
