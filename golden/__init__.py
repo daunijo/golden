@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.4.0'
+__version__ = '1.4.1'
 
+# 1.4.1
+#   - Update ITO when submit Stock Entry
 # 0.4.0
 #   - Add ITO Doctype
 # 0.3.0
