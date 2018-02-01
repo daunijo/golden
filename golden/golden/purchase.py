@@ -7,7 +7,7 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.desk.reportview import get_match_cond, get_filters_cond
 
 def address_query(doctype, txt, searchfield, start, page_len, filters):
-    return frappe.db.sql("""select a.`name`, a.address_title from `tabAddress` a
+    return frappe.db.sql("""select a.`name`, a.city, a.country from `tabAddress` a
         inner join `tabDynamic Link` b on a.`name` = b.parent
         where a.docstatus != '2'
             and (a.address_title like %(txt)s or a.`name` like %(txt)s)

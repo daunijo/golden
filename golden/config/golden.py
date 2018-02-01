@@ -36,6 +36,11 @@ def get_data():
 					"name": "ITO",
 					"description": _("ITO.")
 				},
+				{
+					"type": "doctype",
+					"name": "Packing",
+					"description": _("Packing.")
+				},
 			]
 		},
 	]
