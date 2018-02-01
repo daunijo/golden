@@ -59,32 +59,37 @@ def submit_sales_order_3(doc, method):
                 ito.insert()
 
 def submit_sales_order_4(doc, method):
-    ito_id = frappe.db.sql("""select `name` from `tabITO` where docstatus = '0'""")[0][0]
-    warehouse_detail = frappe.db.sql("""select `name` from `tabWarehouse` where is_group = '0' and type = 'Location' and parent is not null""", as_dict=1)
-    for wd in warehouse_detail:
-        bins = frappe.db.sql("""select * from `tabBin` where warehouse = %s and (projected_qty + ito_qty) < 0""", wd.name, as_dict=1)
-        for row in bins:
-            check_ito_item = frappe.db.sql("""select count(*) from `tabITO Item` where parent = %s and item_code = %s and location = %s""", (ito_id, row.item_code, row.warehouse))[0][0]
-            if flt(check_ito_item) == 0:
-                item_name = frappe.db.get_value("Item", {"item_code": row.item_code}, "item_name")
-                ito_item = frappe.get_doc({
-                	"doctype": "ITO Item",
-        			"parent": ito_id,
-        			"parentfield": "items",
-        			"parenttype": "ITO",
-                	"item_code": row.item_code,
-                	"item_name": item_name,
-                	"qty_need": (flt(row.projected_qty) * -1) - flt(row.ito_qty),
-                    "stock_uom": row.stock_uom,
-                    "qty":0,
-                    "location": row.warehouse,
-                    "bin": row.name
-                })
-                ito_item.insert()
-            else:
-                ito_item = frappe.get_doc("ITO Item", {"parent": ito_id, "item_code": row.item_code, "location": row.warehouse})
-                ito_item.qty_need = (flt(row.projected_qty) * -1) - flt(row.ito_qty)
-                ito_item.save()
+    count_ito = frappe.db.sql("""select count(*) from `tabITO` where docstatus = '0'""")[0][0]
+    if flt(count_ito) == 1:
+        ito_id = frappe.db.sql("""select `name` from `tabITO` where docstatus = '0'""")[0][0]
+        warehouse_detail = frappe.db.sql("""select `name` from `tabWarehouse` where is_group = '0' and type = 'Location' and parent is not null""", as_dict=1)
+        for wd in warehouse_detail:
+            bins = frappe.db.sql("""select * from `tabBin` where warehouse = %s and (projected_qty + ito_qty) < 0""", wd.name, as_dict=1)
+            for row in bins:
+                check_ito_item = frappe.db.sql("""select count(*) from `tabITO Item` where parent = %s and item_code = %s and location = %s""", (ito_id, row.item_code, row.warehouse))[0][0]
+                if flt(check_ito_item) == 0:
+                    item_name = frappe.db.get_value("Item", {"item_code": row.item_code}, "item_name")
+                    ito_item = frappe.get_doc({
+                    	"doctype": "ITO Item",
+            			"parent": ito_id,
+            			"parentfield": "items",
+            			"parenttype": "ITO",
+                    	"item_code": row.item_code,
+                    	"item_name": item_name,
+                    	"qty_need": (flt(row.projected_qty) * -1) - flt(row.ito_qty),
+                        "stock_uom": row.stock_uom,
+                        "qty":0,
+                        "location": row.warehouse,
+                        "bin": row.name
+                    })
+                    ito_item.insert()
+                else:
+                    ito_item = frappe.get_doc("ITO Item", {"parent": ito_id, "item_code": row.item_code, "location": row.warehouse})
+                    ito_item.qty_need = (flt(row.projected_qty) * -1) - flt(row.ito_qty)
+                    ito_item.save()
+
+def submit_sales_order_5(doc, method):
+	pass
 
 def cancel_sales_order(doc, method):
     pick = frappe.db.sql("""select `name` from `tabPicking` where docstatus = '1' and sales_order = %s""", doc.name, as_dict=1)

@@ -31,3 +31,34 @@ def make_material_transfer(source_name, target_doc=None):
 		},
 	}, target_doc, set_missing_values)
     return doc
+
+@frappe.whitelist()
+def make_packing_list(source_name, target_doc=None):
+    def set_missing_values(source, target):
+        target.run_method("set_missing_values")
+
+    doc = get_mapped_doc("Sales Order", source_name, {
+		"Sales Order": {
+			"doctype": "Packing",
+			"validation": {
+				"docstatus": ["=", 1],
+			},
+		},
+		"Sales Order Item": {
+			"doctype": "Packing Item",
+			"field_map":{
+				"parent": "against_sales_order"
+			},
+		},
+	}, target_doc, set_missing_values)
+    return doc
+
+@frappe.whitelist()
+def get_picking(sales_order):
+    picking_list = []
+    pick = frappe.db.sql("""select `name` from `tabPicking` where docstatus = '1' and sales_order = %s""", sales_order, as_dict=1)
+    for picking in pick:
+        picking_list.append(frappe._dict({
+            'picking': picking.name,
+        }))
+    return picking_list
