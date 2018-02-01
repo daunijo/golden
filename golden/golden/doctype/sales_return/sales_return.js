@@ -1,7 +1,7 @@
 // Copyright (c) 2018, RSS and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on('Purchase Return', {
+frappe.ui.form.on('Sales Return', {
 	refresh: function(frm) {
 		frm.events.set_read_only(frm);
 	},
@@ -17,25 +17,19 @@ frappe.ui.form.on('Purchase Return', {
 			frm.set_df_property("posting_time", "read_only", true);
 		}
 	},
-	supplier: function(frm){
+	customer: function(frm){
 		$.each(frm.doc.references, function(i, d) {
-			d.party = frm.doc.supplier;
+			d.party = frm.doc.customer;
 		})
 		frm.refresh_fields("references");
 	},
-	from_warehouse: function(frm){
-		$.each(frm.doc.items, function(i, d) {
-			d.s_warehouse = frm.doc.from_warehouse;
-		})
-		frm.refresh_fields("items");
-	},
-	supplier_address: function(frm){
-		if(frm.doc.supplier_address != undefined){
+	customer_address: function(frm){
+		if(frm.doc.customer_address != undefined){
 			frappe.call({
 				method: "frappe.client.get",
 				args: {
 					doctype: "Address",
-					name: frm.doc.supplier_address
+					name: frm.doc.customer_address
 				},
 				callback: function (data) {
 					if(data.message.address_line1 != undefined){
@@ -71,18 +65,24 @@ frappe.ui.form.on('Purchase Return', {
 			frm.set_value("address_display", "");
 		}
 	},
-	debit_account: function(frm){
+	to_warehouse: function(frm){
+		$.each(frm.doc.items, function(i, d) {
+			d.t_warehouse = frm.doc.to_warehouse;
+		})
+		frm.refresh_fields("items");
+	},
+	credit_account: function(frm){
 		$.each(frm.doc.references, function(i, d) {
-			d.account = frm.doc.debit_account;
+			d.account = frm.doc.credit_account;
 		})
 		frm.refresh_fields("references");
 	},
 });
-//Purchase Return Detail (items)
-frappe.ui.form.on('Purchase Return Detail', {
+//Sales Return Detail (items)
+frappe.ui.form.on('Sales Return Detail', {
 	items_add: function(frm, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
-		if(!row.s_warehouse) row.s_warehouse = frm.doc.from_warehouse;
+		if(!row.t_warehouse) row.t_warehouse = frm.doc.to_warehouse;
 		frm.refresh_fields("items");
 	},
 	items_remove: function(frm, cdt, cdn) {
@@ -155,8 +155,7 @@ frappe.ui.form.on('Purchase Return Detail', {
 			});
 		}
 	},
-
-});
+})
 var calculate_total_quantity = function(frm) {
 	var total_quantity = frappe.utils.sum(
 		(frm.doc.items || []).map(function(i) {
@@ -165,49 +164,41 @@ var calculate_total_quantity = function(frm) {
 	);
 	frm.set_value("total", total_quantity);
 }
-var calculate_total_return = function(frm) {
-	var total_return = frappe.utils.sum(
-		(frm.doc.references || []).map(function(i) {
-			return (flt(i.debit_in_account_currency));
-		})
-	);
-	frm.set_value("total_return", total_return);
-}
 
-cur_frm.set_query("supplier_address", function(frm) {
+cur_frm.set_query("customer_address", function(frm) {
 	return {
 		query: "golden.golden.purchase.address_query",
 		filters: {
-			'link_name': cur_frm.doc.supplier
+			'link_name': cur_frm.doc.customer
 		}
 	}
 });
-cur_frm.set_query("item_code", "items",  function (doc, cdt, cdn) {
+cur_frm.set_query("item_code", "items", function (doc, cdt, cdn) {
 	var c_doc= locals[cdt][cdn];
 	return {
-		query: "golden.golden.purchase.item_query",
+		query: "golden.golden.selling.item_query",
 		filters: {
-			'supplier': cur_frm.doc.supplier
+			'customer': cur_frm.doc.customer
 		}
 	}
 });
-cur_frm.set_query("reference_name", "references",  function (doc, cdt, cdn) {
+cur_frm.set_query("reference_name", "references", function (doc, cdt, cdn) {
 	var c_doc= locals[cdt][cdn];
 	return {
 		filters: {
-			'supplier': cur_frm.doc.supplier,
+			'customer': cur_frm.doc.customer,
 			'docstatus': 1,
 			'status': ["!=", "Paid"]
 		}
 	}
 });
-frappe.ui.form.on("Purchase Return Reference", {
+frappe.ui.form.on("Sales Return Reference", {
 	reference_name: function(frm, cdt, cdn) {
 		row = locals[cdt][cdn];
 		frappe.call({
 			"method": "frappe.client.get",
 			args: {
-				doctype: "Purchase Invoice",
+				doctype: "Sales Invoice",
 				name: row.reference_name
 			},
 			callback: function (data) {
@@ -216,12 +207,12 @@ frappe.ui.form.on("Purchase Return Reference", {
 		})
 		calculate_total_return(frm, cdt, cdn);
 	},
-	debit_in_account_currency: function(frm, cdt, cdn) {
+	credit_in_account_currency: function(frm, cdt, cdn) {
 		calculate_total_return(frm, cdt, cdn);
 	},
 	references_add: function(frm, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
-		if(!row.party) row.party = frm.doc.supplier;
+		if(!row.party) row.party = frm.doc.customer;
 		if(!row.account) row.account = frm.doc.debit_account;
 		frm.refresh_fields("references");
 	},
@@ -229,3 +220,11 @@ frappe.ui.form.on("Purchase Return Reference", {
 		calculate_total_return(frm, cdt, cdn);
 	},
 })
+var calculate_total_return = function(frm) {
+	var total_return = frappe.utils.sum(
+		(frm.doc.references || []).map(function(i) {
+			return (flt(i.credit_in_account_currency));
+		})
+	);
+	frm.set_value("total_return", total_return);
+}

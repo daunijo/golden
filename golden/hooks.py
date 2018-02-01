@@ -81,13 +81,33 @@ app_include_css = "/files/custom.css"
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
+doc_events = {
+    "Sales Order": {
+        "on_submit": [
+            "golden.golden.reference.submit_sales_order",
+            "golden.golden.reference.submit_sales_order_2",
+            "golden.golden.reference.submit_sales_order_3",
+            "golden.golden.reference.submit_sales_order_4"
+        ],
+        "on_cancel": [
+            "golden.golden.reference.cancel_sales_order",
+            "golden.golden.reference.cancel_sales_order_2",
+            "golden.golden.reference.cancel_sales_order_3"
+        ]
+    },
+    "Stock Entry": {
+        "on_submit": [
+            "golden.golden.reference.submit_stock_entry",
+            "golden.golden.reference.cancel_sales_order_2",
+            "golden.golden.reference.cancel_sales_order_3"
+        ]
+    }
 # 	"*": {
 # 		"on_update": "method",
 # 		"on_cancel": "method",
 # 		"on_trash": "method"
 #	}
-# }
+}
 
 # Scheduled Tasks
 # ---------------
