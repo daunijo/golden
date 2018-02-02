@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.5.1'
+__version__ = '1.6.0'
 
+# 1.6.0
+#   - Add Delivery Keeptrack Doctype
+# 1.5.2
+#   - Update on submit in Packing
+#   - Fix create Delivery Note automatically from Packing
 # 1.5.1
 #   - Fix submit_sales_order_4
 # 1.5.0

@@ -41,6 +41,11 @@ def get_data():
 					"name": "Packing",
 					"description": _("Packing.")
 				},
+				{
+					"type": "doctype",
+					"name": "Delivery Keeptrack",
+					"description": _("Delivery Keeptrack.")
+				},
 			]
 		},
 	]
