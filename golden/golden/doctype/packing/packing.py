@@ -5,10 +5,11 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe.utils import nowdate, cstr, flt, now, getdate, add_months
+from frappe.utils import nowdate, cstr, flt
 from frappe import msgprint, _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from frappe.model import display_fieldtypes
 
 class Packing(Document):
 	def validate(self):
@@ -25,29 +26,42 @@ class Packing(Document):
 			"customer": self.customer,
 			"posting_date": self.posting_date,
 			"posting_time": self.posting_time,
-			"shipping_address_name": self.shipping_address_name,
-			"currency": self.currency,
-			"conversion_rate": self.conversion_rate,
-			"selling_price_list": self.selling_price_list,
-			"price_list_currency": self.price_list_currency,
-			"plc_conversion_rate": self.plc_conversion_rate,
-			"ignore_pricing_rule": self.ignore_pricing_rule,
-			"items": self.items,
-			"taxes_and_charges": self.taxes_and_charges,
-			"taxes": self.taxes,
-			"total_taxes_and_charges": self.total_taxes_and_charges,
-			"base_total_taxes_and_charges": self.base_total_taxes_and_charges,
-			"total": self.total,
-			"base_total": self.base_total,
-			"net_total": self.net_total,
-			"base_net_total": self.base_net_total,
-			"base_grand_total": self.base_grand_total,
-			"grand_total": self.grand_total,
-			"base_rounding_adjustment": self.base_rounding_adjustment,
-			"base_rounded_total": self.base_rounded_total,
-			"rounded_total": self.rounded_total
+			"set_posting_time": self.set_posting_time,
+			"taxes_and_charges": self.taxes_and_charges
 		})
-		delivery_note.ignore_permissions = True
 		delivery_note.insert()
-#		se = frappe.get_doc("Delivery Note", {"sales_return": self.name})
-#		se.submit()
+		for row in self.items:
+			dni = frappe.get_doc({
+				"doctype": "Delivery Note Item",
+				"parent": delivery_note.name,
+				"parentfield": "items",
+				"parenttype": "Delivery Note",
+				"item_code": row.item_code,
+				"item_name": row.item_name,
+				"description": row.description,
+				"qty": row.qty,
+				"uom": row.uom,
+				"conversion_factor": row.conversion_factor,
+				"rate": row.rate,
+				"warehouse": row.warehouse,
+				"against_sales_order": row.against_sales_order,
+				"so_detail": row.so_detail
+			})
+			dni.insert()
+		if not self.taxes_and_charges and flt(self.total_taxes_and_charges) != 0:
+			for tax in self.taxes:
+				dnt = frappe.get_doc({
+					"doctype": "Sales Taxes and Charges",
+					"parent": delivery_note.name,
+					"parentfield": "taxes",
+					"parenttype": "Delivery Note",
+					"charge_type": tax.charge_type,
+					"account_head": tax.account_head,
+					"cost_center": tax.cost_center,
+					"description": tax.description,
+					"rate": tax.rate,
+
+				})
+				dnt.insert()
+		dn = frappe.get_doc("Delivery Note", delivery_note.name)
+		dn.submit()
