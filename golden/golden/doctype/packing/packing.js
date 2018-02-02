@@ -44,6 +44,14 @@ frappe.ui.form.on('Packing', {
 			}
 		});
 	},
+	barcode: function(frm, cdt, cdn){
+		var bcode="<img src='http://www.barcodes4.me/barcode/c128a/myfilename.png?value="+frm.doc.barcode+"'>"
+//		var bcode="<img src='http://www.barcodes4.me/barcode/c128b/"+frm.doc.barcode+".gif'>"
+
+		var html="<div class='row'><div class='col-md-6'>"+bcode+"</div></div>"
+		$(cur_frm.fields_dict.barcode_img.wrapper).html(html);
+		frm.refresh_fields();
+	},
 	refresh: function(frm) {
 		frm.events.set_read_only(frm);
 	},
@@ -73,6 +81,9 @@ frappe.ui.form.on('Packing', {
 				frm.set_value("customer_name", data.message.customer_name);
 			}
 		})
+	},
+	posting_date: function(frm){
+		frm.set_value("transaction_date", frm.doc.posting_date);
 	},
 	shipping_address_name: function(frm){
 		if(frm.doc.shipping_address_name != undefined){

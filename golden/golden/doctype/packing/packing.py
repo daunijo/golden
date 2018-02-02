@@ -13,9 +13,17 @@ from frappe.model import display_fieldtypes
 
 class Packing(Document):
 	def validate(self):
+		self.check_items()
+		self.update_so()
+
+	def check_items(self):
 		for row in self.items:
 			if flt(row.qty_packing) <= 0:
 				frappe.throw(_("Qty Packing is mandatory in item line {0}").format(row.idx))
+
+	def update_so(self):
+		if self.is_new() and self.sales_order:
+			frappe.db.sql("""update `tabSales Order` set golden_status = 'Pack' where `name` = %s""", self.sales_order)
 
 	def on_submit(self):
 		self.delivery_note_insert()
@@ -65,3 +73,7 @@ class Packing(Document):
 				dnt.insert()
 		dn = frappe.get_doc("Delivery Note", delivery_note.name)
 		dn.submit()
+
+	def on_cancel(self):
+		if self.sales_order:
+			frappe.db.sql("""update `tabSales Order` set golden_status = 'Pick' where `name` = %s""", self.sales_order)

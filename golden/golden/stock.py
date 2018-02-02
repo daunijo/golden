@@ -47,7 +47,8 @@ def make_packing_list(source_name, target_doc=None):
 		"Sales Order Item": {
 			"doctype": "Packing Item",
 			"field_map":{
-				"parent": "against_sales_order"
+				"parent": "against_sales_order",
+                "name": "so_detail"
 			},
 		},
 	}, target_doc, set_missing_values)
@@ -62,3 +63,18 @@ def get_picking(sales_order):
             'picking': picking.name,
         }))
     return picking_list
+
+@frappe.whitelist()
+def get_packing_list(source_name, target_doc=None):
+    def set_missing_values(source, target):
+        target.run_method("set_missing_values")
+
+    doc = get_mapped_doc("Packing", source_name, {
+		"Packing": {
+			"doctype": "Delivery Keeptrack Detail",
+			"validation": {
+				"docstatus": ["=", 1],
+			},
+		},
+	}, target_doc, set_missing_values)
+    return doc
