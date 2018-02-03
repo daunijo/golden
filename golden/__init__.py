@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.6.0'
+__version__ = '1.6.1'
 
+# 1.6.1
+#   - Update barcodes
+#   - Update script automatically create & submit DN when Picking submit
+#   - Few minor fix
+#   - Update Delivery Keeptrack
 # 1.6.0
 #   - Add Delivery Keeptrack Doctype
 # 1.5.2

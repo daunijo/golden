@@ -71,10 +71,14 @@ def get_packing_list(source_name, target_doc=None):
 
     doc = get_mapped_doc("Packing", source_name, {
 		"Packing": {
-			"doctype": "Delivery Keeptrack Detail",
+			"doctype": "Delivery Keeptrack",
 			"validation": {
 				"docstatus": ["=", 1],
 			},
+            "field_no_map": ["posting_date", "posting_time", "set_posting_time", "total_box"]
+		},
+		"Packing Simple": {
+			"doctype": "Delivery Keeptrack Detail",
 		},
 	}, target_doc, set_missing_values)
     return doc

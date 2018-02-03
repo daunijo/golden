@@ -15,6 +15,7 @@ class Packing(Document):
 	def validate(self):
 		self.check_items()
 		self.update_so()
+		self.update_total_box()
 
 	def check_items(self):
 		for row in self.items:
@@ -25,25 +26,33 @@ class Packing(Document):
 		if self.is_new() and self.sales_order:
 			frappe.db.sql("""update `tabSales Order` set golden_status = 'Pack' where `name` = %s""", self.sales_order)
 
+	def update_total_box(self):
+		maks = 0
+		for row in self.items:
+			if flt(row.maks_box) >= flt(maks):
+				maks = row.maks_box
+
+		frappe.db.set(self, 'total_box', maks)
+
 	def on_submit(self):
 		self.delivery_note_insert()
+		self.update_status()
+		self.update_packing_simple()
 
 	def delivery_note_insert(self):
 		delivery_note = frappe.get_doc({
 			"doctype": "Delivery Note",
 			"customer": self.customer,
+			"packing": self.name,
 			"posting_date": self.posting_date,
 			"posting_time": self.posting_time,
 			"set_posting_time": self.set_posting_time,
 			"taxes_and_charges": self.taxes_and_charges
 		})
 		delivery_note.insert()
+		dn = frappe.get_doc("Delivery Note", delivery_note.name)
 		for row in self.items:
-			dni = frappe.get_doc({
-				"doctype": "Delivery Note Item",
-				"parent": delivery_note.name,
-				"parentfield": "items",
-				"parenttype": "Delivery Note",
+			dn.append("items", {
 				"item_code": row.item_code,
 				"item_name": row.item_name,
 				"description": row.description,
@@ -55,25 +64,42 @@ class Packing(Document):
 				"against_sales_order": row.against_sales_order,
 				"so_detail": row.so_detail
 			})
-			dni.insert()
+			dn.save()
 		if not self.taxes_and_charges and flt(self.total_taxes_and_charges) != 0:
 			for tax in self.taxes:
-				dnt = frappe.get_doc({
-					"doctype": "Sales Taxes and Charges",
-					"parent": delivery_note.name,
-					"parentfield": "taxes",
-					"parenttype": "Delivery Note",
+				dn.append("taxes", {
 					"charge_type": tax.charge_type,
 					"account_head": tax.account_head,
 					"cost_center": tax.cost_center,
 					"description": tax.description,
-					"rate": tax.rate,
-
+					"rate": tax.rate
 				})
-				dnt.insert()
-		dn = frappe.get_doc("Delivery Note", delivery_note.name)
+				dn.save()
 		dn.submit()
 
+	def update_status(self):
+		frappe.db.set(self, 'status', 'Submitted')
+
+	def update_packing_simple(self):
+		self.append("simple", {
+			"customer": self.customer,
+			"customer_name": self.customer_name,
+			"expedition": self.expedition,
+			"box": self.total_box,
+			"sales_order": self.sales_order
+		})
+		self.save()
+
 	def on_cancel(self):
-		if self.sales_order:
-			frappe.db.sql("""update `tabSales Order` set golden_status = 'Pick' where `name` = %s""", self.sales_order)
+		if self.status == "Submitted":
+			frappe.db.set(self, 'status', 'Cancelled')
+			ps = frappe.get_doc("Packing Simple", {"parent": self.name})
+			ps.delete()
+#			frappe.db.sql("""delete from `tabPacking Simple` where parent = %s""", self.name)
+			if self.sales_order:
+				frappe.db.sql("""update `tabSales Order` set golden_status = 'Pick' where `name` = %s""", self.sales_order)
+			dn = frappe.get_doc("Delivery Note", {"packing": self.name})
+			dn.cancel()
+			dn.delete()
+		else:
+			frappe.throw(_("You can't cancel this document if status is sent"))

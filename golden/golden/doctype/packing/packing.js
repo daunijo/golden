@@ -45,15 +45,15 @@ frappe.ui.form.on('Packing', {
 		});
 	},
 	barcode: function(frm, cdt, cdn){
-		var bcode="<img src='http://www.barcodes4.me/barcode/c128a/myfilename.png?value="+frm.doc.barcode+"'>"
-//		var bcode="<img src='http://www.barcodes4.me/barcode/c128b/"+frm.doc.barcode+".gif'>"
-
-		var html="<div class='row'><div class='col-md-6'>"+bcode+"</div></div>"
-		$(cur_frm.fields_dict.barcode_img.wrapper).html(html);
+		var bcode = "http://www.barcodes4.me/barcode/c39/"+frm.doc.barcode+".png"
+		frm.set_value("barcode_image", bcode);
 		frm.refresh_fields();
 	},
 	refresh: function(frm) {
 		frm.events.set_read_only(frm);
+	},
+	validate: function(frm){
+		frm.clear_table("simple");
 	},
 	set_posting_time: function(frm){
 		frm.events.set_read_only(frm);
@@ -166,12 +166,26 @@ frappe.ui.form.on('Packing', {
 	},
 });
 frappe.ui.form.on("Packing Item", {
-	expense_account: function(frm, dt, dn) {
-		var d = locals[dt][dn];
-		frm.update_in_all_rows('items', 'expense_account', d.expense_account);
-	},
-	cost_center: function(frm, dt, dn) {
-		var d = locals[dt][dn];
-		frm.update_in_all_rows('items', 'cost_center', d.cost_center);
+	box: function(frm, cdt, cdn){
+		var row = locals[cdt][cdn];
+		if(row.box) {
+			var stringsearch = ",",str = row.box;
+			for(var i=count=0; i<str.length; count+=+(stringsearch===str[i++]));
+			if(count >= 1){
+				banyak = count;
+				var arr = row.box.split(',');
+				maks = 0;
+				maks = arr[0];
+				for(nn=1; nn<=banyak; nn++){
+					if(arr[nn] >= maks){
+						maks = arr[nn];
+					}
+				}
+				sisa = maks;
+			}else{
+				sisa = row.box;
+			}
+			frappe.model.set_value(cdt, cdn, "maks_box", sisa);
+		}
 	}
 });
