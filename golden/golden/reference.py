@@ -128,6 +128,20 @@ def cancel_sales_order_3(doc, method):
 def cancel_sales_order_4(doc, method):
 	frappe.db.sql("""update `tabSales Order` set golden_status = 'Cancelled' where `name` = %s""", doc.name)
 
+def submit_sales_invoice(doc, method):
+    for row in doc.items:
+        if row.sales_order:
+            so_status = frappe.db.sql("""select `status` from `tabSales Order` where `name` = %s""", row.sales_order)[0][0]
+            if so_status == "Completed":
+                update_packing = frappe.db.sql("""update`tabPacking` set is_completed = '1' where sales_order = %s""", row.sales_order)
+                update_so = frappe.db.sql("""update`tabSales Order` set golden_status = 'Invoice' where `name` = %s""", row.sales_order)
+
+def cancel_sales_invoice(doc, method):
+    for row in doc.items:
+        if row.sales_order:
+            update_packing = frappe.db.sql("""update`tabPacking` set is_completed = '0' where sales_order = %s""", row.sales_order)
+            update_so = frappe.db.sql("""update`tabSales Order` set golden_status = 'Pack' where `name` = %s""", row.sales_order)
+
 def submit_stock_entry(doc, method):
     if doc.ito:
         frappe.db.sql("""update `tabBin` set ito = null, ito_qty = 0 where ito = %s""", doc.ito)
