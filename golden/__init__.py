@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.6.1'
+__version__ = '1.7.0'
 
+# 1.7.0
+#   - Add Invoice Keeptrack doctype
 # 1.6.1
 #   - Update barcodes
 #   - Update script automatically create & submit DN when Picking submit
