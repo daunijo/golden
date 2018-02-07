@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.7.0'
+__version__ = '1.7.1'
 
+# 1.7.1
+#   - Get Picking List now in header
+#   - Barcode in Packing now autogenerate from document name
+#   - Hiding expedition in packing
 # 1.7.0
 #   - Add Invoice Keeptrack doctype
 # 1.6.1

@@ -16,6 +16,7 @@ class Packing(Document):
 		self.check_items()
 		self.update_so()
 		self.update_total_box()
+		self.check_completed()
 
 	def check_items(self):
 		for row in self.items:
@@ -103,3 +104,27 @@ class Packing(Document):
 			dn.delete()
 		else:
 			frappe.throw(_("You can't cancel this document if status is sent"))
+
+	def check_completed(self):
+		if self.is_completed:
+			frappe.throw(_("You cannot create Packing from completed Sales Order"))
+
+@frappe.whitelist()
+def get_picking_list(source_name, target_doc=None):
+    def set_missing_values(source, target):
+        target.run_method("set_missing_values")
+
+    doc = get_mapped_doc("Picking", source_name, {
+		"Picking": {
+			"doctype": "Packing",
+			"validation": {
+				"docstatus": ["=", 1],
+			},
+            "field_no_map": ["naming_series", "posting_date", "posting_time", "set_posting_time", "total_box"]
+		},
+		"Picking Item": {
+			"doctype": "Packing Picking",
+			"condition":lambda doc: doc.idx == 1,
+		},
+	}, target_doc, set_missing_values)
+    return doc

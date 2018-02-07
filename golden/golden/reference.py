@@ -17,7 +17,7 @@ def submit_sales_order(doc, method):
     			"doctype": "Picking",
     			"sales_order": doc.name,
     			"section": row.default_section,
-    			"posting_date": doc.transaction_date,
+    			"transaction_date": doc.transaction_date,
     			"company": doc.company,
     		})
     		picking.insert()
