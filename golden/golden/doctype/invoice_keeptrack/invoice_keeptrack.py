@@ -11,6 +11,9 @@ from frappe.model.mapper import get_mapped_doc
 
 class InvoiceKeeptrack(Document):
 	def validate(self):
+		self.check_is_invoice_summary()
+
+	def check_is_invoice_summary(self):
 		for row in self.invoices:
 			check_si = frappe.db.sql("""select sales_invoice_summary from `tabSales Invoice` where docstatus = '1' and `name` = %s""", row.sales_invoice)[0][0]
 			if check_si:
@@ -23,11 +26,11 @@ class InvoiceKeeptrack(Document):
 	def on_cancel(self):
 		for row in self.invoices:
 			frappe.db.sql("""update `tabSales Invoice` set invoice_keeptrack = null where `name` = %s""", row.sales_invoice)
-			
+
 @frappe.whitelist()
 def get_sales_invoice(docstatus):
     si_list = []
-    invoice_list = frappe.db.sql("""select * from `tabSales Invoice` where docstatus = '1' and status != 'Paid' and sales_invoice_summary is null""", as_dict=True)
+    invoice_list = frappe.db.sql("""select * from `tabSales Invoice` where docstatus = '1' and status != 'Paid' and sales_invoice_summary is null and invoice_keeptrack is null""", as_dict=True)
     for d in invoice_list:
 		count_payment = frappe.db.sql("""select count(*) from `tabPayment Entry Reference` where docstatus = '1' and reference_name = %s""", d.name)[0][0]
 		if flt(count_payment) != 0:

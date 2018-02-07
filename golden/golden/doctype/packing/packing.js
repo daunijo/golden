@@ -44,13 +44,33 @@ frappe.ui.form.on('Packing', {
 			}
 		});
 	},
-	barcode: function(frm, cdt, cdn){
-		var bcode = "http://www.barcodes4.me/barcode/c39/"+frm.doc.barcode+".png"
-		frm.set_value("barcode_image", bcode);
-		frm.refresh_fields();
+	onload: function(frm, cdt, cdn){
+		if (!frm.doc.__islocal){
+			var bcode = "http://www.barcodes4.me/barcode/c39/"+frm.doc.name+".png"
+			frm.set_value("barcode_image", bcode);
+			frm.refresh_fields();
+		}
 	},
 	refresh: function(frm) {
 		frm.events.set_read_only(frm);
+		if(frm.doc.docstatus == 0 || frm.doc.__islocal) {
+//			cur_frm.add_custom_button(__('Picking Doc'), cur_frm.cscript['Picking Doc'], "fa fa-sitemap", "btn-default");
+			frm.add_custom_button(__("Get Picking List"), function() {
+				erpnext.utils.map_current_doc({
+					method: "golden.golden.doctype.packing.packing.get_picking_list",
+					source_doctype: "Picking",
+					target: frm,
+					setters:  {
+						company: frm.doc.company || undefined,
+						//customer: undefined,
+					},
+					get_query_filters: {
+						docstatus: 1,
+						sales_order: frm.doc.sales_order
+					}
+				})
+			});
+		}
 	},
 	validate: function(frm){
 		frm.clear_table("simple");
@@ -145,6 +165,7 @@ frappe.ui.form.on('Packing', {
 			frm.set_value("company_address_display", "");
 		}
 	},
+	/*
 	get_picking_item: function(frm){
 		if(frm.doc.sales_order){
 			return frappe.call({
@@ -164,6 +185,7 @@ frappe.ui.form.on('Packing', {
 			})
 		}
 	},
+	*/
 });
 frappe.ui.form.on("Packing Item", {
 	box: function(frm, cdt, cdn){
