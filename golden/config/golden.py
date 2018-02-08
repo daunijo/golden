@@ -26,6 +26,11 @@ def get_data():
 					"name": "Invoice Keeptrack",
 					"description": _("Invoice Keeptrack.")
 				},
+				{
+					"type": "doctype",
+					"name": "Sales Invoice Summary",
+					"description": _("Sales Invoice Summary.")
+				},
 			]
 		},
 		{
