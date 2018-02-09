@@ -1,8 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.7.1'
+__version__ = '1.8.2'
 
+# 1.8.2
+#   - Minur update Sales Invoice Summary
+# 1.8.1
+#   - Update Sales Invoice Summary
+# 1.8.0
+#   - Add Sales Invoice Summary doctype
 # 1.7.1
 #   - Get Picking List now in header
 #   - Barcode in Packing now autogenerate from document name
