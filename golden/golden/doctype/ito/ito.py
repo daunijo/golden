@@ -9,7 +9,8 @@ from frappe import msgprint, _
 
 class ITO(Document):
 	def validate(self):
-		self.check_qty()
+		pass
+#		self.check_qty()
 
 	def on_submit(self):
 		frappe.db.set(self, 'status', 'Submitted')

@@ -17,6 +17,7 @@ class Packing(Document):
 		self.update_so()
 		self.update_total_box()
 		self.check_completed()
+		self.check_picking()
 
 	def check_items(self):
 		for row in self.items:
@@ -108,6 +109,14 @@ class Packing(Document):
 	def check_completed(self):
 		if self.is_completed:
 			frappe.throw(_("You cannot create Packing from completed Sales Order"))
+
+	def check_picking(self):
+		if self.picking_list:
+			temp = []
+			for pick in self.picking_list:
+				if pick.picking in temp:
+					frappe.throw(_("Picking {0} double").format(pick.picking))
+				temp.append(pick.picking)
 
 @frappe.whitelist()
 def get_picking_list(source_name, target_doc=None):

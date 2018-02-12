@@ -111,6 +111,9 @@ doc_events = {
             "golden.golden.reference.cancel_sales_order_2",
             "golden.golden.reference.cancel_sales_order_3"
         ]
+    },
+    "Warehouse": {
+        "validate": "golden.golden.reference.validate_warehouse"
     }
 # 	"*": {
 # 		"on_update": "method",

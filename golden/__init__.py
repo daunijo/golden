@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.8.2'
+__version__ = '1.8.3'
 
+# 1.8.3
+#   - Add customer in picing
+#   - Update validate packing
 # 1.8.2
 #   - Minur update Sales Invoice Summary
 # 1.8.1

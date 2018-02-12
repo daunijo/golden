@@ -54,7 +54,6 @@ frappe.ui.form.on('Packing', {
 	refresh: function(frm) {
 		frm.events.set_read_only(frm);
 		if(frm.doc.docstatus == 0 || frm.doc.__islocal) {
-//			cur_frm.add_custom_button(__('Picking Doc'), cur_frm.cscript['Picking Doc'], "fa fa-sitemap", "btn-default");
 			frm.add_custom_button(__("Get Picking List"), function() {
 				erpnext.utils.map_current_doc({
 					method: "golden.golden.doctype.packing.packing.get_picking_list",
