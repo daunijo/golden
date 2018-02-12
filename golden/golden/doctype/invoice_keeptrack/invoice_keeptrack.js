@@ -4,6 +4,10 @@
 frappe.ui.form.on('Invoice Keeptrack', {
 	refresh: function(frm) {
 		frm.events.set_read_only(frm);
+		if(frm.doc.docstatus == 1 && frm.doc.status == "Submitted") {
+			cur_frm.add_custom_button(__('Payment Entry'), cur_frm.cscript['Payment Entry'], __("Make"));
+			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
+		}
 	},
 	set_posting_time: function(frm){
 		frm.events.set_read_only(frm);
@@ -44,3 +48,9 @@ frappe.ui.form.on('Invoice Keeptrack', {
 		})
 	},
 });
+cur_frm.cscript['Payment Entry'] = function() {
+	frappe.model.open_mapped_doc({
+		method: "golden.golden.stock.make_material_transfer",
+		frm: cur_frm
+	})
+}

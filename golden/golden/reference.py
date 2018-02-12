@@ -16,6 +16,8 @@ def submit_sales_order(doc, method):
     		picking = frappe.get_doc({
     			"doctype": "Picking",
     			"sales_order": doc.name,
+                "customer": doc.customer,
+                "customer_name": doc.customer_name,
     			"section": row.default_section,
     			"transaction_date": doc.transaction_date,
     			"company": doc.company,
@@ -28,17 +30,14 @@ def submit_sales_order_2(doc, method):
     for picking in pick:
         item = frappe.db.sql("""select * from `tabSales Order Item` where parent = %s and default_section = %s""", (doc.name, picking.section), as_dict=1)
         for row in item:
-            picking_item = frappe.get_doc({
-    			"doctype": "Picking Item",
-    			"parent": picking.name,
-    			"parentfield": "items",
-    			"parenttype": "Picking",
+            picking_item = frappe.get_doc("Picking", picking.name)
+            picking_item.append("items", {
     			"item_code": row.item_code,
     			"item_name": row.item_name,
     			"qty": row.qty,
     			"location": row.default_location
-    		})
-            picking_item.insert()
+            })
+            picking_item.save()
         submit_picking = frappe.get_doc("Picking", picking.name)
         submit_picking.submit()
 
@@ -69,20 +68,17 @@ def submit_sales_order_4(doc, method):
                 check_ito_item = frappe.db.sql("""select count(*) from `tabITO Item` where parent = %s and item_code = %s and location = %s""", (ito_id, row.item_code, row.warehouse))[0][0]
                 if flt(check_ito_item) == 0:
                     item_name = frappe.db.get_value("Item", {"item_code": row.item_code}, "item_name")
-                    ito_item = frappe.get_doc({
-                    	"doctype": "ITO Item",
-            			"parent": ito_id,
-            			"parentfield": "items",
-            			"parenttype": "ITO",
+                    ito_item = frappe.get_doc("ITO", ito_id)
+                    ito_item.append("items", {
                     	"item_code": row.item_code,
                     	"item_name": item_name,
                     	"qty_need": (flt(row.projected_qty) * -1) - flt(row.ito_qty),
                         "stock_uom": row.stock_uom,
-                        "qty":0,
+                        "qty": 0,
                         "location": row.warehouse,
                         "bin": row.name
                     })
-                    ito_item.insert()
+                    ito_item.save()
                 else:
                     ito_item = frappe.get_doc("ITO Item", {"parent": ito_id, "item_code": row.item_code, "location": row.warehouse})
                     ito_item.qty_need = (flt(row.projected_qty) * -1) - flt(row.ito_qty)
