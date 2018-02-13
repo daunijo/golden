@@ -137,6 +137,11 @@ def get_picking_list(source_name, target_doc=None):
 		},
 		"Picking Item": {
 			"doctype": "Packing Item",
+			"field_map": {
+				"location": "warehouse",
+				"sales_order": "against_sales_order",
+				"so_detail": "so_detail"
+			},
 		},
 		"Picking Simple": {
 			"doctype": "Packing Picking",

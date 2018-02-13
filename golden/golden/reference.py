@@ -35,6 +35,9 @@ def submit_sales_order_2(doc, method):
     			"item_code": row.item_code,
     			"item_name": row.item_name,
     			"qty": row.qty,
+                "stock_uom": row.stock_uom,
+                "uom": row.uom,
+                "conversion_factor": row.conversion_factor,
     			"location": row.default_location,
                 "sales_order": row.parent,
                 "so_detail": row.name
