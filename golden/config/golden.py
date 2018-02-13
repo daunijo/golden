@@ -58,4 +58,14 @@ def get_data():
 				},
 			]
 		},
+		{
+			"label": _("Commission"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Sales Target",
+					"description": _("Sales Target.")
+				},
+			]
+		},
 	]

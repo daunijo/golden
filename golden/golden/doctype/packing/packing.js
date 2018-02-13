@@ -53,15 +53,18 @@ frappe.ui.form.on('Packing', {
 	},
 	refresh: function(frm) {
 		frm.events.set_read_only(frm);
-		if(frm.doc.docstatus == 0 || frm.doc.__islocal) {
-			frm.add_custom_button(__("Get Picking List"), function() {
+		frm.events.get_picking_order(frm);
+	},
+	get_picking_order: function(frm){
+		if((frm.doc.docstatus == 0 || frm.doc.__islocal)) {
+			frm.add_custom_button(__("Get Picking Order"), function() {
 				erpnext.utils.map_current_doc({
 					method: "golden.golden.doctype.packing.packing.get_picking_list",
 					source_doctype: "Picking",
 					target: frm,
 					setters:  {
-						company: frm.doc.company || undefined,
-						//customer: undefined,
+						//company: frm.doc.company || undefined,
+						customer: frm.doc.customer || undefined,
 					},
 					get_query_filters: {
 						docstatus: 1,
@@ -88,6 +91,7 @@ frappe.ui.form.on('Packing', {
 	},
 	customer: function(frm){
 		frm.events.get_customer_name(frm);
+	//	frm.events.get_picking_order(frm);
 	},
 	get_customer_name: function(frm){
 		frappe.call({

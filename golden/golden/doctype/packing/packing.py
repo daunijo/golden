@@ -86,7 +86,7 @@ class Packing(Document):
 		self.append("simple", {
 			"customer": self.customer,
 			"customer_name": self.customer_name,
-			"expedition": self.expedition,
+			"expedition": self.expedition or None,
 			"box": self.total_box,
 			"sales_order": self.sales_order
 		})
@@ -105,6 +105,10 @@ class Packing(Document):
 			dn.delete()
 		else:
 			frappe.throw(_("You can't cancel this document if status is sent"))
+
+	def on_trash(self):
+		if self.sales_order and self.docstatus == 0:
+			frappe.db.sql("""update `tabSales Order` set golden_status = 'Pick' where `name` = %s""", self.sales_order)
 
 	def check_completed(self):
 		if self.is_completed:
@@ -132,8 +136,10 @@ def get_picking_list(source_name, target_doc=None):
             "field_no_map": ["naming_series", "posting_date", "posting_time", "set_posting_time", "total_box"]
 		},
 		"Picking Item": {
+			"doctype": "Packing Item",
+		},
+		"Picking Simple": {
 			"doctype": "Packing Picking",
-			"condition":lambda doc: doc.idx == 1,
 		},
 	}, target_doc, set_missing_values)
     return doc

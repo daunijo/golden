@@ -193,6 +193,7 @@ class PurchaseReturn(Document):
 			"purchase_return": self.name,
 			"posting_date": self.posting_date,
 			"posting_time": self.posting_time,
+			"set_posting_time": 1,
 			"from_warehouse": self.from_warehouse,
 			"total_outgoing_value": self.total,
 			"value_difference": flt(self.total)*-1,
