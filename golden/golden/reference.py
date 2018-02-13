@@ -28,16 +28,23 @@ def submit_sales_order_2(doc, method):
     so = doc.name
     pick = frappe.db.sql("""select `name`, section from `tabPicking` where docstatus = '0' and sales_order = %s""", doc.name, as_dict=1)
     for picking in pick:
-        item = frappe.db.sql("""select * from `tabSales Order Item` where parent = %s and default_section = %s""", (doc.name, picking.section), as_dict=1)
+        item = frappe.db.sql("""select * from `tabSales Order Item` where parent = %s and default_section = %s order by idx asc""", (doc.name, picking.section), as_dict=1)
         for row in item:
             picking_item = frappe.get_doc("Picking", picking.name)
             picking_item.append("items", {
     			"item_code": row.item_code,
     			"item_name": row.item_name,
     			"qty": row.qty,
-    			"location": row.default_location
+    			"location": row.default_location,
+                "sales_order": row.parent,
+                "so_detail": row.name
             })
             picking_item.save()
+        simple = frappe.get_doc("Picking", picking.name)
+        simple.append("simple", {
+            "picking": picking.name
+        })
+        simple.save()
         submit_picking = frappe.get_doc("Picking", picking.name)
         submit_picking.submit()
 
@@ -63,7 +70,7 @@ def submit_sales_order_4(doc, method):
         ito_id = frappe.db.sql("""select `name` from `tabITO` where docstatus = '0'""")[0][0]
         warehouse_detail = frappe.db.sql("""select `name` from `tabWarehouse` where is_group = '0' and type = 'Location' and parent is not null""", as_dict=1)
         for wd in warehouse_detail:
-            bins = frappe.db.sql("""select * from `tabBin` where warehouse = %s and (projected_qty + ito_qty) < 0""", wd.name, as_dict=1)
+            bins = frappe.db.sql("""select * from `tabBin` where warehouse = %s and (projected_qty + ito_qty) < 0 order by `name` asc""", wd.name, as_dict=1)
             for row in bins:
                 check_ito_item = frappe.db.sql("""select count(*) from `tabITO Item` where parent = %s and item_code = %s and location = %s""", (ito_id, row.item_code, row.warehouse))[0][0]
                 if flt(check_ito_item) == 0:
@@ -142,3 +149,6 @@ def submit_stock_entry(doc, method):
     if doc.ito:
         frappe.db.sql("""update `tabBin` set ito = null, ito_qty = 0 where ito = %s""", doc.ito)
         frappe.db.sql("""update `tabITO` set status = 'Completed' where `name` = %s""", doc.ito)
+
+def validate_warehouse(doc, method):
+    pass

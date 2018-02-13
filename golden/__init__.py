@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.8.3'
+__version__ = '1.9.0'
 
+# 1.9.0
+#   - Add doctype: Sales Target
+#   - Major fix packing
 # 1.8.3
 #   - Add customer in picing
 #   - Update validate packing
