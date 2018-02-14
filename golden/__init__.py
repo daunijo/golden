@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.9.1'
+__version__ = '1.9.2'
 
+# 1.9.2
+#   - Update packing
 # 1.9.1
 #   - Update doctype: picking item
 # 1.9.0

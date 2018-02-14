@@ -7,7 +7,6 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils import nowdate, cstr, flt
 from frappe import msgprint, _
-from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.model import display_fieldtypes
 
@@ -124,10 +123,13 @@ class Packing(Document):
 
 @frappe.whitelist()
 def get_picking_list(source_name, target_doc=None):
-    def set_missing_values(source, target):
-        target.run_method("set_missing_values")
+	def set_missing_values(source, target):
+		target.run_method("set_missing_values")
 
-    doc = get_mapped_doc("Picking", source_name, {
+	def update_item(source, target, source_parent):
+		target.description = frappe.db.sql("""select description from `tabSales Order Item` where `name` = %s""", source.so_detail)[0][0]
+
+	doclist = get_mapped_doc("Picking", source_name, {
 		"Picking": {
 			"doctype": "Packing",
 			"validation": {
@@ -142,9 +144,11 @@ def get_picking_list(source_name, target_doc=None):
 				"sales_order": "against_sales_order",
 				"so_detail": "so_detail"
 			},
+			"postprocess": update_item
 		},
 		"Picking Simple": {
 			"doctype": "Packing Picking",
-		},
+		}
 	}, target_doc, set_missing_values)
-    return doc
+
+	return doclist
