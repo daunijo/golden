@@ -1,0 +1,28 @@
+{
+ "add_total_row": 0, 
+ "apply_user_permissions": 1, 
+ "color": "#6e82b7", 
+ "creation": "2018-02-14 10:26:31.680224", 
+ "disabled": 0, 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "icon": "octicon octicon-file", 
+ "idx": 0, 
+ "is_standard": "Yes", 
+ "modified": "2018-02-14 10:26:31.680224", 
+ "modified_by": "Administrator", 
+ "module": "Golden", 
+ "name": "picking report", 
+ "owner": "Administrator", 
+ "ref_doctype": "Picking", 
+ "report_name": "picking report", 
+ "report_type": "Script Report", 
+ "roles": [
+  {
+   "role": "Administrator"
+  }, 
+  {
+   "role": "Golden User"
+  }
+ ]
+}
