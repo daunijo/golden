@@ -358,7 +358,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
-   "allow_on_submit": 0, 
+   "allow_on_submit": 1, 
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
@@ -4127,7 +4127,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-02-07 11:47:04.147091", 
+ "modified": "2018-02-13 16:10:45.535250", 
  "modified_by": "Administrator", 
  "module": "Golden", 
  "name": "Packing", 
