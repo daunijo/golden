@@ -16,7 +16,6 @@ def execute(filters=None):
 
 def get_columns():
 	return [
-	    #_("Status") + ":Data:80",
 		_("Document") + ":Link/Picking:100",
 		_("No.Sales Order")+":Link/Sales Order:100",
 		_("Date")+":Date:80",
@@ -31,7 +30,6 @@ def get_columns():
 def get_picking_report(filters):
 	conditions = get_conditions(filters)
 	return frappe.db.sql(
-
 		"""select
 				name,
 				sales_order,
@@ -40,7 +38,6 @@ def get_picking_report(filters):
 				creation,owner,
 				modified,modified_by,
 				if(docstatus = 1 && creation <= modified, "<span class = 'label label-success'>Auto</span>","<span class = 'label label-danger'>Manual</span>")
-
 		   from
 		   		`tabPicking`
 		   where
