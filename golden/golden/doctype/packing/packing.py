@@ -41,9 +41,12 @@ class Packing(Document):
 		self.update_packing_simple()
 
 	def delivery_note_insert(self):
+		so = frappe.db.get_value("Sales Order", self.sales_order, ["rss_sales_person", "rss_sales_name"], as_dict=1)
 		delivery_note = frappe.get_doc({
 			"doctype": "Delivery Note",
 			"customer": self.customer,
+			"rss_sales_person": so.rss_sales_person,
+			"rss_sales_name": so.rss_sales_name,
 			"packing": self.name,
 			"posting_date": self.posting_date,
 			"posting_time": self.posting_time,

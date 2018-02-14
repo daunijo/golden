@@ -34,13 +34,8 @@ frappe.ui.form.on('Invoice Keeptrack', {
 						var c = frm.add_child("invoices");
 						c.customer = d.customer;
 						c.customer_name = d.customer_name;
-						c.sales_invoice = d.si_name;
-						c.invoice_date = d.posting_date;
+						c.si_summary = d.si_summary;
 						c.amount = d.amount;
-						c.due_date = d.due_date;
-						c.payment_date = d.payment_date;
-						c.payment_amount = d.payment_amount;
-						c.outstanding = d.outstanding_amount;
 					})
 					frm.refresh_fields();
 				}

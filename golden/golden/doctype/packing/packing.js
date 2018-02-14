@@ -45,18 +45,20 @@ frappe.ui.form.on('Packing', {
 		});
 	},
 	onload: function(frm, cdt, cdn){
-		if (!frm.doc.__islocal){
+		if (!frm.doc.__islocal || frm.doc.docstatus == 0){
 			var bcode = "http://www.barcodes4.me/barcode/c39/"+frm.doc.name+".png"
 			frm.set_value("barcode_image", bcode);
 			frm.refresh_fields();
 		}
 	},
 	refresh: function(frm) {
-		frm.events.set_read_only(frm);
-		frm.events.get_picking_order(frm);
+		if(frm.doc.docstatus == 0 || frm.doc.__islocal){
+			frm.events.set_read_only(frm);
+			frm.events.get_picking_order(frm);
+		}
 	},
 	get_picking_order: function(frm){
-		if((frm.doc.docstatus == 0 || frm.doc.__islocal)) {
+		if(frm.doc.docstatus == 0 || frm.doc.__islocal) {
 			frm.add_custom_button(__("Get Picking Order"), function() {
 				erpnext.utils.map_current_doc({
 					method: "golden.golden.doctype.packing.packing.get_picking_list",

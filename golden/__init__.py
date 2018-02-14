@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.9.2'
+__version__ = '1.9.3'
 
+# 1.9.3
+#   - Update invoice keeptrack
+#   - Update sales invoice summary
 # 1.9.2
 #   - Update packing
 # 1.9.1
