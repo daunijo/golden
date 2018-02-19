@@ -1,8 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.9.3'
+__version__ = '1.10.2'
 
+# 1.10.2
+#   - Update receive order
+# 1.10.1
+#   - Update receive order
+# 1.10.0
+#   - Add doctype: Receive Order
+#   - Update Invoice Keeptrack
 # 1.9.3
 #   - Update invoice keeptrack
 #   - Update sales invoice summary
