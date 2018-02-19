@@ -49,7 +49,7 @@ frappe.query_reports["Stock Card"] = {
 				return{
 					filters: {
 						'is_group': 1,
-						'type': "Section",
+						'type': "Section"
 					}
 				};
 			}
@@ -79,12 +79,6 @@ frappe.query_reports["Stock Card"] = {
 			"label": __("Item Group"),
 			"fieldtype": "Link",
 			"options": "Item Group"
-		},
-		{
-			"fieldname":"batch_no",
-			"label": __("Batch No"),
-			"fieldtype": "Link",
-			"options": "Batch"
 		},
 		{
 			"fieldname":"brand",

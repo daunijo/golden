@@ -20,11 +20,10 @@ def execute(filters=None):
 		item_detail = item_details[sle.item_code]
 
 		data.append([sle.date, sle.item_code, item_detail.item_name, item_detail.item_group,
-			item_detail.brand, item_detail.description, sle.warehouse,
+			item_detail.brand, item_detail.description, sle.warehouse,sle.parent_warehouse,sle.warehouse,
 			item_detail.stock_uom, sle.actual_qty, sle.qty_after_transaction,
 			(sle.incoming_rate if sle.actual_qty > 0 else 0.0),
-			sle.valuation_rate, sle.stock_value, sle.voucher_type, sle.voucher_no,
-			sle.batch_no, sle.serial_no, sle.company])
+			sle.valuation_rate, sle.stock_value, sle.voucher_type, sle.voucher_no])
 
 	return columns, data
 
@@ -33,10 +32,9 @@ def get_columns():
 		_("Date") + ":Datetime:95", _("Item") + ":Link/Item:130",
 		_("Item Name") + "::100", _("Item Group") + ":Link/Item Group:100",
 		_("Brand") + ":Link/Brand:100", _("Description") + "::200",
-		_("Warehouse") + ":Link/Warehouse:100",
-		_("Section") + ":Link/Warehouse:100",
-		_("Location") + ":Link/Warehouse:100",
-		_("Stock UOM") + ":Link/UOM:100",
+		_("Warehouse") + "::150",
+		_("Section") + ":Link/Warehouse:150",
+		_("Location") + ":Link/Warehouse:150", _("Stock UOM") + ":Link/UOM:100",
 		_("Qty") + ":Float:50", _("Balance Qty") + ":Float:100",
 		{"label": _("Incoming Rate"), "fieldtype": "Currency", "width": 110,
 			"options": "Company:company:default_currency"},
@@ -45,24 +43,24 @@ def get_columns():
 		{"label": _("Balance Value"), "fieldtype": "Currency", "width": 110,
 			"options": "Company:company:default_currency"},
 		_("Voucher Type") + "::110",
-		_("Voucher #") + ":Dynamic Link/" + _("Voucher Type") + ":100",
-		_("Batch") + ":Link/Batch:100",
-		_("Serial #") + ":Link/Serial No:100",
-		{"label": _("Company"), "fieldtype": "Link", "width": 110,
-			"options": "company", "fieldname": "company"}
+		_("Voucher #") + ":Dynamic Link/" + _("Voucher Type") + ":100"
+
 	]
 
 	return columns
 
 def get_stock_ledger_entries(filters):
-	return frappe.db.sql("""select concat_ws(" ", posting_date, posting_time) as date,
-			item_code, warehouse, actual_qty, qty_after_transaction, incoming_rate, valuation_rate,
-			stock_value, voucher_type, voucher_no, batch_no, serial_no, company
-		from `tabStock Ledger Entry` sle
-		where company = %(company)s and
-			posting_date between %(from_date)s and %(to_date)s
+	return frappe.db.sql("""select concat_ws(" ", sle.posting_date, sle.posting_time) as date,
+			sle.item_code,
+			whs.parent_warehouse,
+			sle.warehouse,sle.warehouse, sle.actual_qty, sle.qty_after_transaction, sle.incoming_rate, sle.valuation_rate,
+			sle.stock_value, sle.voucher_type, sle.voucher_no
+		from `tabStock Ledger Entry` sle inner join `tabWarehouse` whs
+		on sle.warehouse = whs.name
+		where sle.company = %(company)s and
+			sle.posting_date between %(from_date)s and %(to_date)s
 			{sle_conditions}
-			order by posting_date asc, posting_time asc, name asc"""\
+			order by sle.posting_date asc, sle.posting_time asc, sle.name asc"""\
 		.format(sle_conditions=get_sle_conditions(filters)), filters, as_dict=1)
 
 def get_item_details(filters):
@@ -97,8 +95,6 @@ def get_sle_conditions(filters):
 			conditions.append(warehouse_condition)
 	if filters.get("voucher_no"):
 		conditions.append("voucher_no=%(voucher_no)s")
-	if filters.get("batch_no"):
-		conditions.append("batch_no=%(batch_no)s")
 
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 
