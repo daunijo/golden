@@ -23,13 +23,13 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Invoice Keeptrack",
-					"description": _("Invoice Keeptrack.")
+					"name": "Sales Invoice Summary",
+					"description": _("Sales Invoice Summary.")
 				},
 				{
 					"type": "doctype",
-					"name": "Sales Invoice Summary",
-					"description": _("Sales Invoice Summary.")
+					"name": "Invoice Keeptrack",
+					"description": _("Invoice Keeptrack.")
 				},
 			]
 		},
@@ -55,6 +55,11 @@ def get_data():
 					"type": "doctype",
 					"name": "Delivery Keeptrack",
 					"description": _("Delivery Keeptrack.")
+				},
+				{
+					"type": "doctype",
+					"name": "Receive Order",
+					"description": _("Receive Order.")
 				},
 			]
 		},
