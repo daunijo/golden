@@ -28,9 +28,16 @@ app_include_css = "/files/custom.css"
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-# doctype_js = {"doctype" : "public/js/doctype.js"}
+doctype_js = {
+	"Journal Entry": "public/js/journal_entry.js",
+    "Warehouse": "public/js/warehouse.js"
+}
+
+doctype_tree_js = {
+	"Warehouse" : "public/js/warehouse_tree.js"
+}
+
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
-# doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
 # Home Pages
