@@ -99,7 +99,6 @@ class Packing(Document):
 			frappe.db.set(self, 'status', 'Cancelled')
 			ps = frappe.get_doc("Packing Simple", {"parent": self.name})
 			ps.delete()
-#			frappe.db.sql("""delete from `tabPacking Simple` where parent = %s""", self.name)
 			if self.sales_order:
 				frappe.db.sql("""update `tabSales Order` set golden_status = 'Pick' where `name` = %s""", self.sales_order)
 			dn = frappe.get_doc("Delivery Note", {"packing": self.name})

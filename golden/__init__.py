@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.10.2'
+__version__ = '1.10.3'
 
+# 1.10.3
+#   - Add checkbox in packing item
+#   - Change few labels in ITO
 # 1.10.2
 #   - Update receive order
 # 1.10.1
