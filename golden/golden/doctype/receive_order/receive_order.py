@@ -116,6 +116,7 @@ def get_purchase_order(source_name, target_doc=None):
 	def update_item(source, target, source_parent):
 		target.supplier = frappe.db.sql("""select supplier from `tabPurchase Order` where `name` = %s""", source.parent)[0][0]
 		target.supplier_name = frappe.db.sql("""select supplier_name from `tabPurchase Order` where `name` = %s""", source.parent)[0][0]
+		target.qty = flt(frappe.db.sql("""select qty from `tabPurchase Order Item` where parent = %s""", source.parent)[0][0]) - flt(frappe.db.sql("""select received_qty from `tabPurchase Order Item` where parent = %s""", source.parent)[0][0])
 
 	doclist = get_mapped_doc("Purchase Order", source_name, {
 		"Purchase Order": {
@@ -131,7 +132,6 @@ def get_purchase_order(source_name, target_doc=None):
 				"parent": "purchase_order",
 				"name": "po_detail"
 			},
-			"field_no_map": ["qty"],
 			"postprocess": update_item
 		},
 	}, target_doc, set_missing_values)

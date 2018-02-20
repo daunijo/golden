@@ -154,4 +154,8 @@ def submit_stock_entry(doc, method):
         frappe.db.sql("""update `tabITO` set status = 'Completed' where `name` = %s""", doc.ito)
 
 def validate_warehouse(doc, method):
-    pass
+    if not doc.parent_warehouse:
+        if doc.type != "Warehouse":
+            frappe.throw(_("Type must be <b>Warehouse</b>"))
+        if doc.is_group == 0 and doc.type == "Warehouse":
+            frappe.throw(_("<b>Is Group</b> is mandatory"))

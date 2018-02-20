@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.10.3'
+__version__ = '1.10.4'
 
+# 1.10.4
+#   - Update Get PO in Receive Order
 # 1.10.3
 #   - Add checkbox in packing item
 #   - Change few labels in ITO
