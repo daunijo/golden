@@ -170,27 +170,6 @@ frappe.ui.form.on('Packing', {
 			frm.set_value("company_address_display", "");
 		}
 	},
-	/*
-	get_picking_item: function(frm){
-		if(frm.doc.sales_order){
-			return frappe.call({
-				method: 'golden.golden.stock.get_picking',
-				args: {
-					sales_order: frm.doc.sales_order
-				},
-				callback: function(r, rt) {
-					if(r.message) {
-						$.each(r.message, function(i, d) {
-							var c = frm.add_child("picking_list");
-							c.picking = d.picking;
-						})
-						frm.refresh_fields();
-					}
-				}
-			})
-		}
-	},
-	*/
 });
 frappe.ui.form.on("Packing Item", {
 	box: function(frm, cdt, cdn){
@@ -213,6 +192,12 @@ frappe.ui.form.on("Packing Item", {
 				sisa = row.box;
 			}
 			frappe.model.set_value(cdt, cdn, "maks_box", sisa);
+		}
+	},
+	is_full: function(frm, cdt, cdn){
+		var row = locals[cdt][cdn];
+		if(row.is_full){
+			frappe.model.set_value(cdt, cdn, "qty_packing", row.qty);
 		}
 	}
 });
