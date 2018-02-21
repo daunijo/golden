@@ -22,7 +22,7 @@ def submit_sales_order(doc, method):
     			"transaction_date": doc.transaction_date,
     			"company": doc.company,
     		})
-    		picking.insert()
+    		picking.save()
 
 def submit_sales_order_2(doc, method):
     so = doc.name
@@ -65,7 +65,7 @@ def submit_sales_order_3(doc, method):
                 	"posting_date": doc.transaction_date,
                 	"company": doc.company,
                 })
-                ito.insert()
+                ito.save()
 
 def submit_sales_order_4(doc, method):
     count_ito = frappe.db.sql("""select count(*) from `tabITO` where docstatus = '0'""")[0][0]

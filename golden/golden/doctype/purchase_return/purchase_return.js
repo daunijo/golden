@@ -26,6 +26,20 @@ frappe.ui.form.on('Purchase Return', {
 			d.party = frm.doc.supplier;
 		})
 		frm.refresh_fields("references");
+		frm.events.set_debit_credit_account(frm);
+	},
+	set_debit_credit_account: function(frm){
+		frappe.call({
+			method: "frappe.client.get",
+			args: {
+				doctype: "Company",
+				name: frm.doc.company
+			},
+			callback: function (data) {
+				frm.set_value("debit_account", data.message.default_payable_account);
+				frm.set_value("account", data.message.default_purchase_return_account);
+			}
+		})
 	},
 	from_warehouse: function(frm){
 		$.each(frm.doc.items, function(i, d) {
