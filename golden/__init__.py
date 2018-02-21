@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.10.5'
+__version__ = '1.10.6'
 
+# 1.10.6
+#   - Update on_submit Purchase Return
+#   - Update on_submit Sales Return
+#   - Add custom form in Company
 # 1.10.5
 #   - Update on_submit Purchase Return
 # 1.10.4

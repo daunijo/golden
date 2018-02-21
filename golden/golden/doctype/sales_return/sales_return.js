@@ -5,6 +5,10 @@ frappe.ui.form.on('Sales Return', {
 	refresh: function(frm) {
 		frm.events.set_read_only(frm);
 	},
+	validate: function(frm){
+		frm.clear_table("accounts");
+		frm.events.set_expense_account(frm);
+	},
 	set_posting_time: function(frm){
 		frm.events.set_read_only(frm);
 	},
@@ -22,6 +26,20 @@ frappe.ui.form.on('Sales Return', {
 			d.party = frm.doc.customer;
 		})
 		frm.refresh_fields("references");
+		frm.events.set_debit_credit_account(frm);
+	},
+	set_debit_credit_account: function(frm){
+		frappe.call({
+			method: "frappe.client.get",
+			args: {
+				doctype: "Company",
+				name: frm.doc.company
+			},
+			callback: function (data) {
+				frm.set_value("debit_account", data.message.default_sales_return_account);
+				frm.set_value("credit_account", data.message.default_receivable_account);
+			}
+		})
 	},
 	customer_address: function(frm){
 		if(frm.doc.customer_address != undefined){
@@ -76,6 +94,15 @@ frappe.ui.form.on('Sales Return', {
 			d.account = frm.doc.credit_account;
 		})
 		frm.refresh_fields("references");
+	},
+	debit_account: function(frm){
+		frm.events.set_expense_account(frm);
+	},
+	set_expense_account: function(frm){
+		$.each(frm.doc.items, function(i, d) {
+			d.expense_account = frm.doc.debit_account;
+		})
+		frm.refresh_fields("items");
 	},
 });
 //Sales Return Detail (items)
@@ -173,6 +200,12 @@ cur_frm.set_query("customer_address", function(frm) {
 		}
 	}
 });
+cur_frm.set_query("debit_account", function(frm) {
+	return {
+		query: "erpnext.controllers.queries.get_expense_account",
+	}
+});
+
 cur_frm.set_query("item_code", "items", function (doc, cdt, cdn) {
 	var c_doc= locals[cdt][cdn];
 	return {
@@ -188,7 +221,7 @@ cur_frm.set_query("reference_name", "references", function (doc, cdt, cdn) {
 		filters: {
 			'customer': cur_frm.doc.customer,
 			'docstatus': 1,
-			'status': ["!=", "Paid"]
+			'status': ['!=', 'Paid']
 		}
 	}
 });

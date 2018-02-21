@@ -17,6 +17,7 @@ class PurchaseReturn(Document):
 		self.set_actual_qty()
 		self.calculate_rate_and_amount()
 		self.delete_account()
+		self.set_default_account()
 
 	def before_submit(self):
 		self.copy_references()
@@ -33,6 +34,14 @@ class PurchaseReturn(Document):
 
 	def delete_account(self):
 		frappe.db.sql("""delete from `tabPurchase Return Account` where parent = %s""", self.name)
+
+	def set_default_account(self):
+		if not self.account:
+			check_return_account = frappe.db.sql("""select default_purchase_return_account from `tabCompany` where `name` = %s""", self.company)[0][0]
+			if check_return_account:
+				self.account = check_return_account
+			else:
+				frappe.throw(_("You must set <b>Default Purchase Return Account</b> in Company"))
 
 	def get_item_details(self, args=None, for_update=False):
 		item = frappe.db.sql("""select stock_uom, description, image, item_name,
@@ -171,6 +180,7 @@ class PurchaseReturn(Document):
 			frappe.throw(_("Total Return must be filled"))
 
 	def copy_references(self):
+		cost_center = frappe.db.sql("""select cost_center from `tabCompany` where `name` = %s""", self.company)[0][0]
 		for d in self.get("references"):
 			self.append("accounts", {
 	            "account": d.account,
@@ -179,12 +189,14 @@ class PurchaseReturn(Document):
 	            "debit_in_account_currency": d.debit_in_account_currency,
 	            "credit_in_account_currency": d.credit_in_account_currency,
 				"reference_type": d.reference_type,
-				"reference_name": d.reference_name
+				"reference_name": d.reference_name,
+				"cost_center": cost_center
 			}).save()
 
 		self.append("accounts", {
             "account": self.account,
-            "credit_in_account_currency": self.total_return
+            "credit_in_account_currency": self.total_return,
+			"cost_center": cost_center
 		}).save()
 
 	def stock_entry_insert(self):

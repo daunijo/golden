@@ -7,6 +7,7 @@ frappe.ui.form.on('Purchase Return', {
 	},
 	validate: function(frm){
 		frm.clear_table("accounts");
+		frm.events.set_expense_account(frm);
 	},
 	set_posting_time: function(frm){
 		frm.events.set_read_only(frm);
@@ -79,6 +80,13 @@ frappe.ui.form.on('Purchase Return', {
 			d.account = frm.doc.debit_account;
 		})
 		frm.refresh_fields("references");
+		frm.events.set_expense_account(frm);
+	},
+	set_expense_account: function(frm){
+		$.each(frm.doc.items, function(i, d) {
+			d.expense_account = frm.doc.account;
+		})
+		frm.refresh_fields("items");
 	},
 });
 //Purchase Return Detail (items)
@@ -185,6 +193,11 @@ cur_frm.set_query("supplier_address", function(frm) {
 		}
 	}
 });
+cur_frm.set_query("account", function(frm) {
+	return {
+		query: "erpnext.controllers.queries.get_expense_account",
+	}
+});
 cur_frm.set_query("item_code", "items",  function (doc, cdt, cdn) {
 	var c_doc= locals[cdt][cdn];
 	return {
@@ -200,7 +213,7 @@ cur_frm.set_query("reference_name", "references",  function (doc, cdt, cdn) {
 		filters: {
 			'supplier': cur_frm.doc.supplier,
 			'docstatus': 1,
-			'status': ["!=", "Paid"]
+			'status': ['!=', 'Paid']
 		}
 	}
 });
