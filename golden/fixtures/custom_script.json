@@ -25,5 +25,14 @@
   "name": "Sales Invoice-Client", 
   "script": "frappe.ui.form.on(\"Sales Invoice\", {\n\trefresh: function(frm){\n\t\tcur_frm.set_df_property(\"project\", \"read_only\", 1);\n\t\tcur_frm.set_df_property(\"is_pos\", \"hidden\", 1);\n\t\tcur_frm.set_df_property(\"update_stock\", \"hidden\", 1);\n\t\tvar df = frappe.meta.get_docfield(\"Sales Invoice Item\", \"barcode\", cur_frm.doc.name);\n\t\tdf.hidden = 1;\n\t\t//frm.refresh_fields();\n\t},\n\tonload: function(frm){\n\t\t//cur_frm.set_df_property(\"project\", \"read_only\", 1);\n\t}\n});", 
   "script_type": "Client"
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Script", 
+  "dt": "Company", 
+  "modified": "2018-02-21 12:57:48.591604", 
+  "name": "Company-Client", 
+  "script": "cur_frm.set_query(\"default_purchase_return_account\", function(frm) {\n\treturn {\n\t\tquery: \"erpnext.controllers.queries.get_expense_account\",\n\t}\n});\ncur_frm.set_query(\"default_selling_return_account\", function(frm) {\n\treturn {\n\t\tquery: \"erpnext.controllers.queries.get_expense_account\",\n\t}\n});", 
+  "script_type": "Client"
  }
 ]

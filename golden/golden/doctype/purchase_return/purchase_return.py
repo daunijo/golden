@@ -17,6 +17,7 @@ class PurchaseReturn(Document):
 		self.set_actual_qty()
 		self.calculate_rate_and_amount()
 		self.delete_account()
+		self.set_default_account()
 
 	def before_submit(self):
 		self.copy_references()
@@ -33,6 +34,14 @@ class PurchaseReturn(Document):
 
 	def delete_account(self):
 		frappe.db.sql("""delete from `tabPurchase Return Account` where parent = %s""", self.name)
+
+	def set_default_account(self):
+		if not self.account:
+			check_return_account = frappe.db.sql("""select default_purchase_return_account from `tabCompany` where `name` = %s""", self.company)[0][0]
+			if check_return_account:
+				self.account = check_return_account
+			else:
+				frappe.throw(_("You must set <b>Default Purchase Return Account</b> in Company"))
 
 	def get_item_details(self, args=None, for_update=False):
 		item = frappe.db.sql("""select stock_uom, description, image, item_name,
@@ -117,6 +126,7 @@ class PurchaseReturn(Document):
 			})
 
 			if not flt(d.basic_rate) or d.s_warehouse or force:
+#			if not flt(d.basic_rate):
 				basic_rate = flt(get_incoming_rate(args), self.precision("basic_rate", d))
 				if basic_rate > 0:
 					d.basic_rate = basic_rate
@@ -170,6 +180,7 @@ class PurchaseReturn(Document):
 			frappe.throw(_("Total Return must be filled"))
 
 	def copy_references(self):
+		cost_center = frappe.db.sql("""select cost_center from `tabCompany` where `name` = %s""", self.company)[0][0]
 		for d in self.get("references"):
 			self.append("accounts", {
 	            "account": d.account,
@@ -178,12 +189,14 @@ class PurchaseReturn(Document):
 	            "debit_in_account_currency": d.debit_in_account_currency,
 	            "credit_in_account_currency": d.credit_in_account_currency,
 				"reference_type": d.reference_type,
-				"reference_name": d.reference_name
+				"reference_name": d.reference_name,
+				"cost_center": cost_center
 			}).save()
 
 		self.append("accounts", {
             "account": self.account,
-            "credit_in_account_currency": self.total_return
+            "credit_in_account_currency": self.total_return,
+			"cost_center": cost_center
 		}).save()
 
 	def stock_entry_insert(self):
@@ -200,7 +213,7 @@ class PurchaseReturn(Document):
 			"total_amount": self.total,
 			"items": self.items
 		})
-		stock_entry.insert()
+		stock_entry.save()
 		se = frappe.get_doc("Stock Entry", {"purchase_return": self.name})
 		se.submit()
 
@@ -215,17 +228,19 @@ class PurchaseReturn(Document):
 			"total_credit": self.total_return,
 			"accounts": self.accounts
 		})
-		journal_entry.insert()
+		journal_entry.save()
 		je = frappe.get_doc("Journal Entry", {"purchase_return": self.name})
 		je.submit()
 
 	def stock_entry_cancel(self):
 		se = frappe.get_doc("Stock Entry", {"purchase_return": self.name})
 		se.cancel()
+		se.delete()
 
 	def journal_entry_cancel(self):
 		je = frappe.get_doc("Journal Entry", {"purchase_return": self.name})
 		je.cancel()
+		je.delete()
 
 @frappe.whitelist()
 def get_warehouse_details(args):
