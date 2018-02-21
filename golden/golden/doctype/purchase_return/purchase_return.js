@@ -5,6 +5,9 @@ frappe.ui.form.on('Purchase Return', {
 	refresh: function(frm) {
 		frm.events.set_read_only(frm);
 	},
+	validate: function(frm){
+		frm.clear_table("accounts");
+	},
 	set_posting_time: function(frm){
 		frm.events.set_read_only(frm);
 	},

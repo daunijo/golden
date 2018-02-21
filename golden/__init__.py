@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.10.4'
+__version__ = '1.10.5'
 
+# 1.10.5
+#   - Update on_submit Purchase Return
 # 1.10.4
 #   - Update Get PO in Receive Order
 # 1.10.3

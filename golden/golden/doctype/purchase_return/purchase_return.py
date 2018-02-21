@@ -117,6 +117,7 @@ class PurchaseReturn(Document):
 			})
 
 			if not flt(d.basic_rate) or d.s_warehouse or force:
+#			if not flt(d.basic_rate):
 				basic_rate = flt(get_incoming_rate(args), self.precision("basic_rate", d))
 				if basic_rate > 0:
 					d.basic_rate = basic_rate
@@ -200,7 +201,7 @@ class PurchaseReturn(Document):
 			"total_amount": self.total,
 			"items": self.items
 		})
-		stock_entry.insert()
+		stock_entry.save()
 		se = frappe.get_doc("Stock Entry", {"purchase_return": self.name})
 		se.submit()
 
@@ -215,17 +216,19 @@ class PurchaseReturn(Document):
 			"total_credit": self.total_return,
 			"accounts": self.accounts
 		})
-		journal_entry.insert()
+		journal_entry.save()
 		je = frappe.get_doc("Journal Entry", {"purchase_return": self.name})
 		je.submit()
 
 	def stock_entry_cancel(self):
 		se = frappe.get_doc("Stock Entry", {"purchase_return": self.name})
 		se.cancel()
+		se.delete()
 
 	def journal_entry_cancel(self):
 		je = frappe.get_doc("Journal Entry", {"purchase_return": self.name})
 		je.cancel()
+		je.delete()
 
 @frappe.whitelist()
 def get_warehouse_details(args):
