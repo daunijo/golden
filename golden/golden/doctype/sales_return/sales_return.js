@@ -50,32 +50,17 @@ frappe.ui.form.on('Sales Return', {
 					name: frm.doc.customer_address
 				},
 				callback: function (data) {
-					if(data.message.address_line1 != undefined){
-						line1 = data.message.address_line1
-					}else{
-						line1 = ""
-					}
 					if(data.message.address_line2 != undefined){
 						line2 = "\n"+data.message.address_line2
 					}else{
 						line2 = ""
-					}
-					if(data.message.city != undefined){
-						city = "\n"+data.message.city
-					}else{
-						city = ""
-					}
-					if(data.message.country != undefined){
-						country = "\n"+data.message.country
-					}else{
-						country = ""
 					}
 					if(data.message.pincode != undefined){
 						pincode = "\n"+data.message.pincode
 					}else{
 						pincode = ""
 					}
-					join = line1+line2+city+country+pincode;
+					join = data.message.address_line1+line2+"\n"+data.message.city+"\n"+data.message.country+pincode;
 					frm.set_value("address_display", join);
 				}
 			})
@@ -117,6 +102,9 @@ frappe.ui.form.on('Sales Return Detail', {
 	},
 	item_code: function(frm, cdt, cdn) {
 		var d = locals[cdt][cdn];
+		frappe.model.set_value(cdt, cdn, "sales_invoice", "");
+		frappe.model.set_value(cdt, cdn, "si_rate", "0");
+		calculate_total_quantity(frm, cdt, cdn);
 		if(d.item_code) {
 			var args = {
 				'item_code'		: d.item_code,
@@ -144,6 +132,26 @@ frappe.ui.form.on('Sales Return Detail', {
 					}
 				}
 			});
+		}
+	},
+	sales_invoice: function(doc, cdt, cdn) {
+		var d = locals[cdt][cdn];
+		if(d.sales_invoice && d.item_code){
+			frappe.call({
+				method: "frappe.client.get",
+				args: {
+					doctype: "Sales Invoice Item",
+					filters:{
+						parent: d.sales_invoice,
+						item_code: d.item_code
+					}
+				},
+				callback: function (data) {
+					frappe.model.set_value(cdt, cdn, "si_rate", data.message.rate);
+				}
+			})
+		}else{
+			frappe.model.set_value(cdt, cdn, "si_rate", "0");
 		}
 	},
 	qty: function(frm, cdt, cdn){
@@ -190,6 +198,12 @@ var calculate_total_quantity = function(frm) {
 		})
 	);
 	frm.set_value("total", total_quantity);
+	var total_2 = frappe.utils.sum(
+		(frm.doc.items || []).map(function(i) {
+			return (flt(i.qty) * flt(i.si_rate));
+		})
+	);
+	frm.set_value("total_2", total_2);
 }
 
 cur_frm.set_query("customer_address", function(frm) {
@@ -205,13 +219,22 @@ cur_frm.set_query("debit_account", function(frm) {
 		query: "erpnext.controllers.queries.get_expense_account",
 	}
 });
-
 cur_frm.set_query("item_code", "items", function (doc, cdt, cdn) {
 	var c_doc= locals[cdt][cdn];
 	return {
 		query: "golden.golden.selling.item_query",
 		filters: {
 			'customer': cur_frm.doc.customer
+		}
+	}
+});
+cur_frm.set_query("sales_invoice", "items",  function (doc, cdt, cdn) {
+	var c_doc= locals[cdt][cdn];
+	return {
+		query: "golden.golden.selling.si_query",
+		filters: {
+			'customer': cur_frm.doc.customer,
+			'item_code': c_doc.item_code
 		}
 	}
 });

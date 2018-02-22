@@ -23,7 +23,7 @@ class PurchaseReturn(Document):
 		self.copy_references()
 
 	def on_submit(self):
-		self.check_total_return()
+#		self.check_total_return()
 		self.stock_entry_insert()
 		self.journal_entry_insert()
 
@@ -175,27 +175,41 @@ class PurchaseReturn(Document):
 						frappe.bold(d.transfer_qty)),
 					NegativeStockError, title=_('Insufficient Stock'))
 
-	def check_total_return(self):
-		if not flt(self.total_return):
-			frappe.throw(_("Total Return must be filled"))
+#	def check_total_return(self):
+#		if not flt(self.total_return):
+#			frappe.throw(_("Total Return must be filled"))
 
 	def copy_references(self):
 		cost_center = frappe.db.sql("""select cost_center from `tabCompany` where `name` = %s""", self.company)[0][0]
-		for d in self.get("references"):
+		if self.get("references"):
+			for d in self.get("references"):
+				self.append("accounts", {
+		            "account": d.account,
+		            "party_type": d.party_type,
+		            "party": d.party,
+		            "debit_in_account_currency": d.debit_in_account_currency,
+		            "credit_in_account_currency": d.credit_in_account_currency,
+					"reference_type": d.reference_type,
+					"reference_name": d.reference_name,
+					"cost_center": cost_center
+				}).save()
+		else:
 			self.append("accounts", {
-	            "account": d.account,
-	            "party_type": d.party_type,
-	            "party": d.party,
-	            "debit_in_account_currency": d.debit_in_account_currency,
-	            "credit_in_account_currency": d.credit_in_account_currency,
-				"reference_type": d.reference_type,
-				"reference_name": d.reference_name,
+				"account": self.debit_account,
+				"party_type": "Supplier",
+				"party": self.supplier,
+				"debit_in_account_currency": self.total_2,
+				"credit_in_account_currency": 0,
 				"cost_center": cost_center
 			}).save()
 
+		if self.total_return:
+			total_2 = self.total_return
+		else:
+			total_2 = self.total_2
 		self.append("accounts", {
             "account": self.account,
-            "credit_in_account_currency": self.total_return,
+            "credit_in_account_currency": total_2,
 			"cost_center": cost_center
 		}).save()
 
@@ -218,14 +232,18 @@ class PurchaseReturn(Document):
 		se.submit()
 
 	def journal_entry_insert(self):
+		if self.total_return:
+			total_2 = self.total_return
+		else:
+			total_2 = self.total_2
 		journal_entry = frappe.get_doc({
 			"doctype": "Journal Entry",
 			"voucher_type": "Journal Entry",
 			"purchase_return": self.name,
 			"posting_date": self.posting_date,
 			"company": self.company,
-			"total_debit": self.total_return,
-			"total_credit": self.total_return,
+			"total_debit": total_2,
+			"total_credit": total_2,
 			"accounts": self.accounts
 		})
 		journal_entry.save()
