@@ -8,8 +8,8 @@ from frappe.desk.reportview import get_match_cond, get_filters_cond
 
 def item_query(doctype, txt, searchfield, start, page_len, filters):
     return frappe.db.sql("""select distinct(a.`name`), a.item_group from `tabItem` a
-        inner join `tabDelivery Note Item` b on a.`name` = b.item_code
-        inner join `tabDelivery Note` c on b.parent = c.`name`
+        inner join `tabSales Invoice Item` b on a.`name` = b.item_code
+        inner join `tabSales Invoice` c on b.parent = c.`name`
         where c.docstatus = '1'
             and (a.`name` like %(txt)s or a.item_code like %(txt)s)
             and c.customer = %(cond)s
@@ -38,4 +38,24 @@ def default_warehouse(doctype, txt, searchfield, start, page_len, filters):
             '_txt': txt.replace("%", ""),
             'start': start,
             'page_len': page_len
+        })
+
+def si_query(doctype, txt, searchfield, start, page_len, filters):
+    return frappe.db.sql("""select distinct(b.`name`), a.rate from `tabSales Invoice Item` a
+        inner join `tabSales Invoice` b on a.parent = b.`name`
+        where b.docstatus = '1'
+            and b.`name` like %(txt)s
+            and b.customer = %(customer)s
+            and a.item_code = %(item_code)s
+            {mcond}
+        limit %(start)s, %(page_len)s""".format(**{
+            'key': searchfield,
+            'mcond':get_match_cond(doctype)
+        }), {
+            'txt': "%%%s%%" % txt,
+            '_txt': txt.replace("%", ""),
+            'start': start,
+            'page_len': page_len,
+            'customer': filters.get("customer"),
+            'item_code': filters.get("item_code")
         })

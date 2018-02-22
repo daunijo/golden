@@ -115,6 +115,9 @@ frappe.ui.form.on('Purchase Return Detail', {
 	},
 	item_code: function(frm, cdt, cdn) {
 		var d = locals[cdt][cdn];
+		frappe.model.set_value(cdt, cdn, "purchase_invoice", "");
+		frappe.model.set_value(cdt, cdn, "pi_rate", "0");
+		calculate_total_quantity(frm, cdt, cdn);
 		if(d.item_code) {
 			var args = {
 				'item_code'		: d.item_code,
@@ -142,6 +145,26 @@ frappe.ui.form.on('Purchase Return Detail', {
 					}
 				}
 			});
+		}
+	},
+	purchase_invoice: function(doc, cdt, cdn) {
+		var d = locals[cdt][cdn];
+		if(d.purchase_invoice && d.item_code){
+			frappe.call({
+				method: "frappe.client.get",
+				args: {
+					doctype: "Purchase Invoice Item",
+					filters:{
+						parent: d.purchase_invoice,
+						item_code: d.item_code
+					}
+				},
+				callback: function (data) {
+					frappe.model.set_value(cdt, cdn, "pi_rate", data.message.rate);
+				}
+			})
+		}else{
+			frappe.model.set_value(cdt, cdn, "pi_rate", "0");
 		}
 	},
 	qty: function(frm, cdt, cdn){
@@ -189,6 +212,12 @@ var calculate_total_quantity = function(frm) {
 		})
 	);
 	frm.set_value("total", total_quantity);
+	var total_2 = frappe.utils.sum(
+		(frm.doc.items || []).map(function(i) {
+			return (flt(i.qty) * flt(i.pi_rate));
+		})
+	);
+	frm.set_value("total_2", total_2);
 }
 var calculate_total_return = function(frm) {
 	var total_return = frappe.utils.sum(
@@ -218,6 +247,16 @@ cur_frm.set_query("item_code", "items",  function (doc, cdt, cdn) {
 		query: "golden.golden.purchase.item_query",
 		filters: {
 			'supplier': cur_frm.doc.supplier
+		}
+	}
+});
+cur_frm.set_query("purchase_invoice", "items",  function (doc, cdt, cdn) {
+	var c_doc= locals[cdt][cdn];
+	return {
+		query: "golden.golden.purchase.pi_query",
+		filters: {
+			'supplier': cur_frm.doc.supplier,
+			'item_code': c_doc.item_code
 		}
 	}
 });

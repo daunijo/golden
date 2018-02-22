@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.10.7'
+__version__ = '1.10.8'
 
+# 1.10.8
+#   - Update Purchase & Sales Return
 # 1.10.7
 #   - Set default debit & credit in Purchase Return
 # 1.10.6

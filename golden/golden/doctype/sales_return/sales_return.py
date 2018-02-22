@@ -23,7 +23,7 @@ class SalesReturn(Document):
 		self.copy_references()
 
 	def on_submit(self):
-		self.check_total_return()
+#		self.check_total_return()
 		self.stock_entry_insert()
 		self.journal_entry_insert()
 
@@ -174,30 +174,41 @@ class SalesReturn(Document):
 						frappe.bold(d.transfer_qty)),
 					NegativeStockError, title=_('Insufficient Stock'))
 
-	def check_total_return(self):
-		if not flt(self.total_return):
-			frappe.throw(_("Total Return must be filled"))
-
-		if not flt(self.total_return):
-			frappe.throw(_("Total Return must be filled"))
+#	def check_total_return(self):
+#		if not flt(self.total_return):
+#			frappe.throw(_("Total Return must be filled"))
 
 	def copy_references(self):
 		cost_center = frappe.db.sql("""select cost_center from `tabCompany` where `name` = %s""", self.company)[0][0]
-		for d in self.get("references"):
+		if self.get("references"):
+			for d in self.get("references"):
+				self.append("accounts", {
+		            "account": d.account,
+		            "party_type": d.party_type,
+		            "party": d.party,
+		            "debit_in_account_currency": d.debit_in_account_currency,
+		            "credit_in_account_currency": d.credit_in_account_currency,
+					"reference_type": d.reference_type,
+					"reference_name": d.reference_name,
+					"cost_center": cost_center
+				}).save()
+		else:
 			self.append("accounts", {
-	            "account": d.account,
-	            "party_type": d.party_type,
-	            "party": d.party,
-	            "debit_in_account_currency": d.debit_in_account_currency,
-	            "credit_in_account_currency": d.credit_in_account_currency,
-				"reference_type": d.reference_type,
-				"reference_name": d.reference_name,
+				"account": self.credit_account,
+				"party_type": "Customer",
+				"party": self.customer,
+				"debit_in_account_currency": 0,
+				"credit_in_account_currency": self.total_2,
 				"cost_center": cost_center
 			}).save()
 
+		if self.total_return:
+			total_2 = self.total_return
+		else:
+			total_2 = self.total_2
 		self.append("accounts", {
             "account": self.debit_account,
-            "debit_in_account_currency": self.total_return,
+            "debit_in_account_currency": total_2,
 			"cost_center": cost_center
 		}).save()
 

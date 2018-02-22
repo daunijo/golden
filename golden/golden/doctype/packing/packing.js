@@ -65,12 +65,12 @@ frappe.ui.form.on('Packing', {
 					source_doctype: "Picking",
 					target: frm,
 					setters:  {
-						//company: frm.doc.company || undefined,
 						customer: frm.doc.customer || undefined,
+//						sales_order: undefined,
 					},
 					get_query_filters: {
 						docstatus: 1,
-						sales_order: frm.doc.sales_order
+//						sales_order: frm.doc.sales_order
 					}
 				})
 			});
