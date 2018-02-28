@@ -44,3 +44,50 @@ frappe.ui.form.on('Receive Order', {
 		}
 	},
 });
+frappe.ui.form.on('Receive Order Item', {
+	item_code: function(doc, cdt, cdn) {
+		var d = locals[cdt][cdn];
+		if(d.item_code){
+			frappe.call({
+				method: "frappe.client.get",
+				args: {
+					doctype: "Item",
+					filters:{
+						name: d.item_code,
+					}
+				},
+				callback: function (data) {
+					frappe.model.set_value(cdt, cdn, "stock_uom", data.message.stock_uom);
+					frappe.model.set_value(cdt, cdn, "uom", data.message.stock_uom);
+					frappe.model.set_value(cdt, cdn, "conversion_factor", "1");
+				}
+			})
+		}else{
+			frappe.model.set_value(cdt, cdn, "stock_uom", "");
+			frappe.model.set_value(cdt, cdn, "uom", "");
+			frappe.model.set_value(cdt, cdn, "conversion_factor", "1");
+		}
+	},
+	uom: function(frm, cdt, cdn){
+		var d = locals[cdt][cdn];
+		if(d.uom){
+			frappe.call({
+				method: "frappe.client.get",
+				args: {
+					doctype: "UOM Conversion Detail",
+					filters:{
+						parent: d.item_code,
+						uom: d.uom
+					}
+				},
+				callback: function (data) {
+					if(data.message){
+						frappe.model.set_value(cdt, cdn, "conversion_factor", data.message.conversion_factor);
+					}else{
+						frappe.model.set_value(cdt, cdn, "conversion_factor", "1");						
+					}
+				}
+			})
+		}
+	}
+})
