@@ -30,7 +30,9 @@ app_include_css = "/files/custom.css"
 # include js in doctype views
 doctype_js = {
 	"Journal Entry": "public/js/journal_entry.js",
-    "Warehouse": "public/js/warehouse.js"
+    "Warehouse": "public/js/warehouse.js",
+	"Purchase Order": "public/js/purchase_order.js",
+	"Sales Order": "public/js/sales_order.js",
 }
 
 doctype_tree_js = {
