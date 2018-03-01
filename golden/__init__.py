@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.10.13'
+__version__ = '1.10.14'
 
+# 1.10.14
+#   - Update Purchase Return
 # 1.10.13
 #   - Update Packing
 # 1.10.12
