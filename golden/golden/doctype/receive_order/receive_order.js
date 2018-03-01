@@ -45,6 +45,24 @@ frappe.ui.form.on('Receive Order', {
 	},
 });
 frappe.ui.form.on('Receive Order Item', {
+	purchase_order: function(doc, cdt, cdn){
+		var d = locals[cdt][cdn];
+		if(d.purchase_order){
+			frappe.call({
+				method: "frappe.client.get",
+				args: {
+					doctype: "Purchase Order",
+					filters:{
+						name: d.purchase_order,
+					}
+				},
+				callback: function (data) {
+					frappe.model.set_value(cdt, cdn, "supplier", data.message.supplier);
+					frappe.model.set_value(cdt, cdn, "supplier_name", data.message.supplier_name);
+				}
+			})
+		}
+	},
 	item_code: function(doc, cdt, cdn) {
 		var d = locals[cdt][cdn];
 		if(d.item_code){
@@ -60,6 +78,20 @@ frappe.ui.form.on('Receive Order Item', {
 					frappe.model.set_value(cdt, cdn, "stock_uom", data.message.stock_uom);
 					frappe.model.set_value(cdt, cdn, "uom", data.message.stock_uom);
 					frappe.model.set_value(cdt, cdn, "conversion_factor", "1");
+				}
+			})
+			frappe.call({
+				method: "frappe.client.get",
+				args: {
+					doctype: "Purchase Order Item",
+					filters:{
+						item_code: d.item_code,
+						parent: d.purchase_order
+					}
+				},
+				callback: function (data) {
+					frappe.model.set_value(cdt, cdn, "po_detail", data.message.name);
+					frappe.model.set_value(cdt, cdn, "qty", data.message.qty);
 				}
 			})
 		}else{
@@ -84,10 +116,19 @@ frappe.ui.form.on('Receive Order Item', {
 					if(data.message){
 						frappe.model.set_value(cdt, cdn, "conversion_factor", data.message.conversion_factor);
 					}else{
-						frappe.model.set_value(cdt, cdn, "conversion_factor", "1");						
+						frappe.model.set_value(cdt, cdn, "conversion_factor", "1");
 					}
 				}
 			})
 		}
 	}
 })
+cur_frm.set_query("item_code", "items",  function (doc, cdt, cdn) {
+	var c_doc= locals[cdt][cdn];
+	return {
+		query: "golden.golden.doctype.receive_order.receive_order.get_item_code",
+		filters: {
+			'po': c_doc.purchase_order
+		}
+	}
+});

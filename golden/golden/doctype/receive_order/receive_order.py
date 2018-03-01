@@ -8,6 +8,7 @@ from frappe.model.document import Document
 from frappe.utils import nowdate, cstr, flt
 from frappe import msgprint, _
 from frappe.model.mapper import get_mapped_doc
+from frappe.desk.reportview import get_match_cond, get_filters_cond
 
 class ReceiveOrder(Document):
 	def validate(self):
@@ -119,7 +120,7 @@ def get_purchase_order(source_name, target_doc=None):
 	def update_item(source, target, source_parent):
 		target.supplier = frappe.db.sql("""select supplier from `tabPurchase Order` where `name` = %s""", source.parent)[0][0]
 		target.supplier_name = frappe.db.sql("""select supplier_name from `tabPurchase Order` where `name` = %s""", source.parent)[0][0]
-		target.qty = flt(frappe.db.sql("""select qty from `tabPurchase Order Item` where parent = %s""", source.parent)[0][0]) - flt(frappe.db.sql("""select received_qty from `tabPurchase Order Item` where parent = %s""", source.parent)[0][0])
+		target.qty = flt(frappe.db.sql("""select qty from `tabPurchase Order Item` where `name` = %s""", source.name)[0][0]) - flt(frappe.db.sql("""select received_qty from `tabPurchase Order Item` where `name` = %s""", source.name)[0][0])
 
 	doclist = get_mapped_doc("Purchase Order", source_name, {
 		"Purchase Order": {
@@ -140,3 +141,20 @@ def get_purchase_order(source_name, target_doc=None):
 	}, target_doc, set_missing_values)
 
 	return doclist
+
+def get_item_code(doctype, txt, searchfield, start, page_len, filters):
+    return frappe.db.sql("""select item_code, item_group from `tabPurchase Order Item`
+        where docstatus = '1'
+            and `name` like %(txt)s
+            and parent = %(po)s
+            {mcond}
+        limit %(start)s, %(page_len)s""".format(**{
+            'key': searchfield,
+            'mcond':get_match_cond(doctype)
+        }), {
+            'txt': "%%%s%%" % txt,
+            '_txt': txt.replace("%", ""),
+            'start': start,
+            'page_len': page_len,
+            'po': filters.get("po")
+        })
