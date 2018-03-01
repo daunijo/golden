@@ -160,7 +160,8 @@ frappe.ui.form.on('Purchase Return Detail', {
 					}
 				},
 				callback: function (data) {
-					frappe.model.set_value(cdt, cdn, "pi_rate", data.message.rate);
+					var rates = flt(data.message.rate) / flt(data.message.conversion_factor);
+					frappe.model.set_value(cdt, cdn, "pi_rate", rates);
 				}
 			})
 		}else{
