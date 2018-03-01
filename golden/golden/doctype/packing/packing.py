@@ -53,17 +53,19 @@ class Packing(Document):
 			"set_posting_time": self.set_posting_time,
 			"taxes_and_charges": self.taxes_and_charges
 		})
-		delivery_note.insert()
+		delivery_note.save()
 		dn = frappe.get_doc("Delivery Note", delivery_note.name)
 		for row in self.items:
+			soi = frappe.db.get_value("Sales Order Item", row.so_detail, ["rate"], as_dict=1)
 			dn.append("items", {
 				"item_code": row.item_code,
 				"item_name": row.item_name,
 				"description": row.description,
 				"qty": row.qty,
 				"uom": row.uom,
+				"stock_uom": row.stock_uom,
 				"conversion_factor": row.conversion_factor,
-				"rate": row.rate,
+				"rate": soi.rate,
 				"warehouse": row.warehouse,
 				"against_sales_order": row.against_sales_order,
 				"so_detail": row.so_detail
