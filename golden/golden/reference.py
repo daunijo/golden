@@ -95,7 +95,7 @@ def submit_sales_order_4(doc, method):
                     ito_item.save()
 
 def submit_sales_order_5(doc, method):
-	frappe.db.sql("""update `tabSales Order` set golden_status = 'Pick' where `name` = %s""", doc.name)
+	frappe.db.sql("""update `tabSales Order` set golden_status = 'In Picking' where `name` = %s""", doc.name)
 
 def cancel_sales_order(doc, method):
     pick = frappe.db.sql("""select `name` from `tabPicking` where docstatus = '1' and sales_order = %s""", doc.name, as_dict=1)
@@ -146,7 +146,7 @@ def cancel_sales_invoice(doc, method):
     for row in doc.items:
         if row.sales_order:
             update_packing = frappe.db.sql("""update`tabPacking` set is_completed = '0' where sales_order = %s""", row.sales_order)
-            update_so = frappe.db.sql("""update`tabSales Order` set golden_status = 'Pack' where `name` = %s""", row.sales_order)
+            update_so = frappe.db.sql("""update`tabSales Order` set golden_status = 'In Packing' where `name` = %s""", row.sales_order)
 
 def submit_stock_entry(doc, method):
     if doc.ito:

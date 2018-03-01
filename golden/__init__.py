@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.10.8'
+__version__ = '1.10.9'
 
+# 1.10.9
+#   - Update conversion_factor in Receive Order
 # 1.10.8
 #   - Update Purchase & Sales Return
 # 1.10.7
