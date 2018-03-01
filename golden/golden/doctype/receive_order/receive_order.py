@@ -147,6 +147,7 @@ def get_item_code(doctype, txt, searchfield, start, page_len, filters):
         where docstatus = '1'
             and `name` like %(txt)s
             and parent = %(po)s
+			and qty > received_qty
             {mcond}
         limit %(start)s, %(page_len)s""".format(**{
             'key': searchfield,

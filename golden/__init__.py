@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.10.11'
+__version__ = '1.10.12'
 
+# 1.10.12
+#   - Update Receive Order Item
 # 1.10.11
 #   - Update Receive Order Item
 # 1.10.10
