@@ -76,8 +76,6 @@ frappe.ui.form.on('Receive Order Item', {
 				},
 				callback: function (data) {
 					frappe.model.set_value(cdt, cdn, "stock_uom", data.message.stock_uom);
-					frappe.model.set_value(cdt, cdn, "uom", data.message.uom);
-					frappe.model.set_value(cdt, cdn, "conversion_factor", "1");
 				}
 			})
 			frappe.call({
@@ -90,8 +88,11 @@ frappe.ui.form.on('Receive Order Item', {
 					}
 				},
 				callback: function (data) {
+					var qty = flt(data.message.qty) - flt(data.message.received_qty);
 					frappe.model.set_value(cdt, cdn, "po_detail", data.message.name);
-					frappe.model.set_value(cdt, cdn, "qty", data.message.qty);
+					frappe.model.set_value(cdt, cdn, "qty", qty);
+					frappe.model.set_value(cdt, cdn, "uom", data.message.uom);
+					frappe.model.set_value(cdt, cdn, "conversion_factor", data.message.conversion_factor);
 				}
 			})
 		}else{
@@ -123,6 +124,15 @@ frappe.ui.form.on('Receive Order Item', {
 		}
 	}
 })
+cur_frm.set_query("purchase_order", "items",  function (doc, cdt, cdn) {
+	var c_doc= locals[cdt][cdn];
+	return {
+		filters: {
+			'docstatus': 1,
+			'status': ['in', 'To Receive and Bill, To Receive']
+		}
+	}
+});
 cur_frm.set_query("item_code", "items",  function (doc, cdt, cdn) {
 	var c_doc= locals[cdt][cdn];
 	return {
