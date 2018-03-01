@@ -56,6 +56,7 @@ class ReceiveOrder(Document):
 			if flt(row.qty) >= 1:
 				pr = frappe.get_doc("Purchase Receipt", {"receive_order": self.name, "rss_po": row.purchase_order})
 				po = frappe.db.get_value("Purchase Order", row.purchase_order, ["schedule_date"], as_dict=1)
+				poi = frappe.db.get_value("Purchase Order Item", row.po_detail, ["price_list_rate", "rate"], as_dict=1)
 				pr.append("items", {
 					"item_code": row.item_code,
 					"item_name": row.item_name,
@@ -68,7 +69,9 @@ class ReceiveOrder(Document):
 					"purchase_order": row.purchase_order,
 					"purchase_order_item": row.po_detail,
 					"schedule_date": po.schedule_date,
-					"stock_qty": row.qty
+					"stock_qty": row.qty,
+					"price_list_rate": poi.price_list_rate,
+					"rate": poi.rate
 				})
 				pr.save()
 
