@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.10.14'
+__version__ = '1.10.15'
 
+# 1.10.15
+#   - Update Purchase Return
+#   - Update Sales Return
 # 1.10.14
 #   - Update Purchase Return
 # 1.10.13

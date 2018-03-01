@@ -147,7 +147,8 @@ frappe.ui.form.on('Sales Return Detail', {
 					}
 				},
 				callback: function (data) {
-					frappe.model.set_value(cdt, cdn, "si_rate", data.message.rate);
+					var rates = flt(data.message.rate) / flt(data.message.conversion_factor);
+					frappe.model.set_value(cdt, cdn, "si_rate", rates);
 				}
 			})
 		}else{
@@ -194,13 +195,13 @@ frappe.ui.form.on('Sales Return Detail', {
 var calculate_total_quantity = function(frm) {
 	var total_quantity = frappe.utils.sum(
 		(frm.doc.items || []).map(function(i) {
-			return (flt(i.qty) * flt(i.basic_rate));
+			return (flt(i.qty) * flt(i.basic_rate) * flt(i.conversion_factor));
 		})
 	);
 	frm.set_value("total", total_quantity);
 	var total_2 = frappe.utils.sum(
 		(frm.doc.items || []).map(function(i) {
-			return (flt(i.qty) * flt(i.si_rate));
+			return (flt(i.qty) * flt(i.si_rate) * flt(i.conversion_factor));
 		})
 	);
 	frm.set_value("total_2", total_2);

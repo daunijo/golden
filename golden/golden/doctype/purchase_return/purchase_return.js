@@ -56,32 +56,19 @@ frappe.ui.form.on('Purchase Return', {
 					name: frm.doc.supplier_address
 				},
 				callback: function (data) {
-					if(data.message.address_line1 != undefined){
-						line1 = data.message.address_line1
-					}else{
-						line1 = ""
-					}
 					if(data.message.address_line2 != undefined){
 						line2 = "\n"+data.message.address_line2
 					}else{
 						line2 = ""
 					}
-					if(data.message.city != undefined){
-						city = "\n"+data.message.city
-					}else{
-						city = ""
-					}
-					if(data.message.country != undefined){
-						country = "\n"+data.message.country
-					}else{
-						country = ""
-					}
+					city = "\n"+data.message.city
+					country = "\n"+data.message.country
 					if(data.message.pincode != undefined){
 						pincode = "\n"+data.message.pincode
 					}else{
 						pincode = ""
 					}
-					join = line1+line2+city+country+pincode;
+					join = data.message.address_line1+line2+city+country+pincode;
 					frm.set_value("address_display", join);
 				}
 			})
@@ -209,13 +196,13 @@ frappe.ui.form.on('Purchase Return Detail', {
 var calculate_total_quantity = function(frm) {
 	var total_quantity = frappe.utils.sum(
 		(frm.doc.items || []).map(function(i) {
-			return (flt(i.qty) * flt(i.basic_rate));
+			return (flt(i.qty) * flt(i.basic_rate) * flt(i.conversion_factor));
 		})
 	);
 	frm.set_value("total", total_quantity);
 	var total_2 = frappe.utils.sum(
 		(frm.doc.items || []).map(function(i) {
-			return (flt(i.qty) * flt(i.pi_rate));
+			return (flt(i.qty) * flt(i.pi_rate) * flt(i.conversion_factor));
 		})
 	);
 	frm.set_value("total_2", total_2);

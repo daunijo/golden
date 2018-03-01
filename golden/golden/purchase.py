@@ -44,7 +44,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
         })
 
 def pi_query(doctype, txt, searchfield, start, page_len, filters):
-    return frappe.db.sql("""select distinct(b.`name`), a.rate from `tabPurchase Invoice Item` a
+    return frappe.db.sql("""select distinct(b.`name`), (a.rate / a.conversion_factor) as rates from `tabPurchase Invoice Item` a
         inner join `tabPurchase Invoice` b on a.parent = b.`name`
         where b.docstatus = '1'
             and b.`name` like %(txt)s
