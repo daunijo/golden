@@ -76,7 +76,7 @@ frappe.ui.form.on('Receive Order Item', {
 				},
 				callback: function (data) {
 					frappe.model.set_value(cdt, cdn, "stock_uom", data.message.stock_uom);
-					frappe.model.set_value(cdt, cdn, "uom", data.message.stock_uom);
+					frappe.model.set_value(cdt, cdn, "uom", data.message.uom);
 					frappe.model.set_value(cdt, cdn, "conversion_factor", "1");
 				}
 			})
