@@ -157,7 +157,7 @@ frappe.ui.form.on('Purchase Return Detail', {
 	},
 	qty: function(frm, cdt, cdn){
 		var d = locals[cdt][cdn];
-		d.amount = flt(d.qty) * flt(d.basic_rate);
+		d.amount = flt(d.qty) * flt(d.basic_rate) * flt(d.conversion_factor);
 		d.transfer_qty = flt(d.qty) * flt(d.conversion_factor);
 		refresh_field('amount', d.name, 'items');
 		refresh_field('transfer_qty', d.name, 'items');
@@ -165,16 +165,17 @@ frappe.ui.form.on('Purchase Return Detail', {
 	},
 	basic_rate: function(frm, cdt, cdn){
 		var d = locals[cdt][cdn];
-		d.amount = flt(d.qty) * flt(d.basic_rate);
+		d.amount = flt(d.qty) * flt(d.basic_rate) * flt(d.conversion_factor);
 		refresh_field('amount', d.name, 'items');
 		calculate_total_quantity(frm, cdt, cdn);
 	},
 	conversion_factor: function(frm, cdt, cdn){
 		d.transfer_qty = flt(d.qty) * flt(d.conversion_factor);
 		refresh_field('transfer_qty', d.name, 'items');
-	},
-	uom: function(doc, cdt, cdn) {
 		calculate_total_quantity(frm, cdt, cdn);
+		frm.refresh_fields("items");
+	},
+	uom: function(frm, cdt, cdn) {
 		var d = locals[cdt][cdn];
 		if(d.uom && d.item_code){
 			return frappe.call({
@@ -187,12 +188,14 @@ frappe.ui.form.on('Purchase Return Detail', {
 				callback: function(r) {
 					if(r.message) {
 						frappe.model.set_value(cdt, cdn, r.message);
+						calculate_total_quantity(frm, cdt, cdn);
+						d.amount = flt(d.qty) * flt(d.basic_rate) * flt(d.conversion_factor);
+						refresh_field('amount', d.name, 'items');
 					}
 				}
 			});
 		}
 	},
-
 });
 var calculate_total_quantity = function(frm) {
 	var total_quantity = frappe.utils.sum(

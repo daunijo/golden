@@ -25,7 +25,7 @@ class Packing(Document):
 
 	def update_so(self):
 		if self.is_new() and self.sales_order:
-			frappe.db.sql("""update `tabSales Order` set golden_status = 'Pack' where `name` = %s""", self.sales_order)
+			frappe.db.sql("""update `tabSales Order` set golden_status = 'In Packing' where `name` = %s""", self.sales_order)
 
 	def update_total_box(self):
 		maks = 0
