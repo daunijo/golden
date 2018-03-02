@@ -35,7 +35,9 @@ app_include_css = "/files/custom.css"
 
 # Home Pages
 # ----------
-
+website_context = {
+	"favicon": 	"/files/icon.png"
+}
 # application home page (will override Website Settings)
 # home_page = "login"
 

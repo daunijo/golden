@@ -174,6 +174,7 @@ frappe.ui.form.on('Purchase Return Detail', {
 		refresh_field('transfer_qty', d.name, 'items');
 	},
 	uom: function(doc, cdt, cdn) {
+		calculate_total_quantity(frm, cdt, cdn);
 		var d = locals[cdt][cdn];
 		if(d.uom && d.item_code){
 			return frappe.call({
