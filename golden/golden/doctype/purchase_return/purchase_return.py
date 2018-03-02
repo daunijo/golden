@@ -136,12 +136,12 @@ class PurchaseReturn(Document):
 	def update_valuation_rate(self):
 		for d in self.get("items"):
 			if d.transfer_qty:
-				d.amount = flt(flt(d.basic_rate) * flt(d.qty))
+				d.amount = flt(flt(d.basic_rate) * flt(d.qty) * flt(d.conversion_factor))
 				d.valuation_rate = flt(d.basic_rate)
 
 	def set_total_amount(self):
 		self.total = None
-		self.total = sum([flt(item.amount) for item in self.get("items")])
+		self.total = sum([(flt(item.valuation_rate) * flt(item.conversion_factor) * flt(item.qty)) for item in self.get("items")])
 
 	def set_transfer_qty(self):
 		for item in self.get("items"):
@@ -174,10 +174,6 @@ class PurchaseReturn(Document):
 					+ '<br><br>' + _("Available qty is {0}, you need {1}").format(frappe.bold(d.actual_qty),
 						frappe.bold(d.transfer_qty)),
 					NegativeStockError, title=_('Insufficient Stock'))
-
-#	def check_total_return(self):
-#		if not flt(self.total_return):
-#			frappe.throw(_("Total Return must be filled"))
 
 	def copy_references(self):
 		cost_center = frappe.db.sql("""select cost_center from `tabCompany` where `name` = %s""", self.company)[0][0]
