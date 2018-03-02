@@ -44,7 +44,9 @@ doctype_tree_js = {
 
 # Home Pages
 # ----------
-
+website_context = {
+	"favicon": 	"/files/icon.png"
+}
 # application home page (will override Website Settings)
 # home_page = "login"
 
