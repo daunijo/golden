@@ -19,7 +19,7 @@ class DeliveryKeeptrack(Document):
 
 	def on_cancel(self):
 		for row in self.details:
-			frappe.db.sql("""update `tabSales Order` set golden_status = 'Invoice', delivery_keeptrack = null where `name` = %s""", row.sales_order)
+			frappe.db.sql("""update `tabSales Order` set golden_status = 'Wait for Delivery and Bill', delivery_keeptrack = null where `name` = %s""", row.sales_order)
 
 	def on_trash(self):
 		frappe.db.sql("""update `tabSales Order` set golden_status = previous_golden_status, previous_golden_status = null, delivery_keeptrack = null where delivery_keeptrack = %s""", self.name)

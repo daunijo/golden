@@ -102,7 +102,7 @@ class Packing(Document):
 			ps = frappe.get_doc("Packing Simple", {"parent": self.name})
 			ps.delete()
 			if self.sales_order:
-				frappe.db.sql("""update `tabSales Order` set golden_status = 'Pick' where `name` = %s""", self.sales_order)
+				frappe.db.sql("""update `tabSales Order` set golden_status = 'In Picking' where `name` = %s""", self.sales_order)
 			dn = frappe.get_doc("Delivery Note", {"packing": self.name})
 			dn.cancel()
 			dn.delete()
@@ -111,7 +111,7 @@ class Packing(Document):
 
 	def on_trash(self):
 		if self.sales_order and self.docstatus == 0:
-			frappe.db.sql("""update `tabSales Order` set golden_status = 'Pick' where `name` = %s""", self.sales_order)
+			frappe.db.sql("""update `tabSales Order` set golden_status = 'In Picking' where `name` = %s""", self.sales_order)
 
 	def check_completed(self):
 		if self.is_completed:
