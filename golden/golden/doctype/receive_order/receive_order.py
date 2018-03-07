@@ -143,10 +143,9 @@ def get_purchase_order(source_name, target_doc=None):
 	return doclist
 
 def get_item_code(doctype, txt, searchfield, start, page_len, filters):
-    return frappe.db.sql("""select item_code, item_group from `tabPurchase Order Item`
+    return frappe.db.sql("""select item_code, parent, concat("<br />Qty: ",cast((qty-received_qty) as int)) from `tabPurchase Order Item`
         where docstatus = '1'
             and `name` like %(txt)s
-            and parent = %(po)s
 			and qty > received_qty
             {mcond}
         limit %(start)s, %(page_len)s""".format(**{
@@ -157,5 +156,5 @@ def get_item_code(doctype, txt, searchfield, start, page_len, filters):
             '_txt': txt.replace("%", ""),
             'start': start,
             'page_len': page_len,
-            'po': filters.get("po")
+#            'po': filters.get("po")
         })

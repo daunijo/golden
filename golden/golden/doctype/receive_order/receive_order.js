@@ -89,6 +89,7 @@ frappe.ui.form.on('Receive Order Item', {
 				},
 				callback: function (data) {
 					var qty = flt(data.message.qty) - flt(data.message.received_qty);
+					frappe.model.set_value(cdt, cdn, "purchase_order", data.message.parent);					
 					frappe.model.set_value(cdt, cdn, "po_detail", data.message.name);
 					frappe.model.set_value(cdt, cdn, "qty", qty);
 					frappe.model.set_value(cdt, cdn, "uom", data.message.uom);
@@ -137,8 +138,9 @@ cur_frm.set_query("item_code", "items",  function (doc, cdt, cdn) {
 	var c_doc= locals[cdt][cdn];
 	return {
 		query: "golden.golden.doctype.receive_order.receive_order.get_item_code",
-		filters: {
+/*		filters: {
 			'po': c_doc.purchase_order
 		}
+*/
 	}
 });
