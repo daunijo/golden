@@ -79,12 +79,18 @@ def submit_sales_order_4(doc, method):
                 if flt(check_ito_item) == 0:
                     item_name = frappe.db.get_value("Item", {"item_code": row.item_code}, "item_name")
                     ito_item = frappe.get_doc("ITO", ito_id)
+                    count_fw = frappe.db.sql("""select count(warehouse) from `tabBin` where warehouse != %s and item_code = %s order by actual_qty desc limit 1""", (row.warehouse, row.item_code))[0][0]
+                    if flt(count_fw) != 0:
+                        fw = frappe.db.sql("""select warehouse from `tabBin` where warehouse != %s and item_code = %s order by actual_qty desc limit 1""", (row.warehouse, row.item_code))[0][0]
+                    else:
+                        fw = frappe.db.sql("""select `value` from `tabSingles` where doctype = 'Stock Settings' and field = 'default_warehouse'""")[0][0]
                     ito_item.append("items", {
                     	"item_code": row.item_code,
                     	"item_name": item_name,
                     	"qty_need": (flt(row.projected_qty) * -1) - flt(row.ito_qty),
                         "stock_uom": row.stock_uom,
                         "qty": 0,
+                        "from_location": fw,
                         "location": row.warehouse,
                         "bin": row.name
                     })

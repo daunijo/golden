@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.10.17'
+__version__ = '1.10.18'
 
+# 1.10.18
+#   - Update receive order
 # 1.10.17
 #   - Update flow golden_status
 # 1.10.16
