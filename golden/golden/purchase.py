@@ -30,7 +30,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
         inner join `tabPurchase Invoice` c on b.parent = c.`name`
         where c.docstatus = '1'
             and (a.`name` like %(txt)s or a.item_code like %(txt)s)
-            and c.supplier = %(cond)s
+            and c.supplier = %(supplier)s
             {mcond}
         limit %(start)s, %(page_len)s""".format(**{
             'key': searchfield,
@@ -40,12 +40,11 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
             '_txt': txt.replace("%", ""),
             'start': start,
             'page_len': page_len,
-            'cond': filters.get("supplier")
+            'supplier': filters.get("supplier")
         })
 
 def pi_query(doctype, txt, searchfield, start, page_len, filters):
-    return frappe.db.sql("""select distinct(b.`name`), (a.rate / a.conversion_factor) as rates from `tabPurchase Invoice Item` a
-        inner join `tabPurchase Invoice` b on a.parent = b.`name`
+    return frappe.db.sql("""select distinct(b.`name`), cast((a.rate / a.conversion_factor) as int) from `tabPurchase Invoice Item` a inner join `tabPurchase Invoice` b on a.parent = b.`name`
         where b.docstatus = '1'
             and b.`name` like %(txt)s
             and b.supplier = %(supplier)s

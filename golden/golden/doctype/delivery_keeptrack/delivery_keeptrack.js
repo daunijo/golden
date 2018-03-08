@@ -13,7 +13,6 @@ frappe.ui.form.on('Delivery Keeptrack', {
 					target: frm,
 					setters:  {
 						company: frm.doc.company || undefined,
-						//customer: undefined,
 					},
 					get_query_filters: {
 						docstatus: 1,
