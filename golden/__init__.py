@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.10.18'
+__version__ = '1.10.19'
 
+# 1.10.19
+#   - Update delivery keeptrack
+#   - Update sales return Detail
+#   - update packing item
 # 1.10.18
 #   - Update receive order
 # 1.10.17
