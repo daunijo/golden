@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.11.0'
+__version__ = '1.11.1'
 
+# 1.11.1
+#   - Update Packing
 # 1.11.0
 #   - Add doctype: Transfer Order
 #   - Copy all content in from Ito to Transfer Order

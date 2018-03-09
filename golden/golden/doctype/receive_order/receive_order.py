@@ -135,7 +135,8 @@ def get_purchase_order(source_name, target_doc=None):
 			"doctype": "Receive Order Item",
 			"field_map": {
 				"parent": "purchase_order",
-				"name": "po_detail"
+				"name": "po_detail",
+				"qty": "po_qty"
 			},
 			"postprocess": update_item
 		},
