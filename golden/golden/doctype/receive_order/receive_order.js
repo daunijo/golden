@@ -49,16 +49,16 @@ frappe.ui.form.on('Receive Order Item', {
 		var d = locals[cdt][cdn];
 		if(d.purchase_order){
 			frappe.call({
-				method: "frappe.client.get",
+				method: "golden.golden.doctype.receive_order.receive_order.get_po_detail",
 				args: {
-					doctype: "Purchase Order",
-					filters:{
-						name: d.purchase_order,
-					}
+					po: d.purchase_order,
+					item_code: d.item_code
 				},
-				callback: function (data) {
-					frappe.model.set_value(cdt, cdn, "supplier", data.message.supplier);
-					frappe.model.set_value(cdt, cdn, "supplier_name", data.message.supplier_name);
+				callback: function (r, rt) {
+					frappe.model.set_value(cdt, cdn, "po_detail", r.message[0]);
+					frappe.model.set_value(cdt, cdn, "po_qty", r.message[1]);
+					frappe.model.set_value(cdt, cdn, "supplier", r.message[2]);
+					frappe.model.set_value(cdt, cdn, "supplier_name", r.message[3]);
 				}
 			})
 		}
@@ -89,7 +89,7 @@ frappe.ui.form.on('Receive Order Item', {
 				},
 				callback: function (data) {
 					var qty = flt(data.message.qty) - flt(data.message.received_qty);
-					frappe.model.set_value(cdt, cdn, "purchase_order", data.message.parent);					
+					frappe.model.set_value(cdt, cdn, "purchase_order", data.message.parent);
 					frappe.model.set_value(cdt, cdn, "po_detail", data.message.name);
 					frappe.model.set_value(cdt, cdn, "qty", qty);
 					frappe.model.set_value(cdt, cdn, "uom", data.message.uom);
@@ -128,9 +128,9 @@ frappe.ui.form.on('Receive Order Item', {
 cur_frm.set_query("purchase_order", "items",  function (doc, cdt, cdn) {
 	var c_doc= locals[cdt][cdn];
 	return {
+		query: "golden.golden.doctype.receive_order.receive_order.get_list_purchase_order",
 		filters: {
-			'docstatus': 1,
-			'status': ['in', 'To Receive and Bill, To Receive']
+			'item_code': c_doc.item_code,
 		}
 	}
 });
@@ -138,9 +138,5 @@ cur_frm.set_query("item_code", "items",  function (doc, cdt, cdn) {
 	var c_doc= locals[cdt][cdn];
 	return {
 		query: "golden.golden.doctype.receive_order.receive_order.get_item_code",
-/*		filters: {
-			'po': c_doc.purchase_order
-		}
-*/
 	}
 });
