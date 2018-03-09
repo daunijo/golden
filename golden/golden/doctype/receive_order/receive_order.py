@@ -58,14 +58,15 @@ class ReceiveOrder(Document):
 				pr = frappe.get_doc("Purchase Receipt", {"receive_order": self.name, "rss_po": row.purchase_order})
 				po = frappe.db.get_value("Purchase Order", row.purchase_order, ["schedule_date"], as_dict=1)
 				poi = frappe.db.get_value("Purchase Order Item", row.po_detail, ["price_list_rate", "rate"], as_dict=1)
+				final_qty = flt(row.qty) * flt(row.conversion_factor)
 				pr.append("items", {
 					"item_code": row.item_code,
 					"item_name": row.item_name,
 					"description": row.description,
-					"qty": row.qty,
-					"uom": row.uom,
+					"qty": final_qty,
+					"uom": row.stock_uom,
 					"stock_uom": row.stock_uom,
-					"conversion_factor": row.conversion_factor,
+					"conversion_factor": 1,
 					"warehouse": self.accepted_location,
 					"purchase_order": row.purchase_order,
 					"purchase_order_item": row.po_detail,
@@ -142,13 +143,29 @@ def get_purchase_order(source_name, target_doc=None):
 
 	return doclist
 
+@frappe.whitelist()
+def get_po_detail(po, item_code):
+	poi_name = frappe.db.sql("""select `name` from `tabPurchase Order Item` where docstatus = '1' and parent = %s and item_code = %s""", (po, item_code))[0][0]
+	poi_qty = frappe.db.sql("""select qty from `tabPurchase Order Item` where docstatus = '1' and parent = %s and item_code = %s""", (po, item_code))[0][0]
+	supplier = frappe.db.sql("""select supplier from `tabPurchase Order` where docstatus = '1' and `name` = %s""", po)[0][0]
+	supplier_name = frappe.db.sql("""select supplier_name from `tabPurchase Order` where docstatus = '1' and `name` = %s""", po)[0][0]
+	return poi_name, poi_qty, supplier, supplier_name
+#    si_list = []
+#    invoice_list = frappe.db.sql("""select * from `tabPurchase Order Item` where docstatus = '1' and parent = %s and item_code = %s""", (po, item_code), as_dict=True)
+#    for d in invoice_list:
+#		si_list.append(frappe._dict({
+#            'qty': d.qty,
+#            'po_detail': d.name,
+#        }))
+#    return si_list
+
 def get_item_code(doctype, txt, searchfield, start, page_len, filters):
-    return frappe.db.sql("""select item_code, parent, concat("<br />Qty: ",cast((qty-received_qty) as int)) from `tabPurchase Order Item`
+    return frappe.db.sql("""select item_code, parent, concat("<br />Qty PO: ",cast(qty as int)), concat("<br />Qty: ",cast((qty-received_qty) as int)) from `tabPurchase Order Item`
         where docstatus = '1'
-            and `name` like %(txt)s
+            and (`name` like %(txt)s or item_code like %(txt)s)
 			and qty > received_qty
             {mcond}
-        limit %(start)s, %(page_len)s""".format(**{
+        order by item_code asc limit %(start)s, %(page_len)s""".format(**{
             'key': searchfield,
             'mcond':get_match_cond(doctype)
         }), {
@@ -157,4 +174,21 @@ def get_item_code(doctype, txt, searchfield, start, page_len, filters):
             'start': start,
             'page_len': page_len,
 #            'po': filters.get("po")
+        })
+
+def get_list_purchase_order(doctype, txt, searchfield, start, page_len, filters):
+    return frappe.db.sql("""select distinct(parent), concat("Qty PO: ",cast(qty as int)) from `tabPurchase Order Item`
+        where docstatus = '1'
+            and parent like %(txt)s
+			and item_code = %(item_code)s
+            {mcond}
+        order by item_code asc limit %(start)s, %(page_len)s""".format(**{
+            'key': searchfield,
+            'mcond':get_match_cond(doctype)
+        }), {
+            'txt': "%%%s%%" % txt,
+            '_txt': txt.replace("%", ""),
+            'start': start,
+            'page_len': page_len,
+			'item_code': filters.get("item_code")
         })

@@ -1,8 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.10.19'
+__version__ = '1.11.0'
 
+# 1.11.0
+#   - Add doctype: Transfer Order
+#   - Copy all content in from Ito to Transfer Order
+#   - Delete doctype: ITO & ITO Item
+#   - Update insert_pr_item in Purchase Order
+#   - Update Receive Order Item
 # 1.10.19
 #   - Update delivery keeptrack
 #   - Update sales return Detail

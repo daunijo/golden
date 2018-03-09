@@ -43,8 +43,8 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "ITO",
-					"description": _("ITO.")
+					"name": "Transfer Order",
+					"description": _("Transfer Order.")
 				},
 				{
 					"type": "doctype",

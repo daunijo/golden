@@ -11,18 +11,18 @@ def make_material_transfer(source_name, target_doc=None):
         target.purpose = "Material Transfer"
         target.run_method("set_missing_values")
 
-    doc = get_mapped_doc("ITO", source_name, {
-		"ITO": {
+    doc = get_mapped_doc("Transfer Order", source_name, {
+		"Transfer Order": {
 			"doctype": "Stock Entry",
 			"validation": {
 				"docstatus": ["=", 1],
 			},
 			"field_map":{
-				"name": "ito",
+				"name": "transfer_order",
                 "warehouse": "from_warehouse"
 			},
 		},
-		"ITO Item": {
+		"Transfer Order Item": {
 			"doctype": "Stock Entry Detail",
 			"field_map":{
 				"location": "t_warehouse",
