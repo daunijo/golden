@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.12.2'
+__version__ = '1.12.3'
 
+# 1.12.3
+#   - Update on_submit in Sales Order
+#   - Update on_cancel in Sales Order
+#   - Update Receive Order
 # 1.12.2
 #   - Update on_cancel in Sales Order
 #   - Update action in Picking

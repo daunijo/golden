@@ -58,15 +58,23 @@ class ReceiveOrder(Document):
 				pr = frappe.get_doc("Purchase Receipt", {"receive_order": self.name, "rss_po": row.purchase_order})
 				po = frappe.db.get_value("Purchase Order", row.purchase_order, ["schedule_date"], as_dict=1)
 				poi = frappe.db.get_value("Purchase Order Item", row.po_detail, ["price_list_rate", "rate"], as_dict=1)
-				final_qty = flt(row.qty) * flt(row.conversion_factor)
+				if row.uom == row.po_uom:
+					final_qty = flt(row.qty)
+					pr_uom = row.uom
+				elif row.stock_uom == row.po_uom:
+					final_qty = flt(row.qty) * flt(row.conversion_factor)
+					pr_uom = row.stock_uom
+				else:
+					final_qty = flt(row.qty) * flt(row.conversion_factor)
+					pr_uom = row.stock_uom
 				pr.append("items", {
 					"item_code": row.item_code,
 					"item_name": row.item_name,
 					"description": row.description,
 					"qty": final_qty,
-					"uom": row.stock_uom,
+					"uom": pr_uom,
 					"stock_uom": row.stock_uom,
-					"conversion_factor": 1,
+					"conversion_factor": row.conversion_factor,
 					"warehouse": self.accepted_location,
 					"purchase_order": row.purchase_order,
 					"purchase_order_item": row.po_detail,
@@ -136,7 +144,8 @@ def get_purchase_order(source_name, target_doc=None):
 			"field_map": {
 				"parent": "purchase_order",
 				"name": "po_detail",
-				"qty": "po_qty"
+				"qty": "po_qty",
+				"uom": "po_uom"
 			},
 			"postprocess": update_item
 		},
@@ -150,20 +159,13 @@ def get_po_detail(po, item_code):
 	poi_qty = frappe.db.sql("""select qty from `tabPurchase Order Item` where docstatus = '1' and parent = %s and item_code = %s""", (po, item_code))[0][0]
 	supplier = frappe.db.sql("""select supplier from `tabPurchase Order` where docstatus = '1' and `name` = %s""", po)[0][0]
 	supplier_name = frappe.db.sql("""select supplier_name from `tabPurchase Order` where docstatus = '1' and `name` = %s""", po)[0][0]
-	return poi_name, poi_qty, supplier, supplier_name
-#    si_list = []
-#    invoice_list = frappe.db.sql("""select * from `tabPurchase Order Item` where docstatus = '1' and parent = %s and item_code = %s""", (po, item_code), as_dict=True)
-#    for d in invoice_list:
-#		si_list.append(frappe._dict({
-#            'qty': d.qty,
-#            'po_detail': d.name,
-#        }))
-#    return si_list
+	poi_uom = frappe.db.sql("""select uom from `tabPurchase Order Item` where docstatus = '1' and parent = %s and item_code = %s""", (po, item_code))[0][0]
+	return poi_name, poi_qty, supplier, supplier_name, poi_uom
 
 def get_item_code(doctype, txt, searchfield, start, page_len, filters):
     return frappe.db.sql("""select item_code, parent, concat("<br />Qty PO: ",cast(qty as int)), concat("<br />Qty: ",cast((qty-received_qty) as int)) from `tabPurchase Order Item`
         where docstatus = '1'
-            and (`name` like %(txt)s or item_code like %(txt)s)
+            and (item_name like %(txt)s or item_code like %(txt)s)
 			and qty > received_qty
             {mcond}
         order by item_code asc limit %(start)s, %(page_len)s""".format(**{
