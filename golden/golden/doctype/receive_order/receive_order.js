@@ -59,6 +59,7 @@ frappe.ui.form.on('Receive Order Item', {
 					frappe.model.set_value(cdt, cdn, "po_qty", r.message[1]);
 					frappe.model.set_value(cdt, cdn, "supplier", r.message[2]);
 					frappe.model.set_value(cdt, cdn, "supplier_name", r.message[3]);
+					frappe.model.set_value(cdt, cdn, "po_uom", r.message[4]);
 				}
 			})
 		}
