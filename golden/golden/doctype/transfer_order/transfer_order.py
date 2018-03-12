@@ -7,7 +7,7 @@ import frappe
 from frappe.model.document import Document
 from frappe import msgprint, _
 
-class ITO(Document):
+class TransferOrder(Document):
 	def validate(self):
 		pass
 #		self.check_qty()

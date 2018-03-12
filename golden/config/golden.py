@@ -43,6 +43,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Batch Picking",
+					"description": _("Batch Picking.")
+				},
+				{
+					"type": "doctype",
 					"name": "Transfer Order",
 					"description": _("Transfer Order.")
 				},
