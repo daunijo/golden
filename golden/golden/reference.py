@@ -62,7 +62,8 @@ def submit_sales_order_3(doc, method):
                 ito = frappe.get_doc({
                 	"doctype": "Transfer Order",
                 	"posting_date": doc.transaction_date,
-                	"company": doc.company
+                	"company": doc.company,
+                    "action": "Auto"
                 })
                 ito.save()
 
@@ -72,7 +73,11 @@ def submit_sales_order_4(doc, method):
         ito_id = frappe.db.sql("""select `name` from `tabTransfer Order` where docstatus = '0'""")[0][0]
         for row in doc.items:
             if flt(row.projected_qty) < flt(row.stock_qty):
-                difference = flt(row.stock_qty) - flt(row.projected_qty)
+                check_ito_item2 = frappe.db.sql("""select count(*) from `tabTransfer Order Item` where parent = %s and item_code = %s and to_location = %s""", (ito_id, row.item_code, row.warehouse))[0][0]
+                if flt(check_ito_item2) == 0:
+                    difference = flt(row.stock_qty) - flt(row.actual_qty)
+                else:
+                    difference = flt(row.stock_qty)
                 largest_uom = frappe.db.sql("""select uom from `tabUOM Conversion Detail` where parent = %s order by conversion_factor desc limit 1""", row.item_code)[0][0]
                 largest_conversion = frappe.db.sql("""select conversion_factor from `tabUOM Conversion Detail` where parent = %s order by conversion_factor desc limit 1""", row.item_code)[0][0]
                 transfer_qty = math.ceil(flt(difference) / flt(largest_conversion))
@@ -97,8 +102,9 @@ def submit_sales_order_4(doc, method):
                             })
                             ito_item.save()
                         else:
+                            need_qty = frappe.db.get_value("Transfer Order Item", {"parent": ito_id, "item_code": row.item_code, "to_location": row.warehouse}, "qty_need")
                             ito_item = frappe.get_doc("Transfer Order Item", {"parent": ito_id, "item_code": row.item_code, "to_location": row.warehouse})
-                            ito_item.qty_need = difference
+                            ito_item.qty_need = flt(need_qty) + flt(row.stock_qty)
                             ito_item.qty = transfer_qty
                             ito_item.save()
                     else:
@@ -214,7 +220,7 @@ def cancel_sales_invoice(doc, method):
 
 def submit_stock_entry(doc, method):
     if doc.transfer_order:
-        frappe.db.sql("""update `tabBin` set ito = null, ito_qty = 0 where ito = %s""", doc.ito)
+        frappe.db.sql("""update `tabBin` set ito = null, ito_qty = 0 where ito = %s""", doc.transfer_order)
         frappe.db.sql("""update `tabTransfer Order` set status = 'Completed' where `name` = %s""", doc.ito)
 
 def validate_warehouse(doc, method):
@@ -230,4 +236,4 @@ def validate_warehouse(doc, method):
     if doc.type == "Section" and doc.rss_is_primary == 1:
         check_primary = frappe.db.sql("""select count(*) from `tabWarehouse` where rss_is_primary = '1'""")[0][0]
         if flt(check_primary) != 0:
-            frappe.throw(_("<b>Primary Section</b> already used by another Section"))
+            frappe.throw(_("<b>Replenishment Section</b> already used by another Section"))
