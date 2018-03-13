@@ -102,7 +102,7 @@ def submit_sales_order_4(doc, method):
                             ito_item.qty = transfer_qty
                             ito_item.save()
                     else:
-                        frappe.throw(_("Warehouse zero"))
+                        frappe.throw(_("Stock not enough in <b>Replenishment Section</b> for items <b>{0}</b>").format(row.item_code))
                 else:
                     frappe.throw(_("<b>Replenishment Section</b> in <b>Warehouse</b> has not been selected"))
             else:
