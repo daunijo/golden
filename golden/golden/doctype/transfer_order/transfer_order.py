@@ -19,6 +19,7 @@ class TransferOrder(Document):
 		self.make_stock_entry()
 		self.insert_stock_entry_item()
 		self.submit_stock_entry()
+		self.delete_stock_entry_item_so()
 
 	def on_cancel(self):
 		frappe.db.set(self, 'status', 'Cancelled')
@@ -78,3 +79,6 @@ class TransferOrder(Document):
 		se = frappe.db.sql("""select `name` from `tabStock Entry` where docstatus = '0' and transfer_order = %s""", self.name)[0][0]
 		submit_se = frappe.get_doc("Stock Entry", se)
 		submit_se.submit()
+
+	def delete_stock_entry_item_so(self):
+		frappe.db.sql("""update `tabTransfer Order Item Detail` set so_detail = null where parent = %s""", self.name)
