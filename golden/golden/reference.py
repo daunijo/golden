@@ -90,62 +90,64 @@ def submit_sales_order_5(doc, method):
             ito_detail.save()
 
 def submit_sales_order_6(doc, method):
-    ito_id = frappe.db.sql("""select `name` from `tabTransfer Order` where docstatus = '0'""")[0][0]
-    rep = frappe.db.sql("""select `name` from `tabWarehouse` where rss_is_primary = '1'""")[0][0]
-    to_warehouse = frappe.db.sql("""select distinct(to_location) as warehouse from `tabTransfer Order Item Detail` where docstatus = '0' and parent = %s""", ito_id, as_dict=1)
-    for tw in to_warehouse:
-        items = frappe.db.sql("""select distinct(item_code) as item, to_location, item_name, stock_uom from `tabTransfer Order Item Detail` where docstatus = '0' and parent = %s and to_location = %s""", (ito_id, tw.warehouse), as_dict=1)
-        for it in items:
-            qty_need = frappe.db.sql("""select sum(qty_need) from `tabTransfer Order Item Detail` where docstatus = '0' and parent = %s and to_location = %s and item_code = %s""", (ito_id, tw.warehouse, it.item))[0][0]
-            count_check_actual_qty = frappe.db.sql("""select count(*) from `tabBin` where warehouse = %s and actual_qty >= %s""", (it.to_location, qty_need))[0][0]
-            if flt(count_check_actual_qty) == 0:
-                available_qty = frappe.db.sql("""select sum(b.actual_qty) from `tabWarehouse` w inner join `tabBin` b on w.`name` = b.warehouse where w.parent_warehouse = %s and b.item_code = %s""", (rep, it.item))[0][0]
-                if flt(available_qty) >= flt(qty_need):
-                    count_available_qty_location = frappe.db.sql("""select count(w.`name`) from `tabWarehouse` w inner join `tabBin` b on w.`name` = b.warehouse where w.parent_warehouse = %s and b.actual_qty >= %s and b.item_code = %s order by actual_qty asc""", (rep, qty_need, it.item))[0][0]
-                    largest_uom = frappe.db.sql("""select uom from `tabUOM Conversion Detail` where parent = %s order by conversion_factor desc limit 1""", it.item)[0][0]
-                    largest_conversion = frappe.db.sql("""select conversion_factor from `tabUOM Conversion Detail` where parent = %s order by conversion_factor desc limit 1""", it.item)[0][0]
-                    if flt(count_available_qty_location) != 0:
-                        transfer_qty = math.ceil(flt(qty_need) / flt(largest_conversion))
-                        replenish_location = frappe.db.sql("""select w.`name` from `tabWarehouse` w inner join `tabBin` b on w.`name` = b.warehouse where w.parent_warehouse = %s and b.actual_qty >= %s and b.item_code = %s order by actual_qty asc limit 1""", (rep, qty_need, it.item))[0][0]
-                        ito_item = frappe.get_doc("Transfer Order", ito_id)
-                        ito_item.append("items", {
-                        	"item_code": it.item,
-                        	"item_name": it.item_name,
-                        	"qty_need": qty_need,
-                            "stock_uom": it.stock_uom,
-                            "qty": transfer_qty,
-                            "transfer_uom": largest_uom,
-                            "from_location": replenish_location,
-                            "to_location": it.to_location
-                        })
-                        ito_item.save()
+    count_ito = frappe.db.sql("""select count(*) from `tabTransfer Order` where docstatus = '0'""")[0][0]
+    if flt(count_ito) == 1:
+        ito_id = frappe.db.sql("""select `name` from `tabTransfer Order` where docstatus = '0'""")[0][0]
+        rep = frappe.db.sql("""select `name` from `tabWarehouse` where rss_is_primary = '1'""")[0][0]
+        to_warehouse = frappe.db.sql("""select distinct(to_location) as warehouse from `tabTransfer Order Item Detail` where docstatus = '0' and parent = %s""", ito_id, as_dict=1)
+        for tw in to_warehouse:
+            items = frappe.db.sql("""select distinct(item_code) as item, to_location, item_name, stock_uom from `tabTransfer Order Item Detail` where docstatus = '0' and parent = %s and to_location = %s""", (ito_id, tw.warehouse), as_dict=1)
+            for it in items:
+                qty_need = frappe.db.sql("""select sum(qty_need) from `tabTransfer Order Item Detail` where docstatus = '0' and parent = %s and to_location = %s and item_code = %s""", (ito_id, tw.warehouse, it.item))[0][0]
+                count_check_actual_qty = frappe.db.sql("""select count(*) from `tabBin` where warehouse = %s and actual_qty >= %s""", (it.to_location, qty_need))[0][0]
+                if flt(count_check_actual_qty) == 0:
+                    available_qty = frappe.db.sql("""select sum(b.actual_qty) from `tabWarehouse` w inner join `tabBin` b on w.`name` = b.warehouse where w.parent_warehouse = %s and b.item_code = %s""", (rep, it.item))[0][0]
+                    if flt(available_qty) >= flt(qty_need):
+                        count_available_qty_location = frappe.db.sql("""select count(w.`name`) from `tabWarehouse` w inner join `tabBin` b on w.`name` = b.warehouse where w.parent_warehouse = %s and b.actual_qty >= %s and b.item_code = %s order by actual_qty asc""", (rep, qty_need, it.item))[0][0]
+                        largest_uom = frappe.db.sql("""select uom from `tabUOM Conversion Detail` where parent = %s order by conversion_factor desc limit 1""", it.item)[0][0]
+                        largest_conversion = frappe.db.sql("""select conversion_factor from `tabUOM Conversion Detail` where parent = %s order by conversion_factor desc limit 1""", it.item)[0][0]
+                        if flt(count_available_qty_location) != 0:
+                            transfer_qty = math.ceil(flt(qty_need) / flt(largest_conversion))
+                            replenish_location = frappe.db.sql("""select w.`name` from `tabWarehouse` w inner join `tabBin` b on w.`name` = b.warehouse where w.parent_warehouse = %s and b.actual_qty >= %s and b.item_code = %s order by actual_qty asc limit 1""", (rep, qty_need, it.item))[0][0]
+                            ito_item = frappe.get_doc("Transfer Order", ito_id)
+                            ito_item.append("items", {
+                            	"item_code": it.item,
+                            	"item_name": it.item_name,
+                            	"qty_need": qty_need,
+                                "stock_uom": it.stock_uom,
+                                "qty": transfer_qty,
+                                "transfer_uom": largest_uom,
+                                "from_location": replenish_location,
+                                "to_location": it.to_location
+                            })
+                            ito_item.save()
+                        else:
+                            replenish_location_list = frappe.db.sql("""select w.`name` as warehouse, b.`name` as bin_name from `tabWarehouse` w inner join `tabBin` b on w.`name` = b.warehouse where w.parent_warehouse = %s and b.actual_qty >= '1' and b.item_code = %s order by actual_qty asc""", (rep, it.item), as_dict=1)
+                            hit = flt(qty_need)
+                            for lr in replenish_location_list:
+                                if flt(hit) > 0:
+                                    qty_from_loc = frappe.db.sql("""select actual_qty from `tabBin` where item_code = %s and `name` = %s""", (it.item, lr.bin_name))[0][0]
+                                    if flt(qty_from_loc) >= flt(hit):
+                                        need_qty = flt(hit)
+                                        transfer_qty = math.ceil(flt(hit) / flt(largest_conversion))
+                                    else:
+                                        need_qty = flt(qty_from_loc)
+                                        transfer_qty = math.ceil(flt(qty_from_loc) / flt(largest_conversion))
+                                    ito_item = frappe.get_doc("Transfer Order", ito_id)
+                                    ito_item.append("items", {
+                                    	"item_code": it.item,
+                                    	"item_name": it.item_name,
+                                    	"qty_need": need_qty,
+                                        "stock_uom": it.stock_uom,
+                                        "qty": transfer_qty,
+                                        "transfer_uom": largest_uom,
+                                        "from_location": lr.warehouse,
+                                        "to_location": it.to_location
+                                    })
+                                    ito_item.save()
+                                    hit = flt(hit) - flt(qty_from_loc)
                     else:
-                        replenish_location_list = frappe.db.sql("""select w.`name` as warehouse, b.`name` as bin_name from `tabWarehouse` w inner join `tabBin` b on w.`name` = b.warehouse where w.parent_warehouse = %s and b.actual_qty >= '1' and b.item_code = %s order by actual_qty asc""", (rep, it.item), as_dict=1)
-                        hit = flt(qty_need)
-                        for lr in replenish_location_list:
-                            if flt(hit) > 0:
-                                qty_from_loc = frappe.db.sql("""select actual_qty from `tabBin` where item_code = %s and `name` = %s""", (it.item, lr.bin_name))[0][0]
-                                if flt(qty_from_loc) >= flt(hit):
-                                    need_qty = flt(hit)
-                                    transfer_qty = math.ceil(flt(hit) / flt(largest_conversion))
-                                else:
-                                    need_qty = flt(qty_from_loc)
-                                    transfer_qty = math.ceil(flt(qty_from_loc) / flt(largest_conversion))
-                                ito_item = frappe.get_doc("Transfer Order", ito_id)
-                                ito_item.append("items", {
-                                	"item_code": it.item,
-                                	"item_name": it.item_name,
-                                	"qty_need": need_qty,
-                                    "stock_uom": it.stock_uom,
-                                    "qty": transfer_qty,
-                                    "transfer_uom": largest_uom,
-                                    "from_location": lr.warehouse,
-                                    "to_location": it.to_location
-                                })
-                                ito_item.save()
-                                hit = flt(hit) - flt(qty_from_loc)
-                else:
-                    frappe.throw(_("Stock not enough in <b>Replenishment Section</b> for items <b>{0}</b>, only {1} available").format(it.item, available_qty))
+                        frappe.throw(_("Stock not enough in <b>Replenishment Section</b> for items <b>{0}</b>, only {1} available").format(it.item, available_qty))
 
 def submit_sales_order_3_old(doc, method):
     warehouse_detail = frappe.db.sql("""select `name` from `tabWarehouse` where is_group = '0' and type = 'Location' and parent is not null""", as_dict=1)
