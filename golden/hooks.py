@@ -28,18 +28,9 @@ app_include_css = "/files/custom.css"
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-doctype_js = {
-	"Journal Entry": "public/js/journal_entry.js",
-    "Warehouse": "public/js/warehouse.js",
-	"Purchase Order": "public/js/purchase_order.js",
-	"Sales Order": "public/js/sales_order.js",
-}
-
-doctype_tree_js = {
-	"Warehouse" : "public/js/warehouse_tree.js"
-}
-
+# doctype_js = {"doctype" : "public/js/doctype.js"}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
+# doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
 # Home Pages
@@ -99,11 +90,15 @@ doc_events = {
             "golden.golden.reference.submit_sales_order_2",
             "golden.golden.reference.submit_sales_order_3",
             "golden.golden.reference.submit_sales_order_4",
-            "golden.golden.reference.submit_sales_order_5"
+            "golden.golden.reference.submit_sales_order_5",
+            "golden.golden.reference.submit_sales_order_6",
+            "golden.golden.reference.submit_sales_order_7"
         ],
         "on_cancel": [
             "golden.golden.reference.cancel_sales_order",
             "golden.golden.reference.cancel_sales_order_2",
+            "golden.golden.reference.submit_sales_order_4",
+            "golden.golden.reference.submit_sales_order_6",
             "golden.golden.reference.cancel_sales_order_3",
             "golden.golden.reference.cancel_sales_order_4"
         ]
