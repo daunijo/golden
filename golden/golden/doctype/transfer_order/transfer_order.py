@@ -16,6 +16,9 @@ class TransferOrder(Document):
 		frappe.db.set(self, 'status', 'Submitted')
 		self.update_bin()
 		self.check_picker()
+		self.make_stock_entry()
+		self.insert_stock_entry_item()
+		self.submit_stock_entry()
 
 	def on_cancel(self):
 		frappe.db.set(self, 'status', 'Cancelled')
@@ -45,3 +48,33 @@ class TransferOrder(Document):
 	def check_picker(self):
 		if not self.picker:
 			frappe.throw(_("Picker Name is mandatory"))
+
+	def make_stock_entry(self):
+		se = frappe.get_doc({
+        	"doctype": "Stock Entry",
+			"purpose": "Material Transfer",
+        	"posting_date": self.posting_date,
+        	"company": self.company,
+            "set_posting_time": 1,
+			"transfer_order": self.name
+        })
+		se.save()
+
+	def insert_stock_entry_item(self):
+		se = frappe.db.sql("""select `name` from `tabStock Entry` where docstatus = '0' and transfer_order = %s""", self.name)[0][0]
+		for row in self.items:
+			sei = frappe.get_doc("Stock Entry", se)
+			sei.append("items", {
+				"s_warehouse": row.from_location,
+				"t_warehouse": row.to_location,
+	            "item_code": row.item_code,
+	            "item_name": row.item_name,
+	            "qty": row.qty,
+	            "uom": row.transfer_uom,
+	        })
+			sei.save()
+
+	def submit_stock_entry(self):
+		se = frappe.db.sql("""select `name` from `tabStock Entry` where docstatus = '0' and transfer_order = %s""", self.name)[0][0]
+		submit_se = frappe.get_doc("Stock Entry", se)
+		submit_se.submit()
