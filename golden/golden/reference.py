@@ -145,7 +145,7 @@ def submit_sales_order_6(doc, method):
                                 ito_item.save()
                                 hit = flt(hit) - flt(qty_from_loc)
                 else:
-                    frappe.throw(_("Stock not enough in <b>Replenishment Section</b> for items <b>{0}</b>").format(it.item))
+                    frappe.throw(_("Stock not enough in <b>Replenishment Section</b> for items <b>{0}</b>, only {1} available").format(it.item, available_qty))
 
 def submit_sales_order_3_old(doc, method):
     warehouse_detail = frappe.db.sql("""select `name` from `tabWarehouse` where is_group = '0' and type = 'Location' and parent is not null""", as_dict=1)
