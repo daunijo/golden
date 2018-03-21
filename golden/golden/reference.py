@@ -99,21 +99,23 @@ def submit_sales_order_6(doc, method):
             items = frappe.db.sql("""select distinct(item_code) as item, to_location, item_name, stock_uom from `tabTransfer Order Item Detail` where docstatus = '0' and parent = %s and to_location = %s""", (ito_id, tw.warehouse), as_dict=1)
             for it in items:
                 qty_need = frappe.db.sql("""select sum(qty_need) from `tabTransfer Order Item Detail` where docstatus = '0' and parent = %s and to_location = %s and item_code = %s""", (ito_id, tw.warehouse, it.item))[0][0]
-                count_check_actual_qty = frappe.db.sql("""select count(*) from `tabBin` where warehouse = %s and actual_qty >= %s""", (it.to_location, qty_need))[0][0]
+                qty_bin = frappe.db.sql("""select (actual_qty - ito_qty) from `tabBin` where warehouse = %s and item_code = %s""", (tw.warehouse, it.item))[0][0]
+                count_check_actual_qty = frappe.db.sql("""select count(*) from `tabBin` where warehouse = %s and item_code = %s and actual_qty >= %s""", (it.to_location, it.item, qty_need))[0][0]
                 if flt(count_check_actual_qty) == 0:
-                    available_qty = frappe.db.sql("""select sum(b.actual_qty) from `tabWarehouse` w inner join `tabBin` b on w.`name` = b.warehouse where w.parent_warehouse = %s and b.item_code = %s""", (rep, it.item))[0][0]
+                    available_qty = frappe.db.sql("""select sum(b.actual_qty - b.ito_qty) from `tabWarehouse` w inner join `tabBin` b on w.`name` = b.warehouse where w.parent_warehouse = %s and b.item_code = %s""", (rep, it.item))[0][0]
                     if flt(available_qty) >= flt(qty_need):
                         count_available_qty_location = frappe.db.sql("""select count(w.`name`) from `tabWarehouse` w inner join `tabBin` b on w.`name` = b.warehouse where w.parent_warehouse = %s and b.actual_qty >= %s and b.item_code = %s order by actual_qty asc""", (rep, qty_need, it.item))[0][0]
                         largest_uom = frappe.db.sql("""select uom from `tabUOM Conversion Detail` where parent = %s order by conversion_factor desc limit 1""", it.item)[0][0]
                         largest_conversion = frappe.db.sql("""select conversion_factor from `tabUOM Conversion Detail` where parent = %s order by conversion_factor desc limit 1""", it.item)[0][0]
+                        qty_minus = flt(qty_need) - flt(qty_bin)
                         if flt(count_available_qty_location) != 0:
-                            transfer_qty = math.ceil(flt(qty_need) / flt(largest_conversion))
+                            transfer_qty = math.ceil(flt(qty_minus) / flt(largest_conversion))
                             replenish_location = frappe.db.sql("""select w.`name` from `tabWarehouse` w inner join `tabBin` b on w.`name` = b.warehouse where w.parent_warehouse = %s and b.actual_qty >= %s and b.item_code = %s order by actual_qty asc limit 1""", (rep, qty_need, it.item))[0][0]
                             ito_item = frappe.get_doc("Transfer Order", ito_id)
                             ito_item.append("items", {
                             	"item_code": it.item,
                             	"item_name": it.item_name,
-                            	"qty_need": qty_need,
+                            	"qty_need": qty_minus,
                                 "stock_uom": it.stock_uom,
                                 "qty": transfer_qty,
                                 "transfer_uom": largest_uom,
