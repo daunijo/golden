@@ -35,14 +35,6 @@ class TransferOrder(Document):
 				bins.ito_qty = row.qty
 				bins.save()
 
-	def cancel_bin(self):
-		for row in self.items:
-			if row.bin:
-				bins = frappe.get_doc("Bin", row.bin)
-				bins.ito = None
-				bins.ito_qty = 0
-				bins.save()
-
 	def check_qty(self):
 		for row in self.items:
 			if row.qty <= 0:
@@ -96,8 +88,16 @@ class TransferOrder(Document):
 				add_qty = flt(bin_qty) + flt(row.qty_need)
 				frappe.db.sql("""update `tabBin` set qty_need = %s where `name` = %s""", (self.name, add_qty, bin))
 			else:
-				frappe.throw(_("<b>Bin</b> already used in another Transfer Order"))
+				frappe.throw(_("Packing from the previous Transfer Order has not been completed"))
 
 	def update_picking(self):
 		for i in self.detail:
 			frappe.db.sql("""update `tabPicking Item` set transfer_order = %s where so_detail = %s""", (self.name, i.so_detail))
+
+	def cancel_bin(self):
+		for row in self.items:
+			if row.bin:
+				bins = frappe.get_doc("Bin", row.bin)
+				bins.ito = None
+				bins.ito_qty = 0
+				bins.save()

@@ -39,6 +39,7 @@ class Packing(Document):
 		self.delivery_note_insert()
 		self.update_status()
 		self.update_packing_simple()
+		self.update_bin()
 
 	def delivery_note_insert(self):
 		so = frappe.db.get_value("Sales Order", self.sales_order, ["rss_sales_person", "rss_sales_name"], as_dict=1)
@@ -96,7 +97,22 @@ class Packing(Document):
 		})
 		self.save()
 
+	def update_bin(self):
+		for row in self.items:
+			if row.picking:
+				bin = frappe.db.get_value("Bin", {"item_code": row.item_code, "warehouse": row.warehouse}, ["name", "ito", "ito_qty"], as_dict=1)
+				temp.append(bin.ito)
+				if bin.ito:
+					if flt(bin.ito_qty) >= flt(row.qty_packing):
+						diff = flt(bin.ito_qty) - flt(row.qty_packing)
+						frappe.db.sql("""update `tabBin` set ito = null, ito_qty = %s where `name` = %s""", (diff, bin.name))
+					else:
+						frappe.db.sql("""update `tabBin` set ito = null, ito_qty = 0 where `name` = %s""", bin.name)
+
 	def on_cancel(self):
+		self.delete_dn()
+
+	def delete_dn(self):
 		if self.status == "Submitted":
 			frappe.db.set(self, 'status', 'Cancelled')
 			ps = frappe.get_doc("Packing Simple", {"parent": self.name})
@@ -146,7 +162,8 @@ def get_picking_list(source_name, target_doc=None):
 			"field_map": {
 				"location": "warehouse",
 				"sales_order": "against_sales_order",
-				"so_detail": "so_detail"
+				"so_detail": "so_detail",
+				"name": "picking_detail"
 			},
 			"postprocess": update_item
 		},
