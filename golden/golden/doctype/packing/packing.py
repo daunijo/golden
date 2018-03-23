@@ -101,7 +101,6 @@ class Packing(Document):
 		for row in self.items:
 			if row.picking:
 				bin = frappe.db.get_value("Bin", {"item_code": row.item_code, "warehouse": row.warehouse}, ["name", "ito", "ito_qty"], as_dict=1)
-				temp.append(bin.ito)
 				if bin.ito:
 					if flt(bin.ito_qty) >= flt(row.qty_packing):
 						diff = flt(bin.ito_qty) - flt(row.qty_packing)
