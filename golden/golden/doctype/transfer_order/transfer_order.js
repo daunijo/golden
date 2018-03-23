@@ -19,3 +19,42 @@ cur_frm.cscript['Material Transfer'] = function() {
 	})
 }
 */
+frappe.ui.form.on('Transfer Order Item', {
+	item_code: function(doc, cdt, cdn) {
+		var d = locals[cdt][cdn];
+		if(d.item_code){
+			frappe.call({
+				method: "frappe.client.get",
+				args: {
+					doctype: "Item",
+					filters:{
+						name: d.item_code,
+					}
+				},
+				callback: function (data) {
+					frappe.model.set_value(cdt, cdn, "stock_uom", data.message.stock_uom);
+					frappe.model.set_value(cdt, cdn, "transfer_uom", data.message.stock_uom);
+					frappe.model.set_value(cdt, cdn, "to_location", data.message.default_warehouse);
+				}
+			})
+		}
+	}
+})
+cur_frm.set_query("from_location", "items",  function (doc, cdt, cdn) {
+	var c_doc= locals[cdt][cdn];
+	return {
+		filters: {
+			'is_group': 0,
+			'type': 'Location'
+		}
+	}
+});
+cur_frm.set_query("to_location", "items",  function (doc, cdt, cdn) {
+	var c_doc= locals[cdt][cdn];
+	return {
+		filters: {
+			'is_group': 0,
+			'type': 'Location'
+		}
+	}
+});
