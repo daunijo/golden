@@ -20,7 +20,7 @@ def execute(filters=None):
 		item_detail = item_details[sle.item_code]
 
 		data.append([sle.date, sle.item_code, item_detail.item_name, item_detail.item_group,
-			item_detail.brand, item_detail.description, sle.warehouse,sle.parent_warehouse,sle.warehouse,
+			item_detail.brand, item_detail.description, sle.parent_warehouse_rss,sle.parent_section_rss,sle.warehouse,
 			item_detail.stock_uom, sle.actual_qty, sle.qty_after_transaction,
 			(sle.incoming_rate if sle.actual_qty > 0 else 0.0),
 			sle.valuation_rate, sle.stock_value, sle.voucher_type, sle.voucher_no])
@@ -52,7 +52,7 @@ def get_columns():
 def get_stock_ledger_entries(filters):
 	return frappe.db.sql("""select concat_ws(" ", sle.posting_date, sle.posting_time) as date,
 			sle.item_code,
-			whs.parent_warehouse,
+			whs.parent_warehouse_rss,whs.parent_section_rss,whs.parent_warehouse,
 			sle.warehouse,sle.warehouse, sle.actual_qty, sle.qty_after_transaction, sle.incoming_rate, sle.valuation_rate,
 			sle.stock_value, sle.voucher_type, sle.voucher_no
 		from `tabStock Ledger Entry` sle inner join `tabWarehouse` whs
@@ -93,6 +93,17 @@ def get_sle_conditions(filters):
 		warehouse_condition = get_warehouse_condition(filters.get("warehouse"))
 		if warehouse_condition:
 			conditions.append(warehouse_condition)
+
+	if filters.get("section"):
+		warehouse_condition = get_warehouse_condition(filters.get("section"))
+		if warehouse_condition:
+			conditions.append(warehouse_condition)
+
+	if filters.get("location"):
+		warehouse_condition = get_warehouse_condition(filters.get("location"))
+		if warehouse_condition:
+			conditions.append(warehouse_condition)
+
 	if filters.get("voucher_no"):
 		conditions.append("voucher_no=%(voucher_no)s")
 
