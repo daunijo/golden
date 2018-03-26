@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.12.14'
+__version__ = '1.12.15'
 
+# 1.12.15
+#   - Update on_submit in Sales Order
 # 1.12.14
 #   - Update transfer order manual
 # 1.12.13
