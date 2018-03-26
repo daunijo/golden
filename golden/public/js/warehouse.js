@@ -1,5 +1,9 @@
 frappe.ui.form.on('Warehouse', {
 	 	refresh: function(frm) {
+			frm.add_custom_button(__("Stock Position"), function() {
+				frappe.set_route("query-report", "Stock Position", {"warehouse": frm.doc.name});
+			});
+
 			frm.fields_dict['parent_warehouse_rss'].get_query = function(doc) {
 				return {
 					filters: {
@@ -32,7 +36,8 @@ frappe.ui.form.on('Warehouse', {
 
      parent_section_rss: function(frm){
    		frm.set_value("parent_warehouse", frm.doc.parent_section_rss);
-   	}
+   	},
+
 })
 
 cur_frm.set_query("parent_section_rss",  function (frm) {
