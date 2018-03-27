@@ -58,6 +58,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Delivery Order",
+					"description": _("Delivery Order.")
+				},
+				{
+					"type": "doctype",
 					"name": "Delivery Keeptrack",
 					"description": _("Delivery Keeptrack.")
 				},
