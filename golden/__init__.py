@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.12.15'
+__version__ = '1.13.0'
 
+# 1.13.0
+#   - Add doctype: Delivery Order & Delivery Order Detail
 # 1.12.15
 #   - Update on_submit in Sales Order
 # 1.12.14
