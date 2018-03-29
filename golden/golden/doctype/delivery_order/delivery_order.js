@@ -64,6 +64,7 @@ frappe.ui.form.on("Delivery Order Detail", {
 					frappe.model.set_value(cdt, cdn, "customer", data.message.customer);
 					frappe.model.set_value(cdt, cdn, "customer_name", data.message.customer_name);
 					frappe.model.set_value(cdt, cdn, "packing_date", data.message.posting_date);
+					frappe.model.set_value(cdt, cdn, "total_box", data.message.total_box);
 				}
 			})
 		}

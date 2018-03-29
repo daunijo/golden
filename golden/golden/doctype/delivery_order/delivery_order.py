@@ -16,10 +16,10 @@ class DeliveryOrder(Document):
 
 	def check_detail(self):
 		temp = []
-		for row in doc.details:
+		for row in self.details:
 			temp.append(row.packing)
 			if row.packing in temp:
-				frappe.throw(_("Packing no {0} double").format(row.packing))
+				frappe.throw(_("Packing <b>{0}</b> is double").format(row.packing))
 
 @frappe.whitelist()
 def get_packing_list(source_name, target_doc=None):
@@ -27,10 +27,11 @@ def get_packing_list(source_name, target_doc=None):
 		target.run_method("set_missing_values")
 
 	def update_item(source, target, source_parent):
-		st = frappe.db.get_value("Packing", source.parent, ["customer", "customer_name", "posting_date"], as_dict=1)
+		st = frappe.db.get_value("Packing", source.parent, ["customer", "customer_name", "posting_date", "total_box"], as_dict=1)
 		target.customer = st.customer
 		target.customer_name = st.customer_name
 		target.packing_date = st.posting_date
+		target.total_box = st.total_box
 
 	doclist = get_mapped_doc("Packing", source_name, {
 		"Packing": {
