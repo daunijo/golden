@@ -1,8 +1,21 @@
 frappe.ui.form.on('Warehouse', {
 	 	refresh: function(frm) {
-			frm.add_custom_button(__("Stock Position"), function() {
-				frappe.set_route("query-report", "Stock Position", {"warehouse": frm.doc.name});
-			});
+
+			switch(frm.doc.type) {
+				case 'Location' :
+						frm.add_custom_button(__("Stock Position"), function() {
+								frappe.set_route("query-report", "Stock Position", {"location": frm.doc.name});
+						});break;
+				case 'Section' :
+						frm.add_custom_button(__("Stock Position"), function() {
+								frappe.set_route("query-report", "Stock Position", {"section": frm.doc.name});
+						}); break;
+
+				default :
+						frm.add_custom_button(__("Stock Position"), function() {
+								frappe.set_route("query-report", "Stock Position", {"warehouse": frm.doc.name});
+						}); break;
+			}
 
 			frm.fields_dict['parent_warehouse_rss'].get_query = function(doc) {
 				return {
