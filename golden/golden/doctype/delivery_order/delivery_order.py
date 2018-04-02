@@ -9,17 +9,30 @@ from frappe.utils import nowdate, cstr, flt
 from frappe import msgprint, _
 from frappe.model.mapper import get_mapped_doc
 from frappe.model import display_fieldtypes
+from frappe.desk.reportview import get_match_cond, get_filters_cond
 
 class DeliveryOrder(Document):
 	def on_submit(self):
 		self.check_detail()
+		self.check_packing()
+		self.update_packing()
 
 	def check_detail(self):
 		temp = []
-		for row in doc.details:
-			temp.append(row.packing)
+		for row in self.details:
 			if row.packing in temp:
-				frappe.throw(_("Packing no {0} double").format(row.packing))
+				frappe.throw(_("Packing <b>{0}</b> is double").format(row.packing))
+			temp.append(row.packing)
+
+	def check_packing(self):
+		for row in self.details:
+			count_do = frappe.db.sql("""select count(*) from `tabPacking` where `name`= %s and delivery_order = %s""", (row.packing, self.name))[0][0]
+			if flt(count_do) != 0:
+				frappe.throw(_("Packing {0} is already used by another Delivery Order").format(row.packing))
+
+	def update_packing(self):
+		for row in self.details:
+			frappe.db.sql("""update `tabPacking` set delivery_order = %s where `name` = %s""", (self.name, row.packing))
 
 @frappe.whitelist()
 def get_packing_list(source_name, target_doc=None):
@@ -27,10 +40,12 @@ def get_packing_list(source_name, target_doc=None):
 		target.run_method("set_missing_values")
 
 	def update_item(source, target, source_parent):
-		st = frappe.db.get_value("Packing", source.parent, ["customer", "customer_name", "posting_date"], as_dict=1)
+		st = frappe.db.get_value("Packing", source.parent, ["customer", "customer_name", "posting_date", "total_box"], as_dict=1)
+		target.packing_date = st.posting_date
+		target.do_no = "DO-"+source.parent[3::]
 		target.customer = st.customer
 		target.customer_name = st.customer_name
-		target.packing_date = st.posting_date
+		target.total_box = st.total_box
 
 	doclist = get_mapped_doc("Packing", source_name, {
 		"Packing": {
@@ -51,3 +66,20 @@ def get_packing_list(source_name, target_doc=None):
 	}, target_doc, set_missing_values)
 
 	return doclist
+
+def contact_query(doctype, txt, searchfield, start, page_len, filters):
+    return frappe.db.sql("""select `name`, handphone, email_id from `tabExpedition Detail`
+        where docstatus != '2'
+            and contact_name like %(txt)s
+            and parent = %(cond)s
+            {mcond}
+        limit %(start)s, %(page_len)s""".format(**{
+            'key': searchfield,
+            'mcond':get_match_cond(doctype)
+        }), {
+            'txt': "%%%s%%" % txt,
+            '_txt': txt.replace("%", ""),
+            'start': start,
+            'page_len': page_len,
+            'cond': filters.get("link_name")
+        })

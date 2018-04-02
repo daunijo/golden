@@ -11,6 +11,23 @@ frappe.ui.form.on('Delivery Order', {
 				}
 			}
 		});
+		frm.set_query("contact_person", "details", function (doc, cdt, cdn) {
+			var c_doc= locals[cdt][cdn];
+			return {
+				query: "golden.golden.doctype.delivery_order.delivery_order.contact_query",
+				filters: {
+					'link_name': c_doc.expedition
+				}
+			}
+		});
+		frm.set_query("contact_person", function(doc) {
+			return {
+				query: "golden.golden.doctype.delivery_order.delivery_order.contact_query",
+				filters: {
+					'link_name': doc.expedisi
+				}
+			}
+		});
 	},
 	refresh: function(frm) {
 		if(frm.doc.docstatus == 0 || frm.doc.__islocal){
@@ -42,6 +59,7 @@ frappe.ui.form.on('Delivery Order', {
 					},
 					get_query_filters: {
 						docstatus: 1,
+						delivery_order: ""
 					}
 				})
 			});
@@ -61,11 +79,54 @@ frappe.ui.form.on("Delivery Order Detail", {
 					}
 				},
 				callback: function (data) {
+					no_do = data.message.name.replace('PL-', 'DO-');
+					frappe.model.set_value(cdt, cdn, "do_no", no_do);
+					frappe.model.set_value(cdt, cdn, "packing_date", data.message.posting_date);
 					frappe.model.set_value(cdt, cdn, "customer", data.message.customer);
 					frappe.model.set_value(cdt, cdn, "customer_name", data.message.customer_name);
-					frappe.model.set_value(cdt, cdn, "packing_date", data.message.posting_date);
+					frappe.model.set_value(cdt, cdn, "total_box", data.message.total_box);
 				}
 			})
 		}
-	}
+	},
+	expedition: function(doc, cdt, cdn){
+		var d = locals[cdt][cdn];
+		if (d.expedition){
+			frappe.call({
+				method: "frappe.client.get",
+				args: {
+					doctype: "Expedition",
+					name: d.expedition
+				},
+				callback: function (data) {
+					line1 = data.message.address;
+					city = "\n"+data.message.city;
+					state = "\n"+data.message.state;
+					country = "\n"+data.message.country;
+					join = line1+city+state+country;
+					frappe.model.set_value(cdt, cdn, "expedition_address", join);
+					frappe.model.set_value(cdt, cdn, "website", data.message.website);
+				}
+			})
+		}
+	},
+	contact_person: function(doc, cdt, cdn){
+		var d = locals[cdt][cdn];
+		if(d.contact_person) {
+			frappe.call({
+				method: "frappe.client.get",
+				args: {
+					doctype: "Expedition Detail",
+					name: d.contact_person
+				},
+				callback: function (data) {
+					frappe.model.set_value(cdt, cdn, "contact_name", data.message.contact_name);
+					frappe.model.set_value(cdt, cdn, "phone", data.message.handphone);
+					frappe.model.set_value(cdt, cdn, "email_id", data.message.email_id);
+				}
+			})
+		}else{
+			frappe.model.set_value(cdt, cdn, "contact_name", "");
+		}
+	},
 })

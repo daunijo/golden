@@ -74,6 +74,16 @@ def get_data():
 			]
 		},
 		{
+			"label": _("Masters"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Expedition",
+					"description": _("Expedition.")
+				},
+			]
+		},
+		{
 			"label": _("Commission"),
 			"items": [
 				{
