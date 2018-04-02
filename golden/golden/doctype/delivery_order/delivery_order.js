@@ -7,7 +7,8 @@ frappe.ui.form.on('Delivery Order', {
 			var c_doc= locals[cdt][cdn];
 			return {
 				filters: {
-					'docstatus': 1
+					'docstatus': 1,
+					'delivery_order': ""
 				}
 			}
 		});

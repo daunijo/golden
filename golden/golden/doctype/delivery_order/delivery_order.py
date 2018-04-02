@@ -34,6 +34,13 @@ class DeliveryOrder(Document):
 		for row in self.details:
 			frappe.db.sql("""update `tabPacking` set delivery_order = %s where `name` = %s""", (self.name, row.packing))
 
+	def on_cancel(self):
+		self.delete_packing()
+
+	def delete_packing(self):
+		for row in self.details:
+			frappe.db.sql("""update `tabPacking` set delivery_order = null where `name` = %s""", row.packing)
+
 @frappe.whitelist()
 def get_packing_list(source_name, target_doc=None):
 	def set_missing_values(source, target):
