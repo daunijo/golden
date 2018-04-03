@@ -93,4 +93,15 @@ def get_data():
 				},
 			]
 		},
+		{
+			"label": _("Report"),
+			"items": [
+				{
+					"type": "report",
+					"name": "Dynamic Item Report",
+					"doctype": "Item",
+					"is_query_report": True
+				},
+			]
+		},
 	]
