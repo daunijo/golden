@@ -70,6 +70,7 @@ frappe.ui.form.on('Packing', {
 					},
 					get_query_filters: {
 						docstatus: 1,
+						packing: ""
 //						sales_order: frm.doc.sales_order
 					}
 				})

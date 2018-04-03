@@ -40,6 +40,7 @@ class Packing(Document):
 		self.update_status()
 		self.update_packing_simple()
 		self.update_bin()
+		self.update_picking()
 
 	def delivery_note_insert(self):
 		so = frappe.db.get_value("Sales Order", self.sales_order, ["rss_sales_person", "rss_sales_name"], as_dict=1)
@@ -108,8 +109,13 @@ class Packing(Document):
 					else:
 						frappe.db.sql("""update `tabBin` set ito = null, ito_qty = 0 where `name` = %s""", bin.name)
 
+	def update_picking(self):
+		for row in picking_list:
+			frappe.db.sql("""update `tabPicking` set packing = %s where `name` = %s""", (self.name, row.picking))
+
 	def on_cancel(self):
 		self.delete_dn()
+		self.delete_picking()
 
 	def delete_dn(self):
 		if self.status == "Submitted":
@@ -123,6 +129,10 @@ class Packing(Document):
 			dn.delete()
 		else:
 			frappe.throw(_("You can't cancel this document if status is sent"))
+
+	def delete_picking(self):
+		for row in picking_list:
+			frappe.db.sql("""update `tabPicking` set packing = null where `name` = %s""", row.picking)
 
 	def on_trash(self):
 		if self.sales_order and self.docstatus == 0:

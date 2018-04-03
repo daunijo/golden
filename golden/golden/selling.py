@@ -59,3 +59,41 @@ def si_query(doctype, txt, searchfield, start, page_len, filters):
             'customer': filters.get("customer"),
             'item_code': filters.get("item_code")
         })
+
+@frappe.whitelist()
+def get_items_from_dn(sales_order):
+    dn = frappe.db.sql("""select * from `tabDelivery Note Item` where docstatus = '1' and against_sales_order = %s order by idx asc""", sales_order, as_dict=True)
+    si_list = []
+    for d in dn:
+        item = frappe.db.get_value("Item", d.item_code, ["income_account", "expense_account"], as_dict=1)
+        si_list.append(frappe._dict({
+            'item_code': d.item_code,
+            'item_name': d.item_name,
+            'description': d.description,
+            'image': d.image,
+            'qty': d.qty,
+            'stock_uom': d.stock_uom,
+            'uom': d.uom,
+            'conversion_factor': d.conversion_factor,
+            'stock_qty': d.stock_qty,
+            'price_list_rate': d.price_list_rate,
+            'base_price_list_rate': d.base_price_list_rate,
+            'margin_type': d.margin_type,
+            'discount_percentage': d.discount_percentage,
+            'rate': d.rate,
+            'amount': d.amount,
+            'base_rate': d.base_rate,
+            'base_amount': d.base_amount,
+            'net_rate': d.net_rate,
+            'net_amount': d.net_amount,
+            'base_net_rate': d.base_net_rate,
+            'base_net_amount': d.base_net_amount,
+            'income_account': item.income_account,
+            'expense_account': item.expense_account,
+            'warehouse': d.warehouse,
+            'sales_order': d.against_sales_order,
+            'so_detail': d.so_detail,
+            'delivery_note': d.parent,
+            'dn_detail': d.name
+        }))
+    return si_list
