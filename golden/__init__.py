@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.13.3'
+__version__ = '1.13.4'
 
+# 1.13.4
+#   - Update Sales Invoice
 # 1.13.3
 #   - Add report: Dynamic Item Report
 #   - Update Packing
