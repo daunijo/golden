@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.13.5'
+__version__ = '1.13.6'
 
+# 1.13.6
+#   - Update on_cancel Packing
+#   - Update Purchase Return
 # 1.13.5
 #   - Update on_submit Transfer Order
 #   - Update validate Transfer Order

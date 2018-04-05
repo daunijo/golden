@@ -33,7 +33,7 @@ def execute(filters=None):
 				item_group = cl.item_group
 				count_last_receipt = frappe.db.sql("""select count(*) from `tabPurchase Receipt` pr inner join `tabPurchase Receipt Item` pri where pr.docstatus = '1' and pri.item_code = %s""", cl.item_code)[0][0]
 				if flt(count_last_receipt) == 1:
-					last_receipt = frappe.db.sql("""select pr.posting_date from `tabPurchase Receipt` pr inner join `tabPurchase Receipt Item` pri where pr.docstatus = '1' and pri.item_code = %s order by pr.posting_date desc limit 1""", cl.item_code)
+					last_receipt = frappe.db.sql("""select pr.posting_date from `tabPurchase Receipt` pr inner join `tabPurchase Receipt Item` pri where pr.docstatus = '1' and pri.item_code = %s order by pr.posting_date desc limit 1""", cl.item_code)[0][0]
 				else:
 					last_receipt = ""
 				purchase_pl = frappe.db.sql("""select `name` from `tabPrice List` where enabled = '1' and buying = '1'""")[0][0]
