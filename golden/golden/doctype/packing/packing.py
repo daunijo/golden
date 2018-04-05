@@ -131,7 +131,7 @@ class Packing(Document):
 			frappe.throw(_("You can't cancel this document if status is sent"))
 
 	def delete_picking(self):
-		for row in picking_list:
+		for row in self.picking_list:
 			frappe.db.sql("""update `tabPicking` set packing = null where `name` = %s""", row.picking)
 
 	def on_trash(self):

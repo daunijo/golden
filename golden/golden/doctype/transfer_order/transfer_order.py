@@ -6,11 +6,11 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe import msgprint, _
+from frappe.utils import nowdate, cstr, flt
 
 class TransferOrder(Document):
 	def validate(self):
-		pass
-#		self.check_qty()
+		self.check_uom()
 
 	def on_submit(self):
 		frappe.db.set(self, 'status', 'Submitted')
@@ -26,6 +26,13 @@ class TransferOrder(Document):
 	def on_cancel(self):
 		frappe.db.set(self, 'status', 'Cancelled')
 		self.cancel_bin()
+		self.cancel_stock_entry()
+
+	def check_uom(self):
+		for row in self.items:
+			if row.stock_uom == row.transfer_uom:
+				if flt(row.qty) < flt(row.qty_need):
+					frappe.throw(_("Transfer Qty in <b>{0}</b> is smaller than <b>{1} {2}</b>").format(row.item_code, row.qty_need, row.stock_uom))
 
 	def update_bin(self):
 		for row in self.items:
@@ -102,3 +109,8 @@ class TransferOrder(Document):
 				bins.ito = None
 				bins.ito_qty = 0
 				bins.save()
+
+	def cancel_stock_entry(self):
+		cancel_to = frappe.get_doc("Stock Entry", {"transfer_order": self.name})
+		cancel_to.cancel()
+		cancel_to.delete()
