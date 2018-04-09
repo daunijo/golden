@@ -40,7 +40,6 @@ def execute(filters=None):
 				selling_pl = frappe.db.sql("""select `name` from `tabPrice List` where enabled = '1' and selling = '1'""")[0][0]
 				projected_qty = frappe.db.sql("""select sum(projected_qty) from `tabBin` where item_code = %s""", cl.item_code)[0][0]
 				available_qty = frappe.db.sql("""select sum(actual_qty - reserved_qty) from `tabBin` where item_code = %s""", cl.item_code)[0][0]
-#				bin_uom = frappe.db.get_value("Bin", {"item_code": cl.item_code}, "stock_uom")
 			else:
 				item_code = ""
 				item_name = ""
@@ -71,12 +70,17 @@ def execute(filters=None):
 				so_qty = ""
 				so_uom = ""
 			if flt(q) < flt(count_3):
-				wh = frappe.db.sql("""select warehouse, actual_qty, stock_uom from `tabBin` where item_code = %s order by warehouse asc limit %s,%s""", (cl.name, q, i))
-				location = wh[0][0]
-				section = frappe.db.sql("""select parent from `tabWarehouse` where `name` = %s""", location)[0][0]
-				warehouse = frappe.db.sql("""select parent from `tabWarehouse` where `name` = %s""", section)[0][0]
-				actual_qty = wh[0][1]
-				bin_uom = wh[0][2]
+#				wh = frappe.db.sql("""select warehouse, actual_qty, stock_uom from `tabBin` where item_code = %s order by warehouse asc limit %s,%s""", (cl.name, q, i))
+#				location = wh[0][0]
+#				section = frappe.db.sql("""select parent from `tabWarehouse` where `name` = %s""", location)[0][0]
+#				warehouse = frappe.db.sql("""select parent from `tabWarehouse` where `name` = %s""", section)[0][0]
+#				actual_qty = wh[0][1]
+#				bin_uom = wh[0][2]
+				location = ""
+				section = ""
+				warehouse = ""
+				actual_qty = ""
+				bin_uom = ""
 			else:
 				location = ""
 				section = ""
