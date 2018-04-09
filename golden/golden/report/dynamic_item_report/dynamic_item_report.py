@@ -70,26 +70,26 @@ def execute(filters=None):
 				so_qty = ""
 				so_uom = ""
 			if flt(q) < flt(count_3):
-				if flt(count_3) >= 1:
-					wh = frappe.db.sql("""select warehouse, actual_qty, stock_uom from `tabBin` where item_code = %s order by warehouse asc limit %s,%s""", (cl.name, q, i))
-					location = wh[0][0]
-					section = frappe.db.sql("""select parent from `tabWarehouse` where `name` = %s""", location)[0][0]
-					warehouse = frappe.db.sql("""select parent from `tabWarehouse` where `name` = %s""", section)[0][0]
-					actual_qty = wh[0][1]
-					bin_uom = wh[0][2]
-				else:
-					location = ""
-					section = ""
-					warehouse = ""
-					actual_qty = ""
-					bin_uom = ""
+				# wh = frappe.db.sql("""select warehouse, actual_qty, stock_uom from `tabBin` where item_code = %s order by warehouse asc limit %s,%s""", (cl.name, q, i))
+				# location = wh[0][0]
+				# section = frappe.db.sql("""select parent from `tabWarehouse` where `name` = %s""", location)[0][0]
+				# warehouse = frappe.db.sql("""select parent from `tabWarehouse` where `name` = %s""", section)[0][0]
+				# actual_qty = wh[0][1]
+				# bin_uom = wh[0][2]
+				location = ""
+				section = ""
+				warehouse = ""
+				actual_qty = ""
+				bin_uom = ""
+				test = count_3
 			else:
 				location = ""
 				section = ""
 				warehouse = ""
 				actual_qty = ""
 				bin_uom = ""
-			data.append([item_code, item_name, item_group, po_name, po_qty, po_uom, po_eta, last_receipt, purchase_pl, so_name, so_qty, so_uom, selling_pl, warehouse, section, location, actual_qty, projected_qty, available_qty, bin_uom])
+				test = count_3
+			data.append([item_code, item_name, item_group, po_name, po_qty, po_uom, po_eta, last_receipt, purchase_pl, so_name, so_qty, so_uom, selling_pl, warehouse, section, location, actual_qty, projected_qty, available_qty, bin_uom, test])
 
 	return columns, data
 
@@ -117,6 +117,7 @@ def get_columns():
 		_("Projected Qty")+":Float:90",
 		_("Available Qty")+":Float:90",
 		_("UOM")+":Link/UOM:70",
+		_("Test")+":Data:70",
 	]
 
 	return columns
