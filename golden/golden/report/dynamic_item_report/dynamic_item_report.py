@@ -70,7 +70,7 @@ def execute(filters=None):
 				so_qty = ""
 				so_uom = ""
 			if flt(q) < flt(count_3):
-				if flt(count_3) >= 0:
+				if flt(count_3) >= 1:
 					wh = frappe.db.sql("""select warehouse, actual_qty, stock_uom from `tabBin` where item_code = %s order by warehouse asc limit %s,%s""", (cl.name, q, i))
 					location = wh[0][0]
 					section = frappe.db.sql("""select parent from `tabWarehouse` where `name` = %s""", location)[0][0]
