@@ -11,7 +11,7 @@ def execute(filters=None):
 	data = []
 
 	conditions = get_conditions(filters)
-	sl_entries = frappe.db.sql("""select * from `tabItem` where disabled = '0' and is_stock_item = '1' %s""" % conditions, as_dict=1)
+	sl_entries = frappe.db.sql("""select `name`, item_code, item_name, item_group from `tabItem` where disabled = '0' and is_stock_item = '1' %s""" % conditions, as_dict=1)
 	for cl in sl_entries:
 		count_1 = frappe.db.sql("""select count(*) from `tabPurchase Order` po inner join `tabPurchase Order Item` poi on po.`name` = poi.parent where po.`status` in ('To Receive and Bill', 'To Receive') and po.docstatus = '1' and poi.item_code = %s""", cl.name)[0][0]
 		count_2 = frappe.db.sql("""select count(*) from `tabSales Order` so inner join `tabSales Order Item` soi on so.`name` = soi.parent where so.`status` in ('To Deliver and Bill', 'To Deliver') and so.docstatus = '1' and soi.item_code = %s""", cl.name)[0][0]
@@ -70,17 +70,19 @@ def execute(filters=None):
 				so_qty = ""
 				so_uom = ""
 			if flt(q) < flt(count_3):
-#				wh = frappe.db.sql("""select warehouse, actual_qty, stock_uom from `tabBin` where item_code = %s order by warehouse asc limit %s,%s""", (cl.name, q, i))
-#				location = wh[0][0]
-#				section = frappe.db.sql("""select parent from `tabWarehouse` where `name` = %s""", location)[0][0]
-#				warehouse = frappe.db.sql("""select parent from `tabWarehouse` where `name` = %s""", section)[0][0]
-#				actual_qty = wh[0][1]
-#				bin_uom = wh[0][2]
-				location = ""
-				section = ""
-				warehouse = ""
-				actual_qty = ""
-				bin_uom = ""
+				if flt(count_3) >= 0:
+					wh = frappe.db.sql("""select warehouse, actual_qty, stock_uom from `tabBin` where item_code = %s order by warehouse asc limit %s,%s""", (cl.name, q, i))
+					location = wh[0][0]
+					section = frappe.db.sql("""select parent from `tabWarehouse` where `name` = %s""", location)[0][0]
+					warehouse = frappe.db.sql("""select parent from `tabWarehouse` where `name` = %s""", section)[0][0]
+					actual_qty = wh[0][1]
+					bin_uom = wh[0][2]
+				else:
+					location = ""
+					section = ""
+					warehouse = ""
+					actual_qty = ""
+					bin_uom = ""
 			else:
 				location = ""
 				section = ""
