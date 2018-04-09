@@ -13,6 +13,7 @@ def execute(filters=None):
 	conditions = get_conditions(filters)
 	sl_entries = frappe.db.sql("""select `name`, item_code, item_name, item_group from `tabItem` where disabled = '0' and is_stock_item = '1' %s""" % conditions, as_dict=1)
 	for cl in sl_entries:
+		bin = []
 		count_1 = frappe.db.sql("""select count(*) from `tabPurchase Order` po inner join `tabPurchase Order Item` poi on po.`name` = poi.parent where po.`status` in ('To Receive and Bill', 'To Receive') and po.docstatus = '1' and poi.item_code = %s""", cl.name)[0][0]
 		count_2 = frappe.db.sql("""select count(*) from `tabSales Order` so inner join `tabSales Order Item` soi on so.`name` = soi.parent where so.`status` in ('To Deliver and Bill', 'To Deliver') and so.docstatus = '1' and soi.item_code = %s""", cl.name)[0][0]
 		count_3 = frappe.db.sql("""select count(*) from `tabBin` where item_code = %s""", cl.name)[0][0]
@@ -70,8 +71,10 @@ def execute(filters=None):
 				so_qty = ""
 				so_uom = ""
 			if flt(q) < flt(count_3):
-				qr = str(q)
-				wh = frappe.db.sql("""select warehouse, actual_qty, stock_uom from `tabBin` where item_code = %s order by warehouse asc limit %s,1""", (cl.name, qr))
+				desc = ', '.join(bin)
+				cek = frappe.db.sql("""select `name` from `tabBin` where item_code = %s and `name` not in (%s) order by warehouse asc limit 1""", (cl.name, desc))[0][0]
+				bin.append(cek)
+				wh = frappe.db.sql("""select warehouse, actual_qty, stock_uom from `tabBin` where `name` = %s""", cek)
 				location = wh[0][0]
 				# section = frappe.db.sql("""select parent from `tabWarehouse` where `name` = %s""", location)[0][0]
 				# warehouse = frappe.db.sql("""select parent from `tabWarehouse` where `name` = %s""", section)[0][0]
@@ -81,7 +84,7 @@ def execute(filters=None):
 				warehouse = ""
 				actual_qty = ""
 				bin_uom = ""
-				test = qr
+				test = desc
 			else:
 				location = ""
 				section = ""
