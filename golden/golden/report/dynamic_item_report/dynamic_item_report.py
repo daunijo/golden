@@ -81,14 +81,14 @@ def execute(filters=None):
 				warehouse = ""
 				actual_qty = ""
 				bin_uom = ""
-				test = count_3
+				test = count
 			else:
 				location = ""
 				section = ""
 				warehouse = ""
 				actual_qty = ""
 				bin_uom = ""
-				test = count_3
+				test = "nol"
 			data.append([item_code, item_name, item_group, po_name, po_qty, po_uom, po_eta, last_receipt, purchase_pl, so_name, so_qty, so_uom, selling_pl, warehouse, section, location, actual_qty, projected_qty, available_qty, bin_uom, test])
 
 	return columns, data
