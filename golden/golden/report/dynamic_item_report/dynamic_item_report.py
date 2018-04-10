@@ -85,7 +85,7 @@ def execute(filters=None):
 				warehouse = ""
 				actual_qty = ""
 				bin_uom = ""
-				binti = ""
+				binti = count_3
 				test = ""
 			else:
 				location = ""
@@ -104,7 +104,7 @@ def get_columns():
 
 	columns = [
 		_("Item ID")+":Link/Item:110",
-		_("Item Name")+":Data:110",
+		_("Item Name")+":Data:150",
 		_("Item Group")+":Data:110",
 		_("Actual Qty")+":Float:80",
 		_("Projected Qty")+":Float:90",
