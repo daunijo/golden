@@ -76,16 +76,10 @@ def execute(filters=None):
 				# bin.append(cek)
 				cek = frappe.db.sql("""select `name` from `tabBin` where item_code = %s order by warehouse asc limit %s,1""", (cl.name, q))[0][0]
 				location = frappe.db.sql("""select warehouse from `tabBin` where `name` = %s""", cek)[0][0]
-				# location = wh[0][0]
-				# section = frappe.db.sql("""select parent from `tabWarehouse` where `name` = %s""", location)[0][0]
-				# warehouse = frappe.db.sql("""select parent from `tabWarehouse` where `name` = %s""", section)[0][0]
-				# actual_qty = wh[0][1]
-				# bin_uom = wh[0][2]
-				# location = ""
-				section = ""
-				warehouse = ""
-				actual_qty = ""
-				bin_uom = ""
+				section = frappe.db.sql("""select parent from `tabWarehouse` where `name` = %s""", location)[0][0]
+				warehouse = frappe.db.sql("""select parent from `tabWarehouse` where `name` = %s""", section)[0][0]
+				actual_qty = frappe.db.sql("""select actual_qty from `tabBin` where `name` = %s""", cek)[0][0]
+				bin_uom = frappe.db.sql("""select stock_uom from `tabBin` where `name` = %s""", cek)[0][0]
 				binti = frappe.db.sql("""select `name` from `tabBin` where item_code = %s order by warehouse asc limit %s,1""", (cl.name, q))[0][0]
 				test = "select `name` from `tabBin` where item_code = "+cl.name+" order by warehouse asc limit "+str(q)+",1"
 			else:
