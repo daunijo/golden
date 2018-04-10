@@ -80,7 +80,7 @@ def execute(filters=None):
 				warehouse = frappe.db.sql("""select parent from `tabWarehouse` where `name` = %s""", section)[0][0]
 				actual_qty = wh[0][1]
 				bin_uom = wh[0][2]
-				binti = count_3
+				binti = q
 				test = "select `name` from `tabBin` where item_code = "+cl.name+" and `name` not in ("+desc+") order by warehouse asc limit 1"
 			else:
 				location = ""
