@@ -85,7 +85,7 @@ def execute(filters=None):
 				warehouse = ""
 				actual_qty = ""
 				bin_uom = ""
-				binti = q
+				binti = frappe.db.sql("""select `name` from `tabBin` where item_code = %s order by warehouse asc limit %s,1""", (cl.name, q))[0][0]
 				test = "select `name` from `tabBin` where item_code = "+cl.name+" order by warehouse asc limit "+str(q)+",1"
 			else:
 				location = ""
