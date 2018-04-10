@@ -85,7 +85,7 @@ def execute(filters=None):
 				warehouse = ""
 				actual_qty = ""
 				bin_uom = ""
-				binti = count_3
+				binti = q
 				test = ""
 			else:
 				location = ""
