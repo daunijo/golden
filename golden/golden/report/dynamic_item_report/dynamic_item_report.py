@@ -74,17 +74,18 @@ def execute(filters=None):
 				# desc = ','.join(bin)
 				# cek = frappe.db.sql("select `name` from `tabBin` where item_code = %s and `name` not in (%s) order by warehouse asc limit 1", (cl.name, desc))[0][0]
 				# bin.append(cek)
-				# wh = frappe.db.sql("""select warehouse, actual_qty, stock_uom from `tabBin` where `name` = %s""", cek)
-				# location = wh[0][0]
-				# section = frappe.db.sql("""select parent from `tabWarehouse` where `name` = %s""", location)[0][0]
-				# warehouse = frappe.db.sql("""select parent from `tabWarehouse` where `name` = %s""", section)[0][0]
-				# actual_qty = wh[0][1]
-				# bin_uom = wh[0][2]
-				location = ""
-				section = ""
-				warehouse = ""
-				actual_qty = ""
-				bin_uom = ""
+				cek = frappe.db.sql("""select `name` from `tabBin` where item_code = %s order by warehouse asc limit %s,1""", (cl.name, q))[0][0]
+				wh = frappe.db.sql("""select warehouse, actual_qty, stock_uom from `tabBin` where `name` = %s""", cek)
+				location = wh[0][0]
+				section = frappe.db.sql("""select parent from `tabWarehouse` where `name` = %s""", location)[0][0]
+				warehouse = frappe.db.sql("""select parent from `tabWarehouse` where `name` = %s""", section)[0][0]
+				actual_qty = wh[0][1]
+				bin_uom = wh[0][2]
+				# location = ""
+				# section = ""
+				# warehouse = ""
+				# actual_qty = ""
+				# bin_uom = ""
 				binti = frappe.db.sql("""select `name` from `tabBin` where item_code = %s order by warehouse asc limit %s,1""", (cl.name, q))[0][0]
 				test = "select `name` from `tabBin` where item_code = "+cl.name+" order by warehouse asc limit "+str(q)+",1"
 			else:
