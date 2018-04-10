@@ -71,8 +71,8 @@ def execute(filters=None):
 				so_qty = ""
 				so_uom = ""
 			if flt(q) < flt(count_3):
-				desc = ', '.join(bin)
-				cek = frappe.db.sql("""select `name` from `tabBin` where item_code = %s and `name` not in (%s) order by warehouse asc limit 1""", (cl.name, desc))[0][0]
+				desc = ','.join(bin)
+				cek = frappe.db.sql("select `name` from `tabBin` where item_code = %s and `name` not in (%s) order by warehouse asc limit 1", (cl.name, desc))[0][0]
 				bin.append(cek)
 				wh = frappe.db.sql("""select warehouse, actual_qty, stock_uom from `tabBin` where `name` = %s""", cek)
 				location = wh[0][0]
@@ -80,13 +80,17 @@ def execute(filters=None):
 				warehouse = frappe.db.sql("""select parent from `tabWarehouse` where `name` = %s""", section)[0][0]
 				actual_qty = wh[0][1]
 				bin_uom = wh[0][2]
+				binti = count_3
+				test = "select `name` from `tabBin` where item_code = "+cl.name+" and `name` not in ("+desc+") order by warehouse asc limit 1"
 			else:
 				location = ""
 				section = ""
 				warehouse = ""
 				actual_qty = ""
 				bin_uom = ""
-			data.append([item_code, item_name, item_group, po_name, po_qty, po_uom, po_eta, last_receipt, purchase_pl, so_name, so_qty, so_uom, selling_pl, warehouse, section, location, actual_qty, projected_qty, available_qty, bin_uom])
+				binti = ""
+				test = ""
+			data.append([item_code, item_name, item_group, actual_qty, projected_qty, available_qty, bin_uom, po_name, po_qty, po_uom, po_eta, last_receipt, purchase_pl, so_name, so_qty, so_uom, selling_pl, warehouse, section, location, binti, test])
 
 	return columns, data
 
@@ -97,6 +101,10 @@ def get_columns():
 		_("Item ID")+":Link/Item:110",
 		_("Item Name")+":Data:110",
 		_("Item Group")+":Data:110",
+		_("Actual Qty")+":Float:80",
+		_("Projected Qty")+":Float:90",
+		_("Available Qty")+":Float:90",
+		_("UOM")+":Link/UOM:70",
 		_("PO No.")+":Link/Purchase Order:110",
 		_("PO Qty")+":Float:70",
 		_("PO UOM")+":Link/UOM:70",
@@ -110,10 +118,8 @@ def get_columns():
 		_("Warehouse")+":Link/Warehouse:150",
 		_("Section")+":Link/Warehouse:150",
 		_("Location")+":Link/Warehouse:150",
-		_("Actual Qty")+":Float:80",
-		_("Projected Qty")+":Float:90",
-		_("Available Qty")+":Float:90",
-		_("UOM")+":Link/UOM:70",
+		_("BIN")+":Data:200",
+		_("Test")+":Data:600",
 	]
 
 	return columns
