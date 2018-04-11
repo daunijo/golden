@@ -79,13 +79,14 @@ def execute(filters=None):
 				location = frappe.db.get_value("Bin", cek, "warehouse")
 				section = frappe.db.get_value("Warehouse", location, "parent")
 				warehouse = frappe.db.get_value("Warehouse", section, "parent")
+				actual_qty = frappe.db.get_value("Bin", cek, "actual_qty")
 				# section = frappe.db.sql("""select parent from `tabWarehouse` where `name` = %s""", location)[0][0]
 				# warehouse = frappe.db.sql("""select parent from `tabWarehouse` where `name` = %s""", section)[0][0]
 				# actual_qty = frappe.db.sql("""select actual_qty from `tabBin` where `name` = %s""", cek)[0][0]
 				# bin_uom = frappe.db.sql("""select stock_uom from `tabBin` where `name` = %s""", cek)[0][0]
 				# section = ""
 				# warehouse = ""
-				actual_qty = ""
+				# actual_qty = ""
 				bin_uom = ""
 				binti = frappe.db.sql("""select `name` from `tabBin` where item_code = %s order by warehouse asc limit %s,1""", (cl.name, q))[0][0]
 				test = "select `name` from `tabBin` where item_code = "+cl.name+" order by warehouse asc limit "+str(q)+",1"
