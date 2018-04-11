@@ -75,12 +75,14 @@ def execute(filters=None):
 				# cek = frappe.db.sql("select `name` from `tabBin` where item_code = %s and `name` not in (%s) order by warehouse asc limit 1", (cl.name, desc))[0][0]
 				# bin.append(cek)
 				cek = frappe.db.sql("""select `name` from `tabBin` where item_code = %s order by warehouse asc limit %s,1""", (cl.name, q))[0][0]
-				location = frappe.db.sql("""select warehouse from `tabBin` where `name` = %s""", cek)[0][0]
+				# location = frappe.db.sql("""select warehouse from `tabBin` where `name` = %s""", cek)[0][0]
+				location = frappe.db.get_value("Bin", cek, "warehouse")
+				section = frappe.db.get_value("Warehouse", location, "parent")
 				# section = frappe.db.sql("""select parent from `tabWarehouse` where `name` = %s""", location)[0][0]
 				# warehouse = frappe.db.sql("""select parent from `tabWarehouse` where `name` = %s""", section)[0][0]
 				# actual_qty = frappe.db.sql("""select actual_qty from `tabBin` where `name` = %s""", cek)[0][0]
 				# bin_uom = frappe.db.sql("""select stock_uom from `tabBin` where `name` = %s""", cek)[0][0]
-				section = ""
+				# section = ""
 				warehouse = ""
 				actual_qty = ""
 				bin_uom = ""
