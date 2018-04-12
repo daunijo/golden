@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.13.7'
+__version__ = '1.13.8'
 
+# 1.13.8
+#   - Add doctype: Batch Packing Detail
+#   - Add doctype: Batch Packing Detail Item
+#   - Update Batch Picking
 # 1.13.7
 #   - Update on_cancel Sales Order
 # 1.13.6
