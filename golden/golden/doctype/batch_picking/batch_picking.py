@@ -29,7 +29,7 @@ def get_detail_items(start_from, end_from):
     bp = frappe.db.sql("""select `name` from `tabPicking` where docstatus = '1' and `name` between %s and %s""", (start_from, end_from), as_dict=True)
     pi_list = []
     for d in bp:
-		picking_items = frappe.db.sql("""select * from `tabPicking Item` where docstatus = '1' and parent = %s""", d.name, as_dict=1)
+		picking_items = frappe.db.sql("""select * from `tabPicking Item` where docstatus = '1' and parent = %s order by idx asc""", d.name, as_dict=1)
 		for pi in picking_items:
 			pi_list.append(frappe._dict({
 	            'item_code': pi.item_code,
