@@ -68,6 +68,8 @@ def submit_sales_order_4(doc, method):
     if flt(count_ito) == 1:
         ito_id = frappe.db.sql("""select `name` from `tabTransfer Order` where docstatus = '0'""")[0][0]
         ito_item_delete = frappe.db.sql("""delete from `tabTransfer Order Item` where parent = %s""", ito_id)
+        # ito_item_delete = frappe.get_doc("Transfer Order Item", {"parent": ito_id})
+        # ito_item_delete.delete()
 
     count_rep = frappe.db.sql("""select count(*) from `tabWarehouse` where rss_is_primary = '1'""")[0][0]
     if flt(count_rep) == 0:
@@ -160,7 +162,7 @@ def submit_sales_order_7(doc, method):
 def cancel_sales_order(doc, method):
 	frappe.db.sql("""update `tabSingles` set value = null where doctype = 'Batch Picking' and field = 'from'""")
 	frappe.db.sql("""update `tabSingles` set value = null where doctype = 'Batch Picking' and field = 'to'""")
-    
+
 def cancel_sales_order_2(doc, method):
     pick = frappe.db.sql("""select `name` from `tabPicking` where docstatus = '1' and sales_order = %s""", doc.name, as_dict=1)
     for picking in pick:
