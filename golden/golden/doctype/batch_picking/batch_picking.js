@@ -50,7 +50,8 @@ frappe.ui.form.on('Batch Picking', {
 						c.conversion_factor = d.conversion_factor;
 						c.location = d.location;
 						c.qty_taken = d.qty_taken;
-						c.picking = d.picking
+						c.picking = d.picking;
+						c.urut = d.urut;
 					})
 					frm.refresh_fields();
 				}

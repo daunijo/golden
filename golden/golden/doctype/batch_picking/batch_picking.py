@@ -40,6 +40,7 @@ def get_detail_items(start_from, end_from):
 				'conversion_factor': pi.conversion_factor,
 				'location': pi.location,
 				'qty_taken': pi.qty_taken,
-				'picking': d.name
+				'picking': d.name,
+				'urut': pi.idx
 	        }))
     return pi_list
