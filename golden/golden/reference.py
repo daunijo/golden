@@ -158,13 +158,17 @@ def submit_sales_order_7(doc, method):
 	frappe.db.sql("""update `tabSales Order` set golden_status = 'In Picking' where `name` = %s""", doc.name)
 
 def cancel_sales_order(doc, method):
+	frappe.db.sql("""update `tabSingles` set value = null where doctype = 'Batch Picking' and field = 'from'""")
+	frappe.db.sql("""update `tabSingles` set value = null where doctype = 'Batch Picking' and field = 'to'""")
+    
+def cancel_sales_order_2(doc, method):
     pick = frappe.db.sql("""select `name` from `tabPicking` where docstatus = '1' and sales_order = %s""", doc.name, as_dict=1)
     for picking in pick:
     	cancel_picking = frappe.get_doc("Picking", picking.name)
     	cancel_picking.cancel()
     	cancel_picking.delete()
 
-def cancel_sales_order_2(doc, method):
+def cancel_sales_order_3(doc, method):
     count_ito = frappe.db.sql("""select count(*) from `tabTransfer Order` where docstatus = '0'""")[0][0]
     if flt(count_ito) == 1:
         ito_id = frappe.db.sql("""select `name` from `tabTransfer Order` where docstatus = '0'""")[0][0]
@@ -172,7 +176,7 @@ def cancel_sales_order_2(doc, method):
             ito_detail = frappe.get_doc("Transfer Order Item Detail", {"so_detail": row.name})
             ito_detail.delete()
 
-def cancel_sales_order_3(doc, method):
+def cancel_sales_order_4(doc, method):
     count_ito = frappe.db.sql("""select count(*) from `tabTransfer Order` where docstatus = '0'""")[0][0]
     if flt(count_ito) == 1:
         ito_id = frappe.db.sql("""select `name` from `tabTransfer Order` where docstatus = '0'""")[0][0]
@@ -181,12 +185,8 @@ def cancel_sales_order_3(doc, method):
             delete_ito = frappe.get_doc("Transfer Order", ito_id)
             delete_ito.delete()
 
-def cancel_sales_order_4(doc, method):
-	frappe.db.sql("""update `tabSales Order` set golden_status = 'Cancelled' where `name` = %s""", doc.name)
-
 def cancel_sales_order_5(doc, method):
-	frappe.db.sql("""update `tabSingles` set value = null where doctype = 'Batch Picking' and field = 'from'""")
-	frappe.db.sql("""update `tabSingles` set value = null where doctype = 'Batch Picking' and field = 'to'""")
+	frappe.db.sql("""update `tabSales Order` set golden_status = 'Cancelled' where `name` = %s""", doc.name)
 
 
 def submit_sales_invoice(doc, method):
