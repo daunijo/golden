@@ -63,7 +63,7 @@ class Packing(Document):
 				"item_code": row.item_code,
 				"item_name": row.item_name,
 				"description": row.description,
-				"qty": row.qty,
+				"qty": row.qty_packing,
 				"uom": row.uom,
 				"stock_uom": row.stock_uom,
 				"conversion_factor": row.conversion_factor,
