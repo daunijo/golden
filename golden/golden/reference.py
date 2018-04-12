@@ -184,6 +184,11 @@ def cancel_sales_order_3(doc, method):
 def cancel_sales_order_4(doc, method):
 	frappe.db.sql("""update `tabSales Order` set golden_status = 'Cancelled' where `name` = %s""", doc.name)
 
+def cancel_sales_order_5(doc, method):
+	frappe.db.sql("""update `tabSingles` set value = null where doctype = 'Batch Picking' and field = 'from'""")
+	frappe.db.sql("""update `tabSingles` set value = null where doctype = 'Batch Picking' and field = 'to'""")
+
+
 def submit_sales_invoice(doc, method):
     for row in doc.items:
         if row.sales_order:

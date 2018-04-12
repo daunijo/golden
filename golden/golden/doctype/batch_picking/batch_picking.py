@@ -41,6 +41,6 @@ def get_detail_items(start_from, end_from):
 				'location': pi.location,
 				'qty_taken': pi.qty_taken,
 				'picking': d.name,
-				'urut': pi.idx
+				'sequence': pi.idx
 	        }))
     return pi_list
