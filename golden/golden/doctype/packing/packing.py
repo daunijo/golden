@@ -110,7 +110,7 @@ class Packing(Document):
 						frappe.db.sql("""update `tabBin` set ito = null, ito_qty = 0 where `name` = %s""", bin.name)
 
 	def update_picking(self):
-		for row in picking_list:
+		for row in self.picking_list:
 			frappe.db.sql("""update `tabPicking` set packing = %s where `name` = %s""", (self.name, row.picking))
 
 	def on_cancel(self):
