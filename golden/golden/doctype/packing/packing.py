@@ -15,6 +15,7 @@ class Packing(Document):
 		self.check_items()
 		self.update_so()
 		self.update_total_box()
+		self.box_shorted()
 		self.check_completed()
 		self.check_picking()
 
@@ -26,6 +27,19 @@ class Packing(Document):
 	def update_so(self):
 		if self.is_new() and self.sales_order:
 			frappe.db.sql("""update `tabSales Order` set golden_status = 'In Packing' where `name` = %s""", self.sales_order)
+
+	def box_shorted(self):
+		temp = []
+		for row in self.items:
+			data = row.box.split(",")
+			for i in data:
+				a = int(i)
+				b = str(a)
+				temp.append(a)
+
+		for t in range(1,int(self.total_box)):
+			if t not in temp:
+				frappe.throw(_("There is no box number {0} in the Box").format(t))
 
 	def update_total_box(self):
 		maks = 0
