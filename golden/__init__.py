@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.13.10'
+__version__ = '1.13.11'
 
+# 1.13.11
+#   - Update box Packing
 # 1.13.10
 #   - Update on_submit Packing
 # 1.13.9
