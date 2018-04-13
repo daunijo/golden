@@ -6,7 +6,7 @@ frappe.ui.form.on('Delivery Keeptrack', {
 		frm.events.set_read_only(frm);
 		calculate_total_box(frm);
 		if(frm.doc.docstatus == 0 || frm.doc.__islocal){
-			frm.add_custom_button(__("Packing List"), function() {
+			frm.add_custom_button(__("Delivery Order"), function() {
 				erpnext.utils.map_current_doc({
 					method: "golden.golden.stock.get_packing_list",
 					source_doctype: "Packing",
