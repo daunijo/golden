@@ -14,7 +14,6 @@ class TransferOrder(Document):
 
 	def on_submit(self):
 		frappe.db.set(self, 'status', 'Submitted')
-		self.update_bin()
 		self.check_picker()
 		self.make_stock_entry()
 		self.insert_stock_entry_item()
@@ -34,13 +33,13 @@ class TransferOrder(Document):
 				if flt(row.qty) < flt(row.qty_need):
 					frappe.throw(_("Transfer Qty in <b>{0}</b> is smaller than <b>{1} {2}</b>").format(row.item_code, row.qty_need, row.stock_uom))
 
-	def update_bin(self):
-		for row in self.items:
-			if row.bin:
-				bins = frappe.get_doc("Bin", row.bin)
-				bins.ito = self.name
-				bins.ito_qty = row.qty
-				bins.save()
+	# def update_bin(self):
+	# 	for row in self.items:
+	# 		if row.bin:
+	# 			bins = frappe.get_doc("Bin", row.bin)
+	# 			bins.ito = self.name
+	# 			bins.ito_qty = row.qty
+	# 			bins.save()
 
 	def check_qty(self):
 		for row in self.items:
