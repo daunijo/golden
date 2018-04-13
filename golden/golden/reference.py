@@ -194,10 +194,10 @@ def cancel_sales_order_5(doc, method):
 def submit_sales_invoice(doc, method):
     for row in doc.items:
         if row.sales_order:
-            so_status = frappe.db.sql("""select `status` from `tabSales Order` where `name` = %s""", row.sales_order)[0][0]
-            if so_status == "Completed":
-                update_packing = frappe.db.sql("""update`tabPacking` set is_completed = '1' where sales_order = %s""", row.sales_order)
-                update_so = frappe.db.sql("""update`tabSales Order` set golden_status = 'Wait for Delivery and Bill' where `name` = %s""", row.sales_order)
+            # so_status = frappe.db.sql("""select `status` from `tabSales Order` where `name` = %s""", row.sales_order)[0][0]
+            # if so_status == "Completed":
+            update_packing = frappe.db.sql("""update`tabPacking` set is_completed = '1' where sales_order = %s""", row.sales_order)
+            update_so = frappe.db.sql("""update`tabSales Order` set golden_status = 'Wait for Delivery and Bill' where `name` = %s""", row.sales_order)
 
 def cancel_sales_invoice(doc, method):
     for row in doc.items:
