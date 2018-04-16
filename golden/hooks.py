@@ -135,7 +135,7 @@ doc_events = {
         ]
     },
     "Warehouse": {
-        "validate": "golden.golden.reference.validate_warehouse"
+        "on_update": "golden.golden.reference.validate_warehouse"
     }
 # 	"*": {
 # 		"on_update": "method",
