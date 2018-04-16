@@ -7,17 +7,27 @@ frappe.ui.form.on('Delivery Keeptrack', {
 		calculate_total_box(frm);
 		if(frm.doc.docstatus == 0 || frm.doc.__islocal){
 			frm.add_custom_button(__("Delivery Order"), function() {
+				// erpnext.utils.map_current_doc({
+				// 	method: "golden.golden.stock.get_packing_list",
+				// 	source_doctype: "Packing",
+				// 	target: frm,
+				// 	setters:  {
+				// 		company: frm.doc.company || undefined,
+				// 	},
+				// 	get_query_filters: {
+				// 		docstatus: 1,
+				// 		status: "Submitted",
+				// 		is_completed: 1
+				// 	}
+				// })
 				erpnext.utils.map_current_doc({
-					method: "golden.golden.stock.get_packing_list",
-					source_doctype: "Packing",
+					method: "golden.golden.doctype.delivery_keeptrack.delivery_keeptrack.get_delivery_order",
+					source_doctype: "Delivery Order Detail",
 					target: frm,
 					setters:  {
-						company: frm.doc.company || undefined,
 					},
 					get_query_filters: {
 						docstatus: 1,
-						status: "Submitted",
-						is_completed: 1
 					}
 				})
 			}, __("Get details from"));

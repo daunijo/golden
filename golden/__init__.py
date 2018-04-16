@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.13.11'
+__version__ = '1.13.12'
 
+# 1.13.12
+#   - Update Delivery Keeptrack
 # 1.13.11
 #   - Update box Packing
 # 1.13.10

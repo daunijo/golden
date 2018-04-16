@@ -12,10 +12,16 @@ from frappe.model import display_fieldtypes
 from frappe.desk.reportview import get_match_cond, get_filters_cond
 
 class DeliveryOrder(Document):
+	def on_update(self):
+		for row in self.details:
+			row.do_no = row.name
+			# frappe.db.sql("""update `tabDelivery Order Detail` set do_no = %s where `name` = %s""", (row.name, row.name))
+
 	def on_submit(self):
 		self.check_detail()
 		self.check_packing()
 		self.update_packing()
+		self.update_detail()
 
 	def check_detail(self):
 		temp = []
@@ -34,6 +40,10 @@ class DeliveryOrder(Document):
 		for row in self.details:
 			frappe.db.sql("""update `tabPacking` set delivery_order = %s where `name` = %s""", (self.name, row.packing))
 
+	def update_detail(self):
+		for row in self.details:
+			frappe.db.sql("""update `tabDelivery Order Detail` set transaction_date = %s where `name` = %s""", (row.packing_date, row.name))
+
 	def on_cancel(self):
 		self.delete_packing()
 
@@ -49,7 +59,7 @@ def get_packing_list(source_name, target_doc=None):
 	def update_item(source, target, source_parent):
 		st = frappe.db.get_value("Packing", source.parent, ["customer", "customer_name", "posting_date", "total_box"], as_dict=1)
 		target.packing_date = st.posting_date
-		target.do_no = "DO-"+source.parent[3::]
+		# target.do_no = "DO-"+source.parent[3::]
 		target.customer = st.customer
 		target.customer_name = st.customer_name
 		target.total_box = st.total_box

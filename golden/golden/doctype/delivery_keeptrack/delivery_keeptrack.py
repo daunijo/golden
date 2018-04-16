@@ -7,6 +7,7 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils import cstr, flt
 from frappe import msgprint, _
+from frappe.model.mapper import get_mapped_doc
 
 class DeliveryKeeptrack(Document):
 	def validate(self):
@@ -46,3 +47,28 @@ class DeliveryKeeptrack(Document):
 				check_pl = frappe.db.sql("""select count(*) from `tabDelivery Keeptrack Detail` where parent != %s and packing = %s and docstatus != '2'""", (self.name, row.packing))[0][0]
 				if flt(check_pl) != 0:
 					frappe.throw(_("Packing List {0} already used in other Delivery Keeptrack").format(row.packing))
+
+@frappe.whitelist()
+def get_delivery_order(source_name, target_doc=None):
+	def set_missing_values(source, target):
+		target.run_method("set_missing_values")
+
+	packing = frappe.db.get_value("Delivery Order Detail", source_name, "packing")
+
+	def update_item(source, target, source_parent):
+		target.expedition = frappe.db.get_value("Delivery Order Detail", source_name, "expedition")
+
+	doc = get_mapped_doc("Packing", packing, {
+		"Packing": {
+			"doctype": "Delivery Keeptrack",
+			"validation": {
+				"docstatus": ["=", 1],
+			},
+            "field_no_map": ["posting_date", "posting_time", "set_posting_time", "total_box"]
+		},
+		"Packing Simple": {
+			"doctype": "Delivery Keeptrack Detail",
+			"postprocess": update_item
+		},
+	}, target_doc, set_missing_values)
+	return doc
