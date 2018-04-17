@@ -68,6 +68,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Delivery Return",
+					"description": _("Delivery Return.")
+				},
+				{
+					"type": "doctype",
 					"name": "Receive Order",
 					"description": _("Receive Order.")
 				},

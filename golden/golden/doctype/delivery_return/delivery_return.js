@@ -1,28 +1,15 @@
 // Copyright (c) 2018, RSS and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on('Delivery Keeptrack', {
+frappe.ui.form.on('Delivery Return', {
 	refresh: function(frm) {
 		frm.events.set_read_only(frm);
 		calculate_total_box(frm);
 		if(frm.doc.docstatus == 0 || frm.doc.__islocal){
-			frm.add_custom_button(__("Delivery Order"), function() {
+			frm.add_custom_button(__("Delivery Keeptrack"), function() {
 				erpnext.utils.map_current_doc({
-					method: "golden.golden.doctype.delivery_keeptrack.delivery_keeptrack.get_delivery_order",
-					source_doctype: "Delivery Order Detail",
-					target: frm,
-					setters:  {
-					},
-					get_query_filters: {
-						docstatus: 1,
-						delivery_keeptrack: ""
-					}
-				})
-			}, __("Get details from"));
-			frm.add_custom_button(__("Delivery Return"), function() {
-				erpnext.utils.map_current_doc({
-					method: "golden.golden.doctype.delivery_keeptrack.delivery_keeptrack.get_delivery_order",
-					source_doctype: "Delivery Order Detail",
+					method: "golden.golden.doctype.delivery_return.delivery_return.get_delivery_keeptrack",
+					source_doctype: "Delivery Keeptrack",
 					target: frm,
 					setters:  {
 					},
@@ -31,10 +18,6 @@ frappe.ui.form.on('Delivery Keeptrack', {
 					}
 				})
 			}, __("Get details from"));
-		}
-		if(frm.doc.docstatus == 1) {
-			cur_frm.add_custom_button(__('Delivery Return'), cur_frm.cscript['Delivery Return'], __("Make"));
-			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 		}
 	},
 	set_posting_time: function(frm){
@@ -50,13 +33,7 @@ frappe.ui.form.on('Delivery Keeptrack', {
 		}
 	},
 });
-cur_frm.cscript['Delivery Return'] = function() {
-	frappe.model.open_mapped_doc({
-		method: "golden.golden.doctype.delivery_keeptrack.delivery_keeptrack.make_delivery_return",
-		frm: cur_frm
-	})
-}
-frappe.ui.form.on('Delivery Keeptrack Detail', {
+frappe.ui.form.on('Delivery Return Detail', {
 	details_add: function(frm, cdt, cdn) {
 		calculate_total_box(frm, cdt, cdn);
 	},
