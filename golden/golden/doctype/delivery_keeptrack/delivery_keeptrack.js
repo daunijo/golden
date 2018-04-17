@@ -28,6 +28,7 @@ frappe.ui.form.on('Delivery Keeptrack', {
 					},
 					get_query_filters: {
 						docstatus: 1,
+						delivery_return: ["!=", ""]
 					}
 				})
 			}, __("Get details from"));

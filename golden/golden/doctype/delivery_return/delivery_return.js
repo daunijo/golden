@@ -8,7 +8,7 @@ frappe.ui.form.on('Delivery Return', {
 		if(frm.doc.docstatus == 0 || frm.doc.__islocal){
 			frm.add_custom_button(__("Delivery Keeptrack"), function() {
 				erpnext.utils.map_current_doc({
-					method: "golden.golden.doctype.delivery_return.delivery_return.get_delivery_keeptrack",
+					method: "golden.golden.doctype.delivery_keeptrack.delivery_keeptrack.make_delivery_return",
 					source_doctype: "Delivery Keeptrack",
 					target: frm,
 					setters:  {

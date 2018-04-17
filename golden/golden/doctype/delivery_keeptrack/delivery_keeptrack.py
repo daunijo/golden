@@ -11,6 +11,7 @@ from frappe.model.mapper import get_mapped_doc
 
 class DeliveryKeeptrack(Document):
 	def validate(self):
+		self.update_transaction_date()
 		self.update_sales_order()
 		self.check_packing()
 
@@ -41,6 +42,9 @@ class DeliveryKeeptrack(Document):
 
 	def on_trash(self):
 		frappe.db.sql("""update `tabSales Order` set golden_status = previous_golden_status, previous_golden_status = null, delivery_keeptrack = null where delivery_keeptrack = %s""", self.name)
+
+	def update_transaction_date(self):
+		frappe.db.set(self, 'transaction_date', self.posting_date)
 
 	def update_sales_order(self):
 		if self.is_new():
