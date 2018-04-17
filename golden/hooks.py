@@ -107,6 +107,7 @@ doc_events = {
             "golden.golden.reference.submit_sales_order_4",
             "golden.golden.reference.submit_sales_order_5",
             "golden.golden.reference.submit_sales_order_6",
+            "golden.golden.reference.cancel_sales_order_4",
             "golden.golden.reference.submit_sales_order_7"
         ],
         "on_cancel": [
