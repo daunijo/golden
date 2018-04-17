@@ -4,6 +4,37 @@ from frappe.utils import nowdate, cstr, flt, now, getdate, add_months
 from frappe import msgprint, _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from frappe.desk.reportview import get_match_cond, get_filters_cond
+
+def default_gudang(doctype, txt, searchfield, start, page_len, filters):
+    return frappe.db.sql("""select `name` from `tabWarehouse`
+        where type = 'Warehouse' and disabled = '0' and `name` like %(txt)s
+            {mcond}
+        limit %(start)s, %(page_len)s""".format(**{
+            'key': searchfield,
+            'mcond':get_match_cond(doctype)
+        }), {
+            'txt': "%%%s%%" % txt,
+            '_txt': txt.replace("%", ""),
+            'start': start,
+            'page_len': page_len
+        })
+
+def default_location(doctype, txt, searchfield, start, page_len, filters):
+    return frappe.db.sql("""select `name` from `tabWarehouse`
+        where type = 'Location' and disabled = '0' and `name` like %(txt)s
+            and parent = %(cond)s
+            {mcond}
+        limit %(start)s, %(page_len)s""".format(**{
+            'key': searchfield,
+            'mcond':get_match_cond(doctype)
+        }), {
+            'txt': "%%%s%%" % txt,
+            '_txt': txt.replace("%", ""),
+            'start': start,
+            'page_len': page_len,
+            'cond': filters.get("parent")
+        })
 
 @frappe.whitelist()
 def make_material_transfer(source_name, target_doc=None):

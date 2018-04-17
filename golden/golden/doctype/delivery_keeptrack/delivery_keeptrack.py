@@ -15,12 +15,29 @@ class DeliveryKeeptrack(Document):
 		self.check_packing()
 
 	def on_submit(self):
+		self.update_status_so()
+		self.update_delivery_order()
+
+	def update_status_so(self):
 		for row in self.details:
 			frappe.db.sql("""update `tabSales Order` set golden_status = 'Finished' where `name` = %s""", row.sales_order)
 
+	def update_delivery_order(self):
+		for row in self.details:
+			if row.delivery_order:
+				frappe.db.sql("""update `tabDelivery Order Detail` set delivery_keeptrack = %s where `name` = %s""", (self.name, row.delivery_order))
+
 	def on_cancel(self):
+		self.cancel_so_status()
+		self.cancel_do_status()
+
+	def cancel_so_status(self):
 		for row in self.details:
 			frappe.db.sql("""update `tabSales Order` set golden_status = 'Wait for Delivery and Bill', delivery_keeptrack = null where `name` = %s""", row.sales_order)
+
+	def cancel_do_status(self):
+		for row in self.details:
+			frappe.db.sql("""update `tabDelivery Order Detail` set delivery_keeptrack = null where `name` = %s""", row.delivery_order)
 
 	def on_trash(self):
 		frappe.db.sql("""update `tabSales Order` set golden_status = previous_golden_status, previous_golden_status = null, delivery_keeptrack = null where delivery_keeptrack = %s""", self.name)
@@ -56,6 +73,7 @@ def get_delivery_order(source_name, target_doc=None):
 	packing = frappe.db.get_value("Delivery Order Detail", source_name, "packing")
 
 	def update_item(source, target, source_parent):
+		target.delivery_order = source_name
 		target.expedition = frappe.db.get_value("Delivery Order Detail", source_name, "expedition")
 
 	doc = get_mapped_doc("Packing", packing, {
@@ -72,3 +90,21 @@ def get_delivery_order(source_name, target_doc=None):
 		},
 	}, target_doc, set_missing_values)
 	return doc
+
+@frappe.whitelist()
+def make_delivery_return(source_name, target_doc=None):
+    def set_missing_values(source, target):
+        target.run_method("set_missing_values")
+
+    doc = get_mapped_doc("Delivery Keeptrack", source_name, {
+		"Delivery Keeptrack": {
+			"doctype": "Delivery Return",
+			"validation": {
+				"docstatus": ["=", 1],
+			},
+		},
+		"Delivery Keeptrack Detail": {
+			"doctype": "Delivery Return Detail",
+		},
+	}, target_doc, set_missing_values)
+    return doc
