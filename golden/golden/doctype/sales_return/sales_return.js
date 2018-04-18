@@ -138,17 +138,15 @@ frappe.ui.form.on('Sales Return Detail', {
 		var d = locals[cdt][cdn];
 		if(d.sales_invoice && d.item_code){
 			frappe.call({
-				method: "frappe.client.get",
-				args: {
-					doctype: "Sales Invoice Item",
-					filters:{
-						parent: d.sales_invoice,
-						item_code: d.item_code
-					}
+				method: "golden.golden.doctype.sales_return.sales_return.get_item_rate",
+				args:{
+					parent: d.sales_invoice,
+					item_code: d.item_code
 				},
-				callback: function (data) {
-					var rates = flt(data.message.rate) / flt(data.message.conversion_factor);
-					frappe.model.set_value(cdt, cdn, "si_rate", rates);
+				callback: function (r) {
+					if(r.message) {
+						frappe.model.set_value(cdt, cdn, r.message);
+					}
 				}
 			})
 		}else{

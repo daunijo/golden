@@ -1,8 +1,8 @@
 from __future__ import unicode_literals
 import frappe
+from frappe.model.document import Document
 from frappe.utils import nowdate, cstr, flt, now, getdate, add_months
 from frappe import msgprint, _
-from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.desk.reportview import get_match_cond, get_filters_cond
 
