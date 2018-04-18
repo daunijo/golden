@@ -166,17 +166,13 @@ class SalesReturn(Document):
 			d.actual_qty = previous_sle.get("qty_after_transaction") or 0
 
 			# validate qty during submit
-			if d.docstatus==1 and d.t_warehouse and not allow_negative_stock and d.actual_qty < d.transfer_qty:
-				frappe.throw(_("Row {0}: Qty not available for {4} in warehouse {1} at posting time of the entry ({2} {3})").format(d.idx,
-					frappe.bold(d.t_warehouse), formatdate(self.posting_date),
-					format_time(self.posting_time), frappe.bold(d.item_code))
-					+ '<br><br>' + _("Available qty is {0}, you need {1}").format(frappe.bold(d.actual_qty),
-						frappe.bold(d.transfer_qty)),
-					NegativeStockError, title=_('Insufficient Stock'))
-
-#	def check_total_return(self):
-#		if not flt(self.total_return):
-#			frappe.throw(_("Total Return must be filled"))
+			# if d.docstatus==1 and d.t_warehouse and not allow_negative_stock and d.actual_qty < d.transfer_qty:
+			# 	frappe.throw(_("Row {0}: Qty not available for {4} in warehouse {1} at posting time of the entry ({2} {3})").format(d.idx,
+			# 		frappe.bold(d.t_warehouse), formatdate(self.posting_date),
+			# 		format_time(self.posting_time), frappe.bold(d.item_code))
+			# 		+ '<br><br>' + _("Available qty is {0}, you need {1}").format(frappe.bold(d.actual_qty),
+			# 			frappe.bold(d.transfer_qty)),
+			# 		NegativeStockError, title=_('Insufficient Stock'))
 
 	def copy_references(self):
 		cost_center = frappe.db.sql("""select cost_center from `tabCompany` where `name` = %s""", self.company)[0][0]
