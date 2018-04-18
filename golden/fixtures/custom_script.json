@@ -2,6 +2,15 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Script", 
+  "dt": "Material Request", 
+  "modified": "2018-02-10 20:09:49.855508", 
+  "name": "Material Request-Client", 
+  "script": "frappe.ui.form.on(\"Material Request\", {\n\tsetup: function(frm) {\n\t\tfrm.get_field('items').grid.editable_fields = [\n\t\t\t{fieldname: 'item_code', columns: 3},\n\t\t\t{fieldname: 'qty', columns: 1, width:66},\n\t\t\t{fieldname: 'uom', columns: 1},\n\t\t\t{fieldname: 'warehouse', columns: 2},\n\t\t\t{fieldname: 'schedule_date', columns: 1}\n\t\t];\n\t},\n})", 
+  "script_type": "Client"
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Script", 
   "dt": "Item", 
   "modified": "2018-01-25 10:55:35.319840", 
   "name": "Item-Client", 
