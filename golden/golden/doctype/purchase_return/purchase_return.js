@@ -137,18 +137,16 @@ frappe.ui.form.on('Purchase Return Detail', {
 	purchase_invoice: function(doc, cdt, cdn) {
 		var d = locals[cdt][cdn];
 		if(d.purchase_invoice && d.item_code){
-			frappe.call({
-				method: "frappe.client.get",
-				args: {
-					doctype: "Purchase Invoice Item",
-					filters:{
-						parent: d.purchase_invoice,
-						item_code: d.item_code
-					}
+			return frappe.call({
+				method: "golden.golden.doctype.purchase_return.purchase_return.get_item_rate",
+				args:{
+					parent: d.purchase_invoice,
+					item_code: d.item_code
 				},
-				callback: function (data) {
-					var rates = flt(data.message.rate) / flt(data.message.conversion_factor);
-					frappe.model.set_value(cdt, cdn, "pi_rate", rates);
+				callback: function(r) {
+					if(r.message) {
+						frappe.model.set_value(cdt, cdn, r.message);
+					}
 				}
 			})
 		}else{

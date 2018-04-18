@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.14.1'
+__version__ = '1.14.2'
 
+# 1.14.2
+#   - Update Purchase Return & Sales Return
 # 1.14.1
 #   - Add get_packing in Delivery Order
 # 1.14.0

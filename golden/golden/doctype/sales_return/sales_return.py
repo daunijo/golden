@@ -274,3 +274,11 @@ def get_warehouse_details(args):
 		}
 
 	return ret
+
+@frappe.whitelist()
+def get_item_rate(parent, item_code):
+	rate = frappe.db.sql("""select (rate/conversion_factor) from `tabSales Invoice Item` where parent = %s and item_code = %s""",(parent, item_code))[0][0]
+	si_rate = {
+		'si_rate': flt(rate)
+	}
+	return si_rate
