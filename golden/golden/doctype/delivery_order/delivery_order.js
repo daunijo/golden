@@ -60,7 +60,8 @@ frappe.ui.form.on('Delivery Order', {
 					},
 					get_query_filters: {
 						docstatus: 1,
-						delivery_order: ""
+						delivery_order: "",
+						is_completed: 1
 					}
 				})
 			});
