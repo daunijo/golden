@@ -175,8 +175,10 @@ def cancel_sales_order_3(doc, method):
     if flt(count_ito) == 1:
         ito_id = frappe.db.sql("""select `name` from `tabTransfer Order` where docstatus = '0'""")[0][0]
         for row in doc.items:
-            ito_detail = frappe.get_doc("Transfer Order Item Detail", {"so_detail": row.name})
-            ito_detail.delete()
+            count_ito_det = frappe.db.sql("""select count(*) from `tabTransfer Order Item Detail` where docstatus = '0' and so_detail = %s""", row.name)[0][0]
+            if flt(count_ito_det) != 0:
+                ito_detail = frappe.get_doc("Transfer Order Item Detail", {"so_detail": row.name})
+                ito_detail.delete()
 
 def cancel_sales_order_4(doc, method):
     count_ito = frappe.db.sql("""select count(*) from `tabTransfer Order` where docstatus = '0'""")[0][0]

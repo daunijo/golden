@@ -131,8 +131,8 @@ doc_events = {
     "Stock Entry": {
         "on_submit": [
             "golden.golden.reference.submit_stock_entry",
-            "golden.golden.reference.cancel_sales_order_2",
-            "golden.golden.reference.cancel_sales_order_3"
+            "golden.golden.reference.cancel_sales_order_3",
+            "golden.golden.reference.cancel_sales_order_4"
         ]
     },
     "Warehouse": {
