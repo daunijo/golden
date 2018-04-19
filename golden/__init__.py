@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.14.4'
+__version__ = '1.14.5'
 
-# 1.14.3
+# 1.14.5
+#   - Update Delivery Kepptrack & Delivery Return
+# 1.14.4
 #   - Update Delivery Order
 # 1.14.3
 #   - Update Sales Return

@@ -34,8 +34,11 @@ frappe.ui.form.on('Delivery Keeptrack', {
 			}, __("Get details from"));
 		}
 		if(frm.doc.docstatus == 1) {
-			cur_frm.add_custom_button(__('Delivery Return'), cur_frm.cscript['Delivery Return'], __("Make"));
-			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
+			if(frm.doc.is_completed == 0){
+				cur_frm.add_custom_button(__('Delivery Return'), cur_frm.cscript['Delivery Return'], __("Make"));
+				cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
+				cur_frm.add_custom_button(__('Set as Complete'), cur_frm.cscript['Set as Complete']);				
+			}
 		}
 	},
 	set_posting_time: function(frm){
@@ -56,6 +59,17 @@ cur_frm.cscript['Delivery Return'] = function() {
 		method: "golden.golden.doctype.delivery_keeptrack.delivery_keeptrack.make_delivery_return",
 		frm: cur_frm
 	})
+}
+cur_frm.cscript['Set as Complete'] = function() {
+	frappe.call({
+		method: "golden.golden.doctype.delivery_keeptrack.delivery_keeptrack.set_complete",
+		args: {
+			name: cur_frm.doc.name
+		},
+		callback: function(r){
+			cur_frm.reload_doc();
+		},
+	});
 }
 frappe.ui.form.on('Delivery Keeptrack Detail', {
 	details_add: function(frm, cdt, cdn) {

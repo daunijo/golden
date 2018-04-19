@@ -15,6 +15,7 @@ frappe.ui.form.on('Delivery Return', {
 					},
 					get_query_filters: {
 						docstatus: 1,
+						is_completed: 0
 					}
 				})
 			}, __("Get details from"));
