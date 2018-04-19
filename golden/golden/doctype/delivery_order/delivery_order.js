@@ -116,15 +116,14 @@ frappe.ui.form.on("Delivery Order Detail", {
 		var d = locals[cdt][cdn];
 		if(d.contact_person) {
 			frappe.call({
-				method: "frappe.client.get",
-				args: {
-					doctype: "Expedition Detail",
+				method: "golden.golden.doctype.delivery_order.delivery_order.get_expedition_detail",
+				args:{
 					name: d.contact_person
 				},
-				callback: function (data) {
-					frappe.model.set_value(cdt, cdn, "contact_name", data.message.contact_name);
-					frappe.model.set_value(cdt, cdn, "phone", data.message.handphone);
-					frappe.model.set_value(cdt, cdn, "email_id", data.message.email_id);
+				callback: function (r) {
+					if(r.message) {
+						frappe.model.set_value(cdt, cdn, r.message);
+					}
 				}
 			})
 		}else{
