@@ -100,3 +100,13 @@ def contact_query(doctype, txt, searchfield, start, page_len, filters):
             'page_len': page_len,
             'cond': filters.get("link_name")
         })
+
+@frappe.whitelist()
+def get_expedition_detail(name):
+	exp = frappe.db.get_value("Expedition Detail", name, ["contact_name", "handphone", "email_id"], as_dict=1)
+	si_rate = {
+		'contact_name': exp.contact_name,
+		'phone': exp.handphone,
+		'email_id': exp.email_id
+	}
+	return si_rate
