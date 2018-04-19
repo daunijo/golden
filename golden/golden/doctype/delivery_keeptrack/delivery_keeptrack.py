@@ -12,7 +12,7 @@ from frappe.model.mapper import get_mapped_doc
 class DeliveryKeeptrack(Document):
 	def validate(self):
 		self.update_transaction_date()
-		self.update_sales_order()
+		# self.update_sales_order()
 
 	def on_submit(self):
 		self.check_packing()
@@ -21,7 +21,7 @@ class DeliveryKeeptrack(Document):
 
 	def update_status_so(self):
 		for row in self.details:
-			frappe.db.sql("""update `tabSales Order` set golden_status = 'Finished' where `name` = %s""", row.sales_order)
+			frappe.db.sql("""update `tabSales Order` set previous_golden_status = golden_status, golden_status = 'Delivering' where `name` = %s""", row.sales_order)
 
 	def update_delivery_order(self):
 		for row in self.details:
@@ -34,28 +34,29 @@ class DeliveryKeeptrack(Document):
 
 	def cancel_so_status(self):
 		for row in self.details:
-			frappe.db.sql("""update `tabSales Order` set golden_status = 'Wait for Delivery and Bill', delivery_keeptrack = null where `name` = %s""", row.sales_order)
+			frappe.db.sql("""update `tabSales Order` set golden_status = previous_golden_status, previous_golden_status = null, delivery_keeptrack = null where `name` = %s""", row.sales_order)
 
 	def cancel_do_status(self):
 		for row in self.details:
 			frappe.db.sql("""update `tabDelivery Order Detail` set delivery_keeptrack = null where `name` = %s""", row.delivery_order)
 
-	def on_trash(self):
-		frappe.db.sql("""update `tabSales Order` set golden_status = previous_golden_status, previous_golden_status = null, delivery_keeptrack = null where delivery_keeptrack = %s""", self.name)
+	# def on_trash(self):
+	# 	frappe.db.sql("""update `tabSales Order` set golden_status = previous_golden_status, previous_golden_status = null, delivery_keeptrack = null where delivery_keeptrack = %s""", self.name)
 
 	def update_transaction_date(self):
 		frappe.db.set(self, 'transaction_date', self.posting_date)
 
 	def update_sales_order(self):
-		if self.is_new():
-			for row in self.details:
-				so_status = frappe.db.sql("""select golden_status from `tabSales Order` where `name` = %s""", row.sales_order)[0][0]
-				frappe.db.sql("""update `tabSales Order` set golden_status = 'Delivering', previous_golden_status = %s, delivery_keeptrack = %s where `name` = %s""", (so_status, self.name, row.sales_order))
-		else:
-			frappe.db.sql("""update `tabSales Order` set golden_status = previous_golden_status, previous_golden_status = null, delivery_keeptrack = null where delivery_keeptrack = %s""", self.name)
-			for row in self.details:
-				so_status = frappe.db.sql("""select golden_status from `tabSales Order` where `name` = %s""", row.sales_order)[0][0]
-				frappe.db.sql("""update `tabSales Order` set golden_status = 'Delivering', previous_golden_status = %s, delivery_keeptrack = %s where `name` = %s""", (so_status, self.name, row.sales_order))
+		pass
+		# if self.is_new():
+		# 	for row in self.details:
+		# 		so_status = frappe.db.sql("""select golden_status from `tabSales Order` where `name` = %s""", row.sales_order)[0][0]
+		# 		frappe.db.sql("""update `tabSales Order` set golden_status = 'Delivering', previous_golden_status = %s, delivery_keeptrack = %s where `name` = %s""", (so_status, self.name, row.sales_order))
+		# else:
+		# 	frappe.db.sql("""update `tabSales Order` set golden_status = previous_golden_status, previous_golden_status = null, delivery_keeptrack = null where delivery_keeptrack = %s""", self.name)
+		# 	for row in self.details:
+		# 		so_status = frappe.db.sql("""select golden_status from `tabSales Order` where `name` = %s""", row.sales_order)[0][0]
+		# 		frappe.db.sql("""update `tabSales Order` set golden_status = 'Delivering', previous_golden_status = %s, delivery_keeptrack = %s where `name` = %s""", (so_status, self.name, row.sales_order))
 
 	def check_packing(self):
 		for row in self.details:
@@ -115,6 +116,19 @@ def make_delivery_return(source_name, target_doc=None):
 		},
 		"Delivery Keeptrack Detail": {
 			"doctype": "Delivery Return Detail",
+			"field_map": {
+				"name": "delivery_keeptrack_detail",
+			},
 		},
 	}, target_doc, set_missing_values)
     return doc
+
+@frappe.whitelist()
+def set_complete(name):
+	frappe.db.sql("""update `tabDelivery Keeptrack` set is_completed = '1' where `name` = %s""", name)
+	so_list = frappe.db.sql("""select * from `tabDelivery Keeptrack Detail` where parent = %s""", name, as_dict=1)
+	for row in so_list:
+		if row.delivery_return:
+			frappe.throw(_("This Delivery Keeptrack already has a Delivery Return"))
+		else:
+			frappe.db.sql("""update `tabSales Order` set golden_status = 'Finished' where `name` = %s""", row.sales_order)

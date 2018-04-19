@@ -17,15 +17,37 @@ class DeliveryReturn(Document):
 
 	def on_submit(self):
 		self.update_delivery_order()
+		self.update_delivery_keeptrack()
+		self.update_status_so()
 
 	def update_delivery_order(self):
 		for row in self.details:
 			if row.delivery_order:
 				frappe.db.sql("""update `tabDelivery Order Detail` set delivery_return = %s where `name` = %s""", (self.name, row.delivery_order))
 
+	def update_delivery_keeptrack(self):
+		for row in self.details:
+			frappe.db.sql("""update `tabDelivery Keeptrack Detail` set delivery_return = %s where `name` = %s""", (self.name, row.delivery_keeptrack_detail))
+
+	def update_status_so(self):
+		for row in self.details:
+			if row.sales_order:
+				frappe.db.sql("""update `tabSales Order` set previous_golden_status = golden_status, golden_status = 'Delivery Return' where `name` = %s""", row.sales_order)
+
 	def on_cancel(self):
 		self.cancel_delivery_order()
+		self.cancel_status_so()
+		self.cancel_delivery_keeptrack()
 
 	def cancel_delivery_order(self):
 		for row in self.details:
 			frappe.db.sql("""update `tabDelivery Order Detail` set delivery_return = null where `name` = %s""", row.delivery_order)
+
+	def cancel_status_so(self):
+		for row in self.details:
+			if row.sales_order:
+				frappe.db.sql("""update `tabSales Order` set golden_status = previous_golden_status, previous_golden_status = 'Wait for Delivery and Bill' where `name` = %s""", row.sales_order)
+
+	def cancel_delivery_keeptrack(self):
+		for row in self.details:
+			frappe.db.sql("""update `tabDelivery Keeptrack Detail` set delivery_return = null where `name` = %s""", row.delivery_keeptrack_detail)
