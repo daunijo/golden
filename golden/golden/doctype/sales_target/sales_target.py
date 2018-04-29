@@ -13,19 +13,25 @@ class SalesTarget(Document):
 	pass
 
 @frappe.whitelist()
-def get_sales_invoice(start_date, end_date):
+def get_sales_invoice(sales, start_date, end_date, target1, target2):
+	if flt(target2) >= 1:
+		target = target2
+	else:
+		target = target1
 	si_list = []
-	sales_invoice = frappe.db.sql("""select * from `tabSales Invoice` where docstatus = '1' and posting_date between %s and %s""", (start_date, end_date), as_dict=True)
+	sales_invoice = frappe.db.sql("""select * from `tabSales Invoice` where docstatus = '1' and rss_sales_person = %s and posting_date between %s and %s""", (sales, start_date, end_date), as_dict=True)
 	for si in sales_invoice:
 		count_payment = frappe.db.sql("""select count(*) from `tabPayment Entry Reference` a inner join `tabPayment Entry` b on a.parent = b.`name` where b.docstatus = '1' and a.reference_name = %s order by posting_date desc limit 1""", si.name)[0][0]
 		if flt(count_payment) != 0:
 			payment_date = frappe.db.sql("""select posting_date from `tabPayment Entry Reference` a inner join `tabPayment Entry` b on a.parent = b.`name` where b.docstatus = '1' and a.reference_name = %s order by posting_date desc limit 1""", si.name)[0][0]
 			payment_amount = frappe.db.sql("""select sum(allocated_amount) from `tabPayment Entry Reference` a inner join `tabPayment Entry` b on a.parent = b.`name` where b.docstatus = '1' and a.reference_name = %s""", si.name)[0][0]
 			diff_day = payment_date - si.posting_date
+			contribution = (flt(payment_amount) / flt(target)) * 100
 		else:
 			payment_date = ""
 			payment_amount = 0
 			diff_day = 0
+			contribution = 0
 		si_list.append(frappe._dict({
 	        'customer': si.customer,
 	        'customer_name': si.customer_name,
@@ -34,6 +40,7 @@ def get_sales_invoice(start_date, end_date):
 			'grand_total': si.grand_total,
 			'payment_date': payment_date,
 			'payment_amount': payment_amount,
-			'difference_day': diff_day
+			'difference_day': diff_day,
+			'contribution': contribution
 	    }))
 	return si_list

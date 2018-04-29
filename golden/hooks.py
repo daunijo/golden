@@ -120,6 +120,15 @@ doc_events = {
             "golden.golden.reference.cancel_sales_order_5"
         ]
     },
+    "Delivery Note": {
+        "on_submit": [
+            "golden.golden.reference.submit_delivery_note"
+        ],
+        "on_cancel": [
+            "golden.golden.reference.cancel_delivery_note_1",
+            "golden.golden.reference.cancel_delivery_note_2"
+        ]
+    },
     "Sales Invoice": {
         "on_submit": [
             "golden.golden.reference.submit_sales_invoice"

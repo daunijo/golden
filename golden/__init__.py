@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.14.5'
+__version__ = '1.14.6'
 
+# 1.14.6
+#   - Add Report: Annual Sold Summary Report
+#   - Update sales target
+#   - Update on_cancel & on_submit Delivery Note, sekarang akan update ke Receive Order
 # 1.14.5
 #   - Update Delivery Kepptrack & Delivery Return
 # 1.14.4

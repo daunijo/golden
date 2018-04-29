@@ -15,6 +15,7 @@ class TransferOrder(Document):
 	def on_submit(self):
 		frappe.db.set(self, 'status', 'Submitted')
 		self.check_picker()
+		self.check_batch()
 		self.make_stock_entry()
 		self.insert_stock_entry_item()
 		self.submit_stock_entry()
@@ -33,14 +34,6 @@ class TransferOrder(Document):
 				if flt(row.qty) < flt(row.qty_need):
 					frappe.throw(_("Transfer Qty in <b>{0}</b> is smaller than <b>{1} {2}</b>").format(row.item_code, row.qty_need, row.stock_uom))
 
-	# def update_bin(self):
-	# 	for row in self.items:
-	# 		if row.bin:
-	# 			bins = frappe.get_doc("Bin", row.bin)
-	# 			bins.ito = self.name
-	# 			bins.ito_qty = row.qty
-	# 			bins.save()
-
 	def check_qty(self):
 		for row in self.items:
 			if row.qty <= 0:
@@ -49,6 +42,12 @@ class TransferOrder(Document):
 	def check_picker(self):
 		if not self.picker:
 			frappe.throw(_("Picker Name is mandatory"))
+
+	def check_batch(self):
+		for row in self.items:
+			has_batch = frappe.db.get_value("Item", row.item_code, "has_batch_no")
+			if has_batch == 1 and not row.batch:
+				frappe.throw(_("Batch number is mandatory for <b>{0}</b>").format(row.item_code))
 
 	def make_stock_entry(self):
 		se = frappe.get_doc({
@@ -113,3 +112,17 @@ class TransferOrder(Document):
 		cancel_to = frappe.get_doc("Stock Entry", {"transfer_order": self.name})
 		cancel_to.cancel()
 		cancel_to.delete()
+
+@frappe.whitelist()
+def get_qty_available(item_code, batch, warehouse):
+	count = frappe.db.sql("""select count(*) from `tabStock Ledger Entry` where item_code = %s and warehouse = %s and batch_no = %s""", (item_code, warehouse, batch))[0][0]
+	if flt(count) != 0:
+		available = frappe.db.sql("""select sum(actual_qty) from `tabStock Ledger Entry` where item_code = %s and warehouse = %s and batch_no = %s""", (item_code, warehouse, batch))[0][0]
+		qty_available = {
+			'qty_available': available
+		}
+	else:
+		qty_available = {
+			'qty_available': 0
+		}
+	return qty_available

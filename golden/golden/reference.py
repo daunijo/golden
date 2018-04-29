@@ -192,6 +192,57 @@ def cancel_sales_order_4(doc, method):
 def cancel_sales_order_5(doc, method):
 	frappe.db.sql("""update `tabSales Order` set golden_status = 'Cancelled' where `name` = %s""", doc.name)
 
+def submit_delivery_note(doc, method):
+    for row in doc.items:
+        count_ro = frappe.db.sql("""select count(*) from `tabReceive Order Item` where docstatus = '1' and item_code = %s and stock_qty > used_qty""", row.item_code)[0][0]
+        if flt(count_ro) != 0:
+            roi = frappe.db.sql("""select roi.`name`, roi.stock_qty, roi.used_qty, ro.`name` as ro_id from `tabReceive Order Item` roi inner join `tabReceive Order` ro on roi.parent = ro.`name` where ro.docstatus = '1' and roi.item_code = %s and roi.stock_qty > roi.used_qty order by ro.posting_date asc""", row.item_code, as_dict=1)
+            qty = flt(row.stock_qty)
+            for a in roi:
+                qty_remaining = flt(a.stock_qty) - flt(a.used_qty)
+                if flt(qty_remaining) >= flt(qty):
+                    qty_update =  flt(a.used_qty) + flt(qty)
+                    frappe.db.sql("""update `tabReceive Order Item` set used_qty = %s where `name` = %s""", (qty_update, a.name))
+                    receive_order = frappe.get_doc("Receive Order", a.ro_id)
+                    receive_order.append("delivery", {
+                        "delivery_note": doc.name,
+                        "dn_detail": row.name,
+                        "delivery_date": doc.posting_date,
+                    	"item_code": row.item_code,
+                        "qty": qty,
+                        "ro_item": a.name
+                    })
+                    receive_order.save()
+                    break
+                else:
+                    if flt(qty) <= 0:
+                        break
+                    else:
+                        qty_update =  flt(a.stock_qty)
+                        qty_delivery = flt(a.stock_qty) - flt(a.used_qty)
+                        frappe.db.sql("""update `tabReceive Order Item` set used_qty = %s where `name` = %s""", (qty_update, a.name))
+                        receive_order = frappe.get_doc("Receive Order", a.ro_id)
+                        receive_order.append("delivery", {
+                            "delivery_note": doc.name,
+                            "dn_detail": row.name,
+                            "delivery_date": doc.posting_date,
+                        	"item_code": row.item_code,
+                            "qty": qty_delivery,
+                            "ro_item": a.name
+                        })
+                        receive_order.save()
+                        qty = qty - qty_remaining
+            # frappe.db.get_value("Packing", source.parent, ["customer", "customer_name", "posting_date", "total_box"], as_dict=1)
+
+def cancel_delivery_note_1(doc, method):
+    items = frappe.db.sql("""select * from `tabReceive Order Item Delivery` where delivery_note = %s""", doc.name, as_dict=1)
+    for a in items:
+        used_qty = frappe.db.get_value("Receive Order Item", a.ro_item, "used_qty")
+        new_used_qty = flt(used_qty) - flt(a.qty)
+        frappe.db.sql("""update `tabReceive Order Item` set used_qty = %s where `name` = %s""", (new_used_qty, a.ro_item))
+
+def cancel_delivery_note_2(doc, method):
+    frappe.db.sql("""delete from `tabReceive Order Item Delivery` where delivery_note = %s""", doc.name)
 
 def submit_sales_invoice(doc, method):
     for row in doc.items:
