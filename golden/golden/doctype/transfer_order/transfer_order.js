@@ -3,22 +3,8 @@
 
 frappe.ui.form.on('Transfer Order', {
 	refresh: function(frm) {
-/*
-		if(frm.doc.docstatus == 1 && frm.doc.status == "Submitted") {
-			cur_frm.add_custom_button(__('Material Transfer'), cur_frm.cscript['Material Transfer'], __("Make"));
-			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
-		}
-		*/
-	}
+	},
 });
-/*
-cur_frm.cscript['Material Transfer'] = function() {
-	frappe.model.open_mapped_doc({
-		method: "golden.golden.stock.make_material_transfer",
-		frm: cur_frm
-	})
-}
-*/
 frappe.ui.form.on('Transfer Order Item', {
 	item_code: function(doc, cdt, cdn) {
 		var d = locals[cdt][cdn];
@@ -38,6 +24,26 @@ frappe.ui.form.on('Transfer Order Item', {
 				}
 			})
 		}
+	},
+	batch: function(doc, cdt, cdn){
+		var d = locals[cdt][cdn];
+		if(d.batch){
+			frappe.call({
+				method: "golden.golden.doctype.transfer_order.transfer_order.get_qty_available",
+				args:{
+					item_code: d.item_code,
+					batch: d.batch,
+					warehouse: d.from_location
+				},
+				callback: function (r) {
+					if(r.message) {
+						frappe.model.set_value(cdt, cdn, r.message);
+					}
+				}
+			})
+		}else{
+			frappe.model.set_value(cdt, cdn, "qty_available", "");
+		}
 	}
 })
 cur_frm.set_query("from_location", "items",  function (doc, cdt, cdn) {
@@ -55,6 +61,14 @@ cur_frm.set_query("to_location", "items",  function (doc, cdt, cdn) {
 		filters: {
 			'is_group': 0,
 			'type': 'Location'
+		}
+	}
+});
+cur_frm.set_query("batch", "items",  function (doc, cdt, cdn) {
+	var c_doc= locals[cdt][cdn];
+	return {
+		filters: {
+			'item': c_doc.item_code
 		}
 	}
 });

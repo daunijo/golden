@@ -13,6 +13,7 @@ from frappe.desk.reportview import get_match_cond, get_filters_cond
 class ReceiveOrder(Document):
 	def validate(self):
 		self.check_item()
+		self.update_stock_qty()
 
 	def on_submit(self):
 		self.create_purchase_receipt()
@@ -30,6 +31,10 @@ class ReceiveOrder(Document):
 				frappe.throw(_("Purchase Order {0} is duplicate").format(row.purchase_order))
 			else:
 				temp.append(row.po_detail)
+
+	def update_stock_qty(self):
+		for row in self.items:
+			row.stock_qty = flt(row.qty) * flt(row.conversion_factor)
 
 	def create_purchase_receipt(self):
 		purchase_order = frappe.db.sql("""select distinct(purchase_order) as po_name from `tabReceive Order Item` where parent = %s and qty != 0""", self.name, as_dict=1)

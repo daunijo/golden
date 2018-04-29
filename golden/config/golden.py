@@ -103,6 +103,12 @@ def get_data():
 			"items": [
 				{
 					"type": "report",
+					"name": "Annual Sold Summary Report",
+					"doctype": "Receive Order",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
 					"name": "Dynamic Item Report",
 					"doctype": "Item",
 					"is_query_report": True
