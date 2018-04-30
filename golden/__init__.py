@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.14.8'
+__version__ = '1.14.9'
 
+# 1.14.9
+#   - Update Delivery Keeptrack
 # 1.14.8
 #   - Update Delivery Keeptrack
 #   - Update Delivery Return
