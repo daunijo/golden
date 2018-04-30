@@ -37,6 +37,8 @@ frappe.ui.form.on('Delivery Keeptrack', {
 			if(frm.doc.is_completed == 0 && frm.doc.delivery_return == undefined){
 				cur_frm.add_custom_button(__('Delivery Return'), cur_frm.cscript['Delivery Return'], __("Make"));
 				cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
+			}
+			if(frm.doc.is_completed == 0){
 				cur_frm.add_custom_button(__('Set as Complete'), cur_frm.cscript['Set as Complete']);
 			}
 		}

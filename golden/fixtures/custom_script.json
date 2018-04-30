@@ -12,7 +12,7 @@
   "docstatus": 0, 
   "doctype": "Custom Script", 
   "dt": "Item", 
-  "modified": "2018-01-25 10:55:35.319840", 
+  "modified": "2018-04-30 15:19:41.680554", 
   "name": "Item-Client", 
   "script": "cur_frm.set_query(\"default_gudang\", function(frm) {\n\treturn {\n\t\tfilters: {\n\t\t\t'is_group': 1,\n\t\t\t'type': 'Warehouse'\n\t\t}\n\t}\n});\ncur_frm.set_query(\"default_section\", function(frm) {\n\treturn {\n\t\tfilters: {\n\t\t\t'is_group': 1,\n\t\t\t'type': 'Section',\n\t\t\t'parent': cur_frm.doc.default_gudang\n\t\t}\n\t}\n});\ncur_frm.set_query(\"default_location\", function(frm) {\n\treturn {\n\t\tfilters: {\n\t\t\t'is_group': 0,\n\t\t\t'type': 'Location',\n\t\t\t'parent': cur_frm.doc.default_section\n\t\t}\n\t}\n});\nfrappe.ui.form.on('Item', {\n\tdefault_location: function(frm){\n\t\tfrm.set_value(\"default_warehouse\", frm.doc.default_location);\n\t}\n})", 
   "script_type": "Client"
@@ -42,6 +42,15 @@
   "modified": "2018-02-21 12:57:48.591604", 
   "name": "Company-Client", 
   "script": "cur_frm.set_query(\"default_purchase_return_account\", function(frm) {\n\treturn {\n\t\tquery: \"erpnext.controllers.queries.get_expense_account\",\n\t}\n});\ncur_frm.set_query(\"default_selling_return_account\", function(frm) {\n\treturn {\n\t\tquery: \"erpnext.controllers.queries.get_expense_account\",\n\t}\n});", 
+  "script_type": "Client"
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Script", 
+  "dt": "Stock Reconciliation", 
+  "modified": "2018-04-30 15:22:07.002965", 
+  "name": "Stock Reconciliation-Client", 
+  "script": "cur_frm.set_query(\"default_gudang\", \"items\",  function (doc, cdt, cdn) {\n\tvar c_doc= locals[cdt][cdn];\n\treturn {\n\t//\tquery: \"golden.golden.stock.default_gudang\"\n\t\tfilters: {\n\t\t\t'is_group': 1,\n\t\t\t'type': 'Warehouse',\n\t\t\t'disabled': 0\n\t\t}\n\t}\n});\ncur_frm.set_query(\"default_section\", \"items\",  function (doc, cdt, cdn) {\n\tvar c_doc= locals[cdt][cdn];\n\treturn {\n\t\tfilters: {\n\t\t\t'is_group': 1,\n\t\t\t'type': 'Section',\n\t\t\t'parent': c_doc.default_gudang\n\t\t}\n\t}\n});\nfrappe.ui.form.on('Stock Reconciliation Item', {\n\tdefault_location: function(doc, cdt, cdn){\n\t\tvar d = locals[cdt][cdn];\n\t\tfrappe.model.set_value(cdt, cdn, \"warehouse\", d.default_location);\n\t}\n})", 
   "script_type": "Client"
  }
 ]

@@ -130,7 +130,5 @@ def set_complete(name):
 	frappe.db.sql("""update `tabDelivery Keeptrack` set is_completed = '1' where `name` = %s""", name)
 	so_list = frappe.db.sql("""select * from `tabDelivery Keeptrack Detail` where parent = %s""", name, as_dict=1)
 	for row in so_list:
-		if row.delivery_return:
-			frappe.throw(_("This Delivery Keeptrack already has a Delivery Return"))
-		else:
+		if not row.delivery_return:
 			frappe.db.sql("""update `tabSales Order` set golden_status = 'Finished' where `name` = %s""", row.sales_order)
