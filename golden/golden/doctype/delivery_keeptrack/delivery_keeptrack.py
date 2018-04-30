@@ -14,6 +14,10 @@ class DeliveryKeeptrack(Document):
 		self.update_transaction_date()
 		# self.update_sales_order()
 
+	def update_transaction_date(self):
+		frappe.db.set(self, 'transaction_date', self.posting_date)
+		frappe.db.set(self, 'is_completed', 0)
+
 	def on_submit(self):
 		self.check_packing()
 		self.update_status_so()
@@ -42,9 +46,6 @@ class DeliveryKeeptrack(Document):
 
 	# def on_trash(self):
 	# 	frappe.db.sql("""update `tabSales Order` set golden_status = previous_golden_status, previous_golden_status = null, delivery_keeptrack = null where delivery_keeptrack = %s""", self.name)
-
-	def update_transaction_date(self):
-		frappe.db.set(self, 'transaction_date', self.posting_date)
 
 	def update_sales_order(self):
 		pass
@@ -117,6 +118,7 @@ def make_delivery_return(source_name, target_doc=None):
 		"Delivery Keeptrack Detail": {
 			"doctype": "Delivery Return Detail",
 			"field_map": {
+				"parent": "delivery_keeptrack",
 				"name": "delivery_keeptrack_detail",
 			},
 		},
