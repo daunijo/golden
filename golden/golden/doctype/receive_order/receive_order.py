@@ -16,10 +16,11 @@ class ReceiveOrder(Document):
 		self.update_stock_qty()
 
 	def on_submit(self):
-		self.create_purchase_receipt()
-		self.insert_pr_item()
-		self.insert_pr_taxes()
-		self.submit_purchase_receipt()
+		if not self.from_stock_reconciliation:
+			self.create_purchase_receipt()
+			self.insert_pr_item()
+			self.insert_pr_taxes()
+			self.submit_purchase_receipt()
 
 	def on_cancel(self):
 		self.delete_purchase_receipt()

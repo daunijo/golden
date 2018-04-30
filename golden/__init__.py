@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.14.7'
+__version__ = '1.14.8'
 
+# 1.14.8
+#   - Update Delivery Keeptrack
+#   - Update Delivery Return
 # 1.14.7
 #   - Update Annual Sold Summary Report
 # 1.14.6
