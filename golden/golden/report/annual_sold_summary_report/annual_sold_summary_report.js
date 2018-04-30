@@ -4,6 +4,12 @@
 
 frappe.query_reports["Annual Sold Summary Report"] = {
 	"filters": [
-
+		{
+			"fieldname":"year",
+			"label": __("Year"),
+			"fieldtype": "Link",
+			"options": "Fiscal Year",
+			"reqd": 1
+		},
 	]
 }

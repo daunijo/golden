@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.14.6'
+__version__ = '1.14.7'
 
+# 1.14.7
+#   - Update Annual Sold Summary Report
 # 1.14.6
 #   - Add Report: Annual Sold Summary Report
 #   - Update sales target
