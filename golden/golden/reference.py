@@ -254,9 +254,12 @@ def submit_sales_invoice(doc, method):
 
 def cancel_sales_invoice(doc, method):
     for row in doc.items:
-        if row.sales_order:
-            update_packing = frappe.db.sql("""update`tabPacking` set is_completed = '0' where sales_order = %s""", row.sales_order)
-            update_so = frappe.db.sql("""update`tabSales Order` set golden_status = 'In Packing' where `name` = %s""", row.sales_order)
+        so_status = frappe.db.get_value("Sales Order", row.sales_order, "golden_status")
+        if so_status != 'Wait for Delivery and Bill':
+            frappe.throw(_("You can not cancel this invoice"))
+        elif row.sales_order:
+            update_packing = frappe.db.sql("""update `tabPacking` set is_completed = '0' where sales_order = %s""", row.sales_order)
+            update_so = frappe.db.sql("""update `tabSales Order` set golden_status = 'In Packing' where `name` = %s""", row.sales_order)
 
 def submit_stock_entry(doc, method):
     if doc.transfer_order:
