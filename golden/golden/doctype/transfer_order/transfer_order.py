@@ -24,6 +24,8 @@ class TransferOrder(Document):
 		self.update_picking()
 
 	def on_cancel(self):
+		if self.action == "Auto":
+			frappe.throw(_("You can not cancel auto Transfer Order"))
 		frappe.db.set(self, 'status', 'Cancelled')
 		self.cancel_bin()
 		self.cancel_stock_entry()
