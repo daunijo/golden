@@ -96,7 +96,11 @@ frappe.ui.form.on('Sales Target', {
 	calculate_average_day: function(frm){
 		var total_days = frappe.utils.sum(
 			(frm.doc.details || []).map(function(i) {
-				return (flt(i.difference_day) * flt(i.contribution) / 100);
+				if(i.difference_day == '-'){
+					return(0)
+				}else{
+					return ((flt(i.difference_day) * flt(i.contribution)) / 100);					
+				}
 			})
 		);
 		// var count = frappe.utils.sum(
