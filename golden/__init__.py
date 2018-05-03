@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.15.0'
+__version__ = '1.15.1'
 
+# 1.15.1
+#   - Update calculation on Purchase Budget
 # 1.15.0
 #   - Add Doctype: Purchase Budget
 #   - Add Doctype: Purchase Budget Detail
