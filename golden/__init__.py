@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.14.11'
+__version__ = '1.15.0'
 
+# 1.15.0
+#   - Add Doctype: Purchase Budget
+#   - Add Doctype: Purchase Budget Detail
+#   - Update Sales Target
 # 1.14.11
 #   - Update Sales Target
 #   - Update on_cancel Sales Order

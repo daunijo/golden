@@ -93,6 +93,11 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
+					"name": "Purchase Budget",
+					"description": _("Purchase Budget.")
+				},
+				{
+					"type": "doctype",
 					"name": "Sales Target",
 					"description": _("Sales Target.")
 				},

@@ -11,7 +11,8 @@ from frappe.model.mapper import get_mapped_doc
 from datetime import datetime
 
 class SalesTarget(Document):
-	pass
+	def validate(self):
+		pass
 
 @frappe.whitelist()
 def get_sales_invoice(sales, start_date, end_date, target1, target2):

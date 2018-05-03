@@ -61,6 +61,22 @@ frappe.ui.form.on('Sales Target', {
 			}
 		});
 	},
+	target_planning: function(frm){
+		frm.events.calculate_percentage_si(frm);
+		frm.events.calculate_percentage_payment(frm);
+	},
+	target_revision: function(frm){
+		frm.events.calculate_percentage_si(frm);
+		frm.events.calculate_percentage_payment(frm);
+	},
+	collect_planning: function(frm){
+		frm.events.calculate_percentage_si(frm);
+		frm.events.calculate_percentage_payment(frm);
+	},
+	collect_revision: function(frm){
+		frm.events.calculate_percentage_si(frm);
+		frm.events.calculate_percentage_payment(frm);
+	},
 	calculate_total_invoice: function(frm){
 		var total_invoice = frappe.utils.sum(
 			(frm.doc.details || []).map(function(i) {
@@ -80,16 +96,16 @@ frappe.ui.form.on('Sales Target', {
 	calculate_average_day: function(frm){
 		var total_days = frappe.utils.sum(
 			(frm.doc.details || []).map(function(i) {
-				return (flt(i.difference_day));
+				return (flt(i.difference_day) * flt(i.contribution) / 100);
 			})
 		);
-		var count = frappe.utils.sum(
-			(frm.doc.details || []).map(function(i) {
-				return (1);
-			})
-		);
-		var avg_days = flt(total_days) / flt(count)
-		frm.set_value("avg_day_collected", avg_days);
+		// var count = frappe.utils.sum(
+		// 	(frm.doc.details || []).map(function(i) {
+		// 		return (1);
+		// 	})
+		// );
+		// var avg_days = flt(total_days) / flt(count)
+		frm.set_value("avg_day_collected", total_days);
 	},
 	calculate_percentage_si: function(frm){
 		if(flt(frm.doc.target_revision) == 0){
