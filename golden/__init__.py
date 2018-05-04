@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.15.1'
+__version__ = '1.15.2'
 
+# 1.15.2
+#   - Add Report: Purchase Analysis
 # 1.15.1
 #   - Update calculation on Purchase Budget
 # 1.15.0

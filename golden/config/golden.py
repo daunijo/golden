@@ -118,6 +118,12 @@ def get_data():
 					"doctype": "Item",
 					"is_query_report": True
 				},
+				{
+					"type": "report",
+					"name": "Purchase Analysis",
+					"doctype": "Item",
+					"is_query_report": True
+				},
 			]
 		},
 	]
