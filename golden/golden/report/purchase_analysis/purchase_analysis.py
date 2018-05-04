@@ -23,7 +23,8 @@ def execute(filters=None):
 				count_actual = count_actual + 1
 			else:
 				po_qty = frappe.db.sql("""select sum(stock_qty) from `tabPurchase Order Item` poi inner join `tabPurchase Order` po on poi.parent = po.`name` where po.docstatus = '1' and po.`status` in ('To Receive and Bill', 'To Receive') and poi.item_code = %s""", it.item_code)[0][0]
-				if flt(po_qty) >= flt(min_stock):
+				po_actual_qty = flt(po_qty) + flt(actual_qty)
+				if flt(po_actual_qty) >= flt(min_stock):
 					count_po = count_po + 1
 
 		diff = flt(cl.minimum_item) - flt(count_actual) - flt(count_po)
