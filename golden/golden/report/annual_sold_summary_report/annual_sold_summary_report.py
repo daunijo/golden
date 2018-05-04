@@ -42,7 +42,7 @@ def execute(filters=None):
 		qty_11 = frappe.db.sql("""select sum(qty) from `tabReceive Order Item Delivery` where parent = %s and delivery_date like %s""", (cl.name, nov))[0][0]
 		dec = frappe.db.escape(filters["year"])+"-12%"
 		qty_12 = frappe.db.sql("""select sum(qty) from `tabReceive Order Item Delivery` where parent = %s and delivery_date like %s""", (cl.name, dec))[0][0]
-		data.append([cl.posting_date, cl.name, cl.expedition, qty_pack, qty_ro, qty_sold, percen_sold, qty_1, qty_2, qty_3, qty_4, qty_5, qty_6, qty_7, qty_8, qty_9, qty_10, qty_11, qty_12])
+		data.append([cl.posting_date, cl.name, cl.expedition, cl.container, qty_pack, qty_ro, qty_sold, percen_sold, qty_1, qty_2, qty_3, qty_4, qty_5, qty_6, qty_7, qty_8, qty_9, qty_10, qty_11, qty_12])
 		# january
 
 
@@ -55,6 +55,7 @@ def get_columns():
 		_("Date Received")+":Date:100",
 		_("RO ID")+":Link/Receive Order:140",
 		_("Expedition")+":Link/Expedition:150",
+		_("No Container")+":Data:120",
 		_("Packages")+":Int:70",
 		_("Qty RO")+":Int:70",
 		_("Qty Sold")+":Int:70",
