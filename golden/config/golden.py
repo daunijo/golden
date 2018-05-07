@@ -124,6 +124,12 @@ def get_data():
 					"doctype": "Item",
 					"is_query_report": True
 				},
+				{
+					"type": "report",
+					"name": "Purchase By Item Group",
+					"doctype": "Purchase Budget",
+					"is_query_report": True
+				},
 			]
 		},
 	]
