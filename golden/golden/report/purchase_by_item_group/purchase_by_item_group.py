@@ -11,8 +11,6 @@ def execute(filters=None):
 	data = []
 
 	conditions = get_conditions(filters)
-	# bulk_po = frappe.db.get_value("Purchase Budget", frappe.db.escape(filters["purchase_budget"]), "bulk_po")
-	# frappe.throw(_("select distinct(i.item_group) from `tabPurchase Order Item` poi inner join `tabItem` i on poi.item_code = i.item_code inner join `tabItem Group` ig on i.item_group = ig.`name` where poi.parent in ({0})").format(bulk_po))
 	sl_entries = frappe.db.sql("select distinct(item_group), parent from `tabPurchase Budget Item` where %s order by item_group asc" % conditions, as_dict=1)
 	for cl in sl_entries:
 		total = frappe.db.sql("select sum(net_amount) from `tabPurchase Budget Item` where item_group = %s and parent = %s", (cl.item_group, cl.parent))[0][0]

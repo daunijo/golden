@@ -1,0 +1,27 @@
+{
+ "add_total_row": 0, 
+ "apply_user_permissions": 1, 
+ "creation": "2018-05-07 11:19:39.192485", 
+ "disabled": 0, 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 0, 
+ "is_standard": "Yes", 
+ "letter_head": "Standard", 
+ "modified": "2018-05-07 11:20:03.512491", 
+ "modified_by": "Administrator", 
+ "module": "Golden", 
+ "name": "Purchase By Item Group", 
+ "owner": "Administrator", 
+ "ref_doctype": "Item Group", 
+ "report_name": "Purchase By Item Group", 
+ "report_type": "Script Report", 
+ "roles": [
+  {
+   "role": "Administrator"
+  }, 
+  {
+   "role": "All"
+  }
+ ]
+}
