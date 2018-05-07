@@ -12,9 +12,9 @@
   "docstatus": 0, 
   "doctype": "Custom Script", 
   "dt": "Item", 
-  "modified": "2018-04-30 15:19:41.680554", 
+  "modified": "2018-05-07 16:50:41.814344", 
   "name": "Item-Client", 
-  "script": "cur_frm.set_query(\"default_gudang\", function(frm) {\n\treturn {\n\t\tfilters: {\n\t\t\t'is_group': 1,\n\t\t\t'type': 'Warehouse'\n\t\t}\n\t}\n});\ncur_frm.set_query(\"default_section\", function(frm) {\n\treturn {\n\t\tfilters: {\n\t\t\t'is_group': 1,\n\t\t\t'type': 'Section',\n\t\t\t'parent': cur_frm.doc.default_gudang\n\t\t}\n\t}\n});\ncur_frm.set_query(\"default_location\", function(frm) {\n\treturn {\n\t\tfilters: {\n\t\t\t'is_group': 0,\n\t\t\t'type': 'Location',\n\t\t\t'parent': cur_frm.doc.default_section\n\t\t}\n\t}\n});\nfrappe.ui.form.on('Item', {\n\tdefault_location: function(frm){\n\t\tfrm.set_value(\"default_warehouse\", frm.doc.default_location);\n\t}\n})", 
+  "script": "cur_frm.set_query(\"default_gudang\", function(frm) {\n\treturn {\n\t\tfilters: {\n\t\t\t'is_group': 1,\n\t\t\t'type': 'Warehouse'\n\t\t}\n\t}\n});\ncur_frm.set_query(\"default_section\", function(frm) {\n\treturn {\n\t\tfilters: {\n\t\t\t'is_group': 1,\n\t\t\t'type': 'Section',\n\t\t\t'parent': cur_frm.doc.default_gudang\n\t\t}\n\t}\n});\ncur_frm.set_query(\"default_location\", function(frm) {\n\treturn {\n\t\tfilters: {\n\t\t\t'is_group': 0,\n\t\t\t'type': 'Location',\n\t\t\t'parent': cur_frm.doc.default_section\n\t\t}\n\t}\n});\nfrappe.ui.form.on('Item', {\n\tdefault_location: function(frm){\n\t\tfrm.set_value(\"default_warehouse\", frm.doc.default_location);\n\t\tfrappe.call({\n\t\t\tmethod: \"frappe.client.get\",\n\t\t\targs:{\n\t\t\t\tdoctype: \"Warehouse\",\n\t\t\t\tfilters:{\n\t\t\t\t\tname: frm.doc.default_location\n\t\t\t\t}\n\t\t\t},\n\t\t\tcallback: function(data){\n\t\t\t\tfrm.set_value(\"default_section\", data.message.parent);\n\t\t\t}\n\t\t});\n\t\tfrappe.call({\n\t\t\tmethod: \"frappe.client.get\",\n\t\t\targs:{\n\t\t\t\tdoctype: \"Warehouse\",\n\t\t\t\tfilters:{\n\t\t\t\t\tname: frm.doc.default_section\n\t\t\t\t}\n\t\t\t},\n\t\t\tcallback: function(data){\n\t\t\t\tfrm.set_value(\"default_gudang\", data.message.parent);\n\t\t\t}\n\t\t});\n\t}\n})", 
   "script_type": "Client"
  }, 
  {

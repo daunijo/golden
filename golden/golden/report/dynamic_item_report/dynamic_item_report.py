@@ -11,6 +11,11 @@ def execute(filters=None):
 	data = []
 
 	conditions = get_conditions(filters)
+	limit = frappe.db.escape(filters["limit"])
+	if limit == "No Limit":
+		lim = ""
+	else:
+		lim = "limit"
 	sl_entries = frappe.db.sql("""select `name`, item_code, item_name, item_group from `tabItem` where disabled = '0' and is_stock_item = '1' %s""" % conditions, as_dict=1)
 	for cl in sl_entries:
 		count_1 = frappe.db.sql("""select count(*) from `tabPurchase Order` po inner join `tabPurchase Order Item` poi on po.`name` = poi.parent where po.`status` in ('To Receive and Bill', 'To Receive') and po.docstatus = '1' and poi.item_code = %s""", cl.name)[0][0]
@@ -90,7 +95,7 @@ def get_columns():
 	"""return columns"""
 
 	columns = [
-		_("Item ID")+":Link/Item:110",
+		_("Item ID")+":Link/Item:120",
 		_("Item Name")+":Data:180",
 		_("Item Group")+":Data:110",
 		_("Actual Qty")+":Float:80",
@@ -116,5 +121,9 @@ def get_columns():
 
 def get_conditions(filters):
 	conditions = ""
-
+	if filters.get("item_code"):
+		conditions += " and item_code = '%s'" % frappe.db.escape(filters["item_code"])
+	if filters.get("limit"):
+		if filters.get("limit") != "No Limit":
+			conditions += " limit %s" % frappe.db.escape(filters["limit"])
 	return conditions

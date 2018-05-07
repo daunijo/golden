@@ -59,7 +59,7 @@ def get_columns():
 		_("Packages")+":Int:70",
 		_("Qty RO")+":Int:70",
 		_("Qty Sold")+":Int:70",
-		_("Sold (%)")+":Float:70",
+		_("Sold (%)")+":Percent:70",
 		_("Jan")+":Int:60",
 		_("Feb")+":Int:60",
 		_("Mar")+":Int:60",

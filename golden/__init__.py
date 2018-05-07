@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.15.4'
+__version__ = '1.15.5'
 
+# 1.15.5
+#   - Update Report: Dynamic Item Report
+#   - Update custom script: Item
 # 1.15.4
 #   - Fix few minor update
 # 1.15.3
