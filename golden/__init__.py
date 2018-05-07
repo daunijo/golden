@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.15.2'
+__version__ = '1.15.3'
 
+# 1.15.3
+#   - Add Report: Purchase By Item Group
 # 1.15.2
 #   - Add Report: Purchase Analysis
 # 1.15.1

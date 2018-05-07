@@ -5,6 +5,9 @@ frappe.ui.form.on('Purchase Budget', {
 	refresh: function(frm) {
 		frm.events.set_read_only(frm);
 	},
+	validate: function(frm){
+		frm.refresh_fields();
+	},
 	set_posting_time: function(frm){
 		frm.events.set_read_only(frm);
 	},
@@ -16,6 +19,9 @@ frappe.ui.form.on('Purchase Budget', {
 			frm.set_df_property("posting_date", "read_only", true);
 			frm.set_df_property("posting_time", "read_only", true);
 		}
+	},
+	purchase_by_item_group: function(frm){
+		frappe.set_route("query-report", "Purchase By Item Group", {"purchase_budget": frm.doc.name})
 	},
 	get_purchase_order: function(frm){
 		frm.clear_table("details");

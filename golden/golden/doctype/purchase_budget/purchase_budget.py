@@ -10,7 +10,25 @@ from frappe import msgprint, _
 from frappe.model.mapper import get_mapped_doc
 
 class PurchaseBudget(Document):
-	pass
+	def validate(self):
+		pass
+
+	def on_submit(self):
+		self.insert_items()
+
+	def insert_items(self):
+		for row in self.details:
+			po_item = frappe.db.sql("select item_code, item_name, stock_qty, net_amount, item_group, parent, `name` from `tabPurchase Order Item` where parent = %s", row.purchase_order, as_dict=1)
+			for items in po_item:
+				self.append("items", {
+					"item_code": items.item_code,
+					"item_name": items.item_name,
+					"stock_qty": items.stock_qty,
+					"net_amount": items.net_amount,
+					"item_group": items.item_group,
+					"purchase_order": row.purchase_order,
+					"po_item": items.name
+				}).save()
 
 @frappe.whitelist()
 def get_purchase_order(start_date, end_date, budget1, budget2):
