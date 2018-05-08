@@ -28,7 +28,7 @@ def execute(filters=None):
 		else:
 			item_price = ""
 		so = frappe.db.sql("""select sum(soi.stock_qty) from `tabSales Order` so inner join `tabSales Order Item` soi on so.`name` = soi.parent where so.`status` in ('To Deliver and Bill', 'To Deliver') and so.docstatus = '1' and soi.item_code = %s""", cl.name)[0][0]
-		data.append([cl.item_code, cl.item_name, cl.item_group, cl.stock_uom, bin_qty[0][0], bin_qty[0][1], bin_qty[0][2], po, last_receipt, item_price, so])
+		data.append([cl.item_code, cl.item_name, cl.item_group, cl.stock_uom, bin_qty[0][0], so, bin_qty[0][2], po, item_price, bin_qty[0][1], last_receipt])
 		# count_1 = frappe.db.sql("""select count(*) from `tabPurchase Order` po inner join `tabPurchase Order Item` poi on po.`name` = poi.parent where po.`status` in ('To Receive and Bill', 'To Receive') and po.docstatus = '1' and poi.item_code = %s""", cl.name)[0][0]
 		# count_2 = frappe.db.sql("""select count(*) from `tabSales Order` so inner join `tabSales Order Item` soi on so.`name` = soi.parent where so.`status` in ('To Deliver and Bill', 'To Deliver') and so.docstatus = '1' and soi.item_code = %s""", cl.name)[0][0]
 		# count_3 = frappe.db.sql("""select count(*) from `tabBin` where item_code = %s""", cl.name)[0][0]
@@ -107,12 +107,12 @@ def get_columns():
 		_("Item Group")+":Data:110",
 		_("UOM")+":Link/UOM:60",
 		_("Actual Qty")+":Float:80",
-		_("Projected Qty")+":Float:90",
+		_("SO Qty")+":Float:70",
 		_("Available Qty")+":Float:90",
 		_("PO Qty")+":Float:70",
-		_("Last Receipt Date")+":Date:120",
 		_("Price Rate")+":Float:100",
-		_("SO Qty")+":Float:70",
+		_("Projected Qty")+":Float:90",
+		_("Last Receipt Date")+":Date:120",
 	]
 
 	return columns
