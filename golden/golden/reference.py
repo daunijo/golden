@@ -8,6 +8,25 @@ from frappe.model.naming import make_autoname
 from dateutil import parser
 from num2words import num2words
 
+def change_sales_order(doc, method):
+    if doc.rss_warehouse:
+        for row in doc.items:
+            count_qty = frappe.db.sql("""select count(*) from `tabWarehouse` w1 inner join `tabWarehouse` w2 on w1.`name` = w2.parent_warehouse inner join `tabWarehouse` w3 on w2.`name` = w3.parent_warehouse inner join `tabBin` b on w3.`name` = b.warehouse where w1.`name` = %s and w3.disabled = '0' and b.item_code = %s""", (doc.rss_warehouse, row.item_code))[0][0]
+            if flt(count_qty) >= 1:
+                count_projected = frappe.db.sql("""select count(*) from `tabWarehouse` w1 inner join `tabWarehouse` w2 on w1.`name` = w2.parent_warehouse inner join `tabWarehouse` w3 on w2.`name` = w3.parent_warehouse inner join `tabBin` b on w3.`name` = b.warehouse where w1.`name` = %s and w3.disabled = '0' and b.item_code = %s and b.projected_qty >= %s order by b.projected_qty asc limit 1""", (doc.rss_warehouse, row.item_code, row.stock_qty))[0][0]
+                if flt(count_projected) == 1:
+                    wh = frappe.db.sql("""select w2.`name` as section, w3.`name` as location from `tabWarehouse` w1 inner join `tabWarehouse` w2 on w1.`name` = w2.parent_warehouse inner join `tabWarehouse` w3 on w2.`name` = w3.parent_warehouse inner join `tabBin` b on w3.`name` = b.warehouse where w1.`name` = %s and w3.disabled = '0' and b.item_code = %s and b.projected_qty >= %s order by b.projected_qty asc limit 1""", (doc.rss_warehouse, row.item_code, row.stock_qty))
+                    row.default_gudang = doc.rss_warehouse
+                    row.default_section = wh[0][0]
+                    row.default_location = wh[0][1]
+                    row.warehouse = wh[0][1]
+                else:
+                    wh = frappe.db.sql("""select w2.`name` as section, w3.`name` as location from `tabWarehouse` w1 inner join `tabWarehouse` w2 on w1.`name` = w2.parent_warehouse inner join `tabWarehouse` w3 on w2.`name` = w3.parent_warehouse inner join `tabBin` b on w3.`name` = b.warehouse where w1.`name` = %s and w3.disabled = '0' and b.item_code = %s and b.projected_qty <= %s order by b.projected_qty desc limit 1""", (doc.rss_warehouse, row.item_code, row.stock_qty))
+                    row.default_gudang = doc.rss_warehouse
+                    row.default_section = wh[0][0]
+                    row.default_location = wh[0][1]
+                    row.warehouse = wh[0][1]
+
 def submit_sales_order(doc, method):
     count = frappe.db.sql("""select count(distinct(default_section)) from `tabSales Order Item` where parent = %s""", doc.name)[0][0]
     if flt(count) != 0:
