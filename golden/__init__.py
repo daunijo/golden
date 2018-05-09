@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.15.6'
+__version__ = '1.15.7'
 
+# 1.15.7
+#   - Update scirpt: Sales Order
 # 1.15.6
 #   - Update Report: Dynamic Item Report
 # 1.15.5
