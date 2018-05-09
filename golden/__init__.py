@@ -5,6 +5,7 @@ __version__ = '1.15.7'
 
 # 1.15.7
 #   - Update scirpt: Sales Order
+#   - Add Doctype: Sales Order Replenishment Warehouse
 # 1.15.6
 #   - Update Report: Dynamic Item Report
 # 1.15.5
