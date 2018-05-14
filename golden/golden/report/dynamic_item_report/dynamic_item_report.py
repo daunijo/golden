@@ -121,6 +121,8 @@ def get_conditions(filters):
 	conditions = ""
 	if filters.get("item_code"):
 		conditions += " and item_code = '%s'" % frappe.db.escape(filters["item_code"])
+	if filters.get("item_name"):
+		conditions += " and item_name like '%%%s%%'" % frappe.db.escape(filters["item_name"])
 	if filters.get("limit"):
 		if filters.get("limit") != "No Limit":
 			conditions += " limit %s" % frappe.db.escape(filters["limit"])

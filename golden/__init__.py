@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.15.7'
+__version__ = '1.15.8'
 
+# 1.15.8
+#   - Update sales order
 # 1.15.7
 #   - Update scirpt: Sales Order
 #   - Add Doctype: Sales Order Replenishment Warehouse

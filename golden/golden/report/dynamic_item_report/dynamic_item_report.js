@@ -18,6 +18,12 @@ frappe.query_reports["Dynamic Item Report"] = {
 			"options": "Item"
 		},
 		{
+			"fieldname":"item_name",
+			"label": __("Item Name"),
+			"fieldtype": "Data",
+			"options": "Item"
+		},
+		{
 			"fieldname":"price_list",
 			"label": __("Price List"),
 			"fieldtype": "Link",
