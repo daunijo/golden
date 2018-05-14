@@ -158,7 +158,32 @@ def submit_sales_order_5(doc, method):
                                     bin_ito2 = bin_ito + flt(update_qty)
                                     frappe.db.sql("""update `tabBin` set ito_qty = %s where item_code = %s and warehouse = %s""", (bin_ito2, row.item_code, lol.warehouse))
                 if flt(ada) == 0:
-                    frappe.throw(_("Ini yg gabungan 2 gudang besar atau lbh"))
+                    qty1 = row.stock_qty
+                    for rh in doc.replenishment_warehouse:
+                        list_location = frappe.db.sql("select b.warehouse, b.actual_qty, b.ito_qty from `tabBin` b inner join `tabWarehouse` w1 on b.warehouse = w1.`name` inner join `tabWarehouse` w2 on w1.parent_warehouse = w2.`name` inner join `tabWarehouse` w3 on w2.parent_warehouse = w3.`name` where b.item_code = %s and w3.`name` = %s and (b.actual_qty - b.ito_qty) >= '1' order by (b.actual_qty - b.ito_qty) asc", (row.item_code, rh.warehouse), as_dict=1)
+                        for lol in list_location:
+                            if flt(qty1) >= 1:
+                                rem_qty = flt(lol.actual_qty) - flt(lol.ito_qty)
+                                if flt(qty1) >= flt(rem_qty):
+                                    update_qty = rem_qty
+                                else:
+                                    update_qty = qty1
+                                qty1 = qty1 - rem_qty
+                                ito_detail = frappe.get_doc("Transfer Order", ito)
+                                ito_detail.append("detail", {
+                                    "item_code": row.item_code,
+                                    "item_name": row.item_name,
+                                    "qty_need": update_qty,
+                                    "stock_uom": row.stock_uom,
+                                    "from_location": lol.warehouse,
+                                    "to_location": row.warehouse,
+                                    "so_detail": row.name,
+                                    "sales_order": doc.name
+                                })
+                                ito_detail.save()
+                                bin_ito = frappe.db.get_value("Bin", {"item_code": row.item_code, "warehouse": lol.warehouse}, "ito_qty")
+                                bin_ito2 = bin_ito + flt(update_qty)
+                                frappe.db.sql("""update `tabBin` set ito_qty = %s where item_code = %s and warehouse = %s""", (bin_ito2, row.item_code, lol.warehouse))
             else:
                 frappe.throw(_("Stock not enough in all <b>Replenishment Warehouse</b> for item {0}").format(row.item_code))
 
@@ -288,9 +313,9 @@ def cancel_sales_order_2(doc, method):
     	cancel_picking.delete()
 
 def cancel_sales_order_3(doc, method):
-    count_ito = frappe.db.sql("""select count(*) from `tabTransfer Order` where docstatus = '0'""")[0][0]
+    count_ito = frappe.db.sql("""select count(*) from `tabTransfer Order` where docstatus = '0' and action = 'Auto'""")[0][0]
     if flt(count_ito) == 1:
-        ito_id = frappe.db.sql("""select `name` from `tabTransfer Order` where docstatus = '0'""")[0][0]
+        ito_id = frappe.db.sql("""select `name` from `tabTransfer Order` where docstatus = '0' and action = 'Auto'""")[0][0]
         for row in doc.items:
             count_ito_det = frappe.db.sql("""select count(*) from `tabTransfer Order Item Detail` where docstatus = '0' and so_detail = %s""", row.name)[0][0]
             if flt(count_ito_det) != 0:
@@ -303,9 +328,9 @@ def cancel_sales_order_3(doc, method):
                 ito_detail.delete()
 
 def cancel_sales_order_4(doc, method):
-    count_ito = frappe.db.sql("""select count(*) from `tabTransfer Order` where docstatus = '0'""")[0][0]
+    count_ito = frappe.db.sql("""select count(*) from `tabTransfer Order` where docstatus = '0' and action = 'Auto'""")[0][0]
     if flt(count_ito) == 1:
-        ito_id = frappe.db.sql("""select `name` from `tabTransfer Order` where docstatus = '0'""")[0][0]
+        ito_id = frappe.db.sql("""select `name` from `tabTransfer Order` where docstatus = '0' and action = 'Auto'""")[0][0]
         count_ito_item = frappe.db.sql("""select count(*) from `tabTransfer Order Item` where parent = %s""", ito_id)[0][0]
         if flt(count_ito_item) == 0:
             delete_ito = frappe.get_doc("Transfer Order", ito_id)
