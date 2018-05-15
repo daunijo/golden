@@ -116,12 +116,14 @@ class Packing(Document):
 		for row in self.items:
 			if row.picking:
 				bin = frappe.db.get_value("Bin", {"item_code": row.item_code, "warehouse": row.warehouse}, ["name", "ito", "ito_qty"], as_dict=1)
-				if bin.ito:
-					if flt(bin.ito_qty) >= flt(row.qty_packing):
-						diff = flt(bin.ito_qty) - flt(row.qty_packing)
-						frappe.db.sql("""update `tabBin` set ito = null, ito_qty = %s where `name` = %s""", (diff, bin.name))
-					else:
-						frappe.db.sql("""update `tabBin` set ito = null, ito_qty = 0 where `name` = %s""", bin.name)
+				if flt(bin.ito_qty) >= 1:
+					a = flt(bin.ito_qty) - flt(row.qty)
+					frappe.db.sql("""update `tabBin` set ito_qty = %s where `name` = %s""", (a, bin.name))
+					# if flt(bin.ito_qty) >= flt(row.qty_packing):
+					# 	diff = flt(bin.ito_qty) - flt(row.qty_packing)
+					# 	frappe.db.sql("""update `tabBin` set ito = null, ito_qty = %s where `name` = %s""", (diff, bin.name))
+					# else:
+					# 	frappe.db.sql("""update `tabBin` set ito = null, ito_qty = 0 where `name` = %s""", bin.name)
 
 	def update_picking(self):
 		for row in self.picking_list:
