@@ -35,7 +35,7 @@ def submit_sales_order(doc, method):
         section = frappe.db.sql("""select distinct(default_section) from `tabSales Order Item` where parent = %s""", doc.name, as_dict=1)
         for row in section:
     		picking = frappe.get_doc({
-    			"doctype": "Picking",
+    			"doctype": "Picking Order",
     			"sales_order": doc.name,
                 "customer": doc.customer,
                 "customer_name": doc.customer_name,
@@ -48,11 +48,11 @@ def submit_sales_order(doc, method):
 
 def submit_sales_order_2(doc, method):
     so = doc.name
-    pick = frappe.db.sql("""select `name`, section from `tabPicking` where docstatus = '0' and sales_order = %s""", doc.name, as_dict=1)
+    pick = frappe.db.sql("""select `name`, section from `tabPicking Order` where docstatus = '0' and sales_order = %s""", doc.name, as_dict=1)
     for picking in pick:
         item = frappe.db.sql("""select * from `tabSales Order Item` where parent = %s and default_section = %s order by idx asc""", (doc.name, picking.section), as_dict=1)
         for row in item:
-            picking_item = frappe.get_doc("Picking", picking.name)
+            picking_item = frappe.get_doc("Picking Order", picking.name)
             picking_item.append("items", {
     			"item_code": row.item_code,
     			"item_name": row.item_name,
@@ -65,12 +65,12 @@ def submit_sales_order_2(doc, method):
                 "so_detail": row.name
             })
             picking_item.save()
-        simple = frappe.get_doc("Picking", picking.name)
+        simple = frappe.get_doc("Picking Order", picking.name)
         simple.append("simple", {
             "picking": picking.name
         })
         simple.save()
-        submit_picking = frappe.get_doc("Picking", picking.name)
+        submit_picking = frappe.get_doc("Picking Order", picking.name)
         submit_picking.submit()
 
 def submit_sales_order_3(doc, method):
@@ -317,9 +317,9 @@ def cancel_sales_order(doc, method):
 	frappe.db.sql("""update `tabSingles` set value = null where doctype = 'Batch Picking' and field = 'to'""")
 
 def cancel_sales_order_2(doc, method):
-    pick = frappe.db.sql("""select `name` from `tabPicking` where docstatus = '1' and sales_order = %s""", doc.name, as_dict=1)
+    pick = frappe.db.sql("""select `name` from `tabPicking Order` where docstatus = '1' and sales_order = %s""", doc.name, as_dict=1)
     for picking in pick:
-    	cancel_picking = frappe.get_doc("Picking", picking.name)
+    	cancel_picking = frappe.get_doc("Picking Order", picking.name)
     	cancel_picking.cancel()
     	cancel_picking.delete()
 

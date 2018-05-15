@@ -88,7 +88,7 @@ frappe.ui.form.on('Packing', {
 			frm.add_custom_button(__("Get Picking Order"), function() {
 				erpnext.utils.map_current_doc({
 					method: "golden.golden.doctype.packing.packing.get_picking_list",
-					source_doctype: "Picking",
+					source_doctype: "Picking Order",
 					target: frm,
 					setters:  {
 						customer: frm.doc.customer || undefined,
