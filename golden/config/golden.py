@@ -38,8 +38,8 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Picking",
-					"description": _("Picking.")
+					"name": "Picking Order",
+					"description": _("Picking Order.")
 				},
 				{
 					"type": "doctype",

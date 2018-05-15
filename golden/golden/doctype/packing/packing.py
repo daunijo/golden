@@ -127,7 +127,7 @@ class Packing(Document):
 
 	def update_picking(self):
 		for row in self.picking_list:
-			frappe.db.sql("""update `tabPicking` set packing = %s where `name` = %s""", (self.name, row.picking))
+			frappe.db.sql("""update `tabPicking Order` set packing = %s where `name` = %s""", (self.name, row.picking))
 
 	def on_cancel(self):
 		self.delete_dn()
@@ -148,7 +148,7 @@ class Packing(Document):
 
 	def delete_picking(self):
 		for row in self.picking_list:
-			frappe.db.sql("""update `tabPicking` set packing = null where `name` = %s""", row.picking)
+			frappe.db.sql("""update `tabPicking Order` set packing = null where `name` = %s""", row.picking)
 
 	def on_trash(self):
 		if self.sales_order and self.docstatus == 0:
@@ -163,7 +163,7 @@ class Packing(Document):
 			temp = []
 			for pick in self.picking_list:
 				if pick.picking in temp:
-					frappe.throw(_("Picking {0} double").format(pick.picking))
+					frappe.throw(_("Picking Order {0} double").format(pick.picking))
 				temp.append(pick.picking)
 
 @frappe.whitelist()
@@ -174,8 +174,8 @@ def get_picking_list(source_name, target_doc=None):
 	def update_item(source, target, source_parent):
 		target.description = frappe.db.sql("""select description from `tabSales Order Item` where `name` = %s""", source.so_detail)[0][0]
 
-	doclist = get_mapped_doc("Picking", source_name, {
-		"Picking": {
+	doclist = get_mapped_doc("Picking Order", source_name, {
+		"Picking Order": {
 			"doctype": "Packing",
 			"validation": {
 				"docstatus": ["=", 1],

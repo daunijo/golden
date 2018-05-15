@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.15.10'
+__version__ = '1.16.0'
 
+# 1.16.0
+#   - Add Doctype: Picking Order
 # 1.15.10
 #   - Update on_submit & on_cancel: Sales Order
 #   - Update on_submit: Packing
