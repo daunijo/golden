@@ -8,6 +8,16 @@ frappe.ui.form.on('Packing', {
 				filters: { 'disabled': 0 }
 			}
 		});
+		frm.set_query('packer', function(doc) {
+			return {
+				filters: { 'department': 'Packer' }
+			}
+		});
+		frm.set_query('checker', function(doc) {
+			return {
+				filters: { 'department': 'Checker' }
+			}
+		});
 		frm.set_query("shipping_address_name", function(doc) {
 			return {
 				query: "golden.golden.purchase.address_query",
@@ -40,6 +50,22 @@ frappe.ui.form.on('Packing', {
 						"company": doc.company,
 						"is_group": 0
 					}
+				}
+			}
+		});
+		frm.set_query("picker", "picking_list", function (doc, cdt, cdn) {
+			var c_doc= locals[cdt][cdn];
+			return {
+				filters: {
+					'department': 'Picker'
+				}
+			}
+		});
+		frm.set_query("packer", "picking_list", function (doc, cdt, cdn) {
+			var c_doc= locals[cdt][cdn];
+			return {
+				filters: {
+					'department': 'Packer'
 				}
 			}
 		});

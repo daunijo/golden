@@ -26,6 +26,8 @@ def change_sales_order(doc, method):
                     row.default_section = wh[0][0]
                     row.default_location = wh[0][1]
                     row.warehouse = wh[0][1]
+            else:
+                frappe.throw(_("Item <b>{0}</b> has never been transaction in warehouse <b>{1}</b>").format(row.item_code, doc.rss_warehouse))
 
 def submit_sales_order(doc, method):
     count = frappe.db.sql("""select count(distinct(default_section)) from `tabSales Order Item` where parent = %s""", doc.name)[0][0]
@@ -420,7 +422,7 @@ def validate_warehouse(doc, method):
         if doc.is_group == 0 and doc.type == "Warehouse":
             frappe.throw(_("<b>Is Group</b> is mandatory"))
 
-    if doc.type == "Section" and doc.rss_is_primary == 1:
-        check_primary = frappe.db.sql("""select count(*) from `tabWarehouse` where rss_is_primary = '1'""")[0][0]
-        if flt(check_primary) != 0:
-            frappe.throw(_("<b>Replenishment Section</b> already used by another Section"))
+    # if doc.type == "Section" and doc.rss_is_primary == 1:
+    #     check_primary = frappe.db.sql("""select count(*) from `tabWarehouse` where rss_is_primary = '1'""")[0][0]
+    #     if flt(check_primary) != 0:
+    #         frappe.throw(_("<b>Replenishment Section</b> already used by another Section"))
