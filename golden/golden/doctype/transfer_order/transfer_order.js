@@ -2,6 +2,13 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Transfer Order', {
+	setup: function(frm){
+		frm.set_query('picker', function(doc) {
+			return {
+				filters: { 'department': 'Picker' }
+			}
+		});
+	},
 	refresh: function(frm) {
 	},
 });
