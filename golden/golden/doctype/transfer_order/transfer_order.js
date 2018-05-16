@@ -32,6 +32,23 @@ frappe.ui.form.on('Transfer Order Item', {
 			})
 		}
 	},
+	transfer_uom: function(doc, cdt, cdn){
+		var d = locals[cdt][cdn];
+		if(d.transfer_uom && d.item_code){
+			return frappe.call({
+				method: "golden.golden.doctype.transfer_order.transfer_order.get_uom_details",
+				args: {
+					item_code: d.item_code,
+					uom: d.transfer_uom
+				},
+				callback: function(r) {
+					if(r.message) {
+						frappe.model.set_value(cdt, cdn, r.message);
+					}
+				}
+			});
+		}
+	},
 	batch: function(doc, cdt, cdn){
 		var d = locals[cdt][cdn];
 		if(d.batch){

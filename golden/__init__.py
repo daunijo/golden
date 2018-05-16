@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.16.0'
+__version__ = '1.16.1'
 
+# 1.16.1
+#   - Add field: Priority in Sales Order
+#   - Add field: Conversion Factor in Transfer Order
 # 1.16.0
 #   - Add Doctype: Picking Order
 # 1.15.10
