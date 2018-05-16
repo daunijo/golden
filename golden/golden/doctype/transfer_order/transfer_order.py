@@ -7,6 +7,7 @@ import frappe
 from frappe.model.document import Document
 from frappe import msgprint, _
 from frappe.utils import nowdate, cstr, flt
+from erpnext.stock.get_item_details import get_bin_details, get_default_cost_center, get_conversion_factor
 
 class TransferOrder(Document):
 	def validate(self):
@@ -128,3 +129,20 @@ def get_qty_available(item_code, batch, warehouse):
 			'qty_available': 0
 		}
 	return qty_available
+
+@frappe.whitelist()
+def get_uom_details(item_code, uom):
+	"""Returns dict `{"conversion_factor": [value], "transfer_qty": qty * [value]}`
+
+	:param args: dict with `item_code`, `uom` and `qty`"""
+	conversion_factor = get_conversion_factor(item_code, uom).get("conversion_factor")
+
+	if not conversion_factor:
+		frappe.msgprint(_("UOM coversion factor required for UOM: {0} in Item: {1}")
+			.format(uom, item_code))
+		ret = {'transfer_uom' : ''}
+	else:
+		ret = {
+			'conversion_factor'		: flt(conversion_factor)
+		}
+	return ret
