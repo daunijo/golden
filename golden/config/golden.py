@@ -126,6 +126,12 @@ def get_data():
 				},
 				{
 					"type": "report",
+					"name": "Purchase Analysis Per Item",
+					"doctype": "Item",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
 					"name": "Purchase By Item Group",
 					"doctype": "Purchase Budget",
 					"is_query_report": True
