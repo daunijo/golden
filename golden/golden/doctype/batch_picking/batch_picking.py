@@ -13,7 +13,7 @@ class BatchPicking(Document):
 
 @frappe.whitelist()
 def get_details(start_from, end_from):
-    bp = frappe.db.sql("""select `name`, sales_order from `tabPicking` where docstatus = '1' and `name` between %s and %s""", (start_from, end_from), as_dict=True)
+    bp = frappe.db.sql("""select `name`, sales_order from `tabPicking Order` where docstatus = '1' and `name` between %s and %s""", (start_from, end_from), as_dict=True)
     picking_list = []
     for d in bp:
 		so = frappe.db.get_value("Sales Order", d.sales_order, ["delivery_date", "address_display"], as_dict=1)
@@ -26,7 +26,7 @@ def get_details(start_from, end_from):
 
 @frappe.whitelist()
 def get_detail_items(start_from, end_from):
-    bp = frappe.db.sql("""select `name` from `tabPicking` where docstatus = '1' and `name` between %s and %s""", (start_from, end_from), as_dict=True)
+    bp = frappe.db.sql("""select `name` from `tabPicking Order` where docstatus = '1' and `name` between %s and %s""", (start_from, end_from), as_dict=True)
     pi_list = []
     for d in bp:
 		picking_items = frappe.db.sql("""select * from `tabPicking Item` where docstatus = '1' and parent = %s order by idx asc""", d.name, as_dict=1)

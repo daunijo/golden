@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.16.3'
+__version__ = '1.16.4'
 
+# 1.16.4
+#   - Add Report: Purchase Analysis Per Item
 # 1.16.3
 #   - Update on_submit & on_cancel: Sales Order
 # 1.16.2
