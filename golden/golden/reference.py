@@ -344,6 +344,12 @@ def cancel_sales_order_3(doc, method):
                     c = flt(row.stock_qty) - flt(qty)
                     b = flt(a) - flt(c)
                     frappe.db.sql("""update `tabBin` set ito_qty = %s where item_code = %s and warehouse = %s""", (b, row.item_code, row.default_location))
+    else:
+        for row in doc.items:
+            bin = frappe.db.get_value("Bin", {"item_code": row.item_code, "warehouse": row.default_location}, ["name", "ito_qty"], as_dict=1)
+            if bin:
+                a = flt(bin.ito_qty) - flt(row.stock_qty)
+                frappe.db.sql("""update `tabBin` set ito_qty = %s where `name` = %s""", (a, bin.name))
 
 def cancel_sales_order_4(doc, method):
     count_ito = frappe.db.sql("""select count(*) from `tabTransfer Order` where docstatus = '0' and action = 'Auto'""")[0][0]
