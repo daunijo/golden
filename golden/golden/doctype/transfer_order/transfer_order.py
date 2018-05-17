@@ -21,7 +21,7 @@ class TransferOrder(Document):
 		self.insert_stock_entry_item()
 		self.submit_stock_entry()
 		self.delete_stock_entry_item_so()
-		# self.update_bin()
+		self.update_bin()
 		self.update_picking()
 
 	def on_cancel(self):
@@ -88,16 +88,11 @@ class TransferOrder(Document):
 	def update_bin(self):
 		if self.action == "Auto":
 			for row in self.items:
-				check_ito_bin = frappe.db.sql("""select ito from `tabBin` where item_code = %s and warehouse = %s""", (row.item_code, row.to_location))[0][0]
-				bin = frappe.db.sql("""select `name` from `tabBin` where item_code = %s and warehouse = %s""", (row.item_code, row.to_location))[0][0]
-				if check_ito_bin == None:
-					frappe.db.sql("""update `tabBin` set ito = %s, ito_qty = %s where `name` = %s""", (self.name, row.qty_need, bin))
-				elif check_ito_bin == self.name:
-					bin_qty = frappe.db.sql("""select ito_qty from `tabBin` where `name`""", bin)[0][0]
-					add_qty = flt(bin_qty) + flt(row.qty_need)
-					frappe.db.sql("""update `tabBin` set qty_need = %s where `name` = %s""", (self.name, add_qty, bin))
-				else:
-					frappe.throw(_("Packing from the previous Transfer Order has not been completed"))
+				bin  = frappe.db.get_value("Bin", {"item_code": row.item_code, "warehouse": row.to_location}, ["name", "ito_qty"], as_dict=1)
+				if bin:
+					a = flt(row.qty_need) + flt(bin.ito_qty)
+					frappe.db.sql("""update `tabBin` set ito_qty = %s where `name` = %s""", (a, bin.name))
+					frappe.db.sql("""update `tabBin` set ito_qty = '0' where item_code = %s and warehouse = %s""", (row.item_code, row.from_location))
 
 	def update_picking(self):
 		for i in self.detail:
