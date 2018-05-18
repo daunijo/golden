@@ -86,6 +86,11 @@ def get_data():
 					"name": "Expedition",
 					"description": _("Expedition.")
 				},
+				{
+					"type": "doctype",
+					"name": "Template Warehouse",
+					"description": _("Template Warehouse.")
+				},
 			]
 		},
 		{

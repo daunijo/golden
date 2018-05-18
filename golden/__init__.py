@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.16.4'
+__version__ = '1.17.0'
 
+# 1.17.0
+#   - Add Doctype: Template Warehouse & Template Warehouse Detail
+#   - Update Custom Script Item & Sales Order
 # 1.16.4
 #   - Add Report: Purchase Analysis Per Item
 # 1.16.3
