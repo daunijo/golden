@@ -83,6 +83,11 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
+					"name": "Employee Settings",
+					"description": _("Employee Settings.")
+				},
+				{
+					"type": "doctype",
 					"name": "Expedition",
 					"description": _("Expedition.")
 				},
