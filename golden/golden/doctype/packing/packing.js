@@ -10,12 +10,14 @@ frappe.ui.form.on('Packing', {
 		});
 		frm.set_query('packer', function(doc) {
 			return {
-				filters: { 'department': 'Packer' }
+				query: "golden.golden.doctype.employee_settings.employee_settings.employee_query",
+				filters: { 'department': 'packer' }
 			}
 		});
 		frm.set_query('checker', function(doc) {
 			return {
-				filters: { 'department': 'Checker' }
+				query: "golden.golden.doctype.employee_settings.employee_settings.employee_query",
+				filters: { 'department': 'checker' }
 			}
 		});
 		frm.set_query("shipping_address_name", function(doc) {
@@ -56,16 +58,18 @@ frappe.ui.form.on('Packing', {
 		frm.set_query("picker", "picking_list", function (doc, cdt, cdn) {
 			var c_doc= locals[cdt][cdn];
 			return {
+				query: "golden.golden.doctype.employee_settings.employee_settings.employee_query",
 				filters: {
-					'department': 'Picker'
+					'department': 'picker'
 				}
 			}
 		});
 		frm.set_query("packer", "picking_list", function (doc, cdt, cdn) {
 			var c_doc= locals[cdt][cdn];
 			return {
+				query: "golden.golden.doctype.employee_settings.employee_settings.employee_query",
 				filters: {
-					'department': 'Packer'
+					'department': 'packer'
 				}
 			}
 		});
