@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.17.0'
+__version__ = '1.18.1'
 
+# 1.18.1
+#   - Update field Picker, Packer, Checker in Packing
+# 1.18.0
+#   - Add Doctype: Employee Settings & Employee Settings Detail
 # 1.17.0
 #   - Add Doctype: Template Warehouse & Template Warehouse Detail
 #   - Update Custom Script Item & Sales Order
