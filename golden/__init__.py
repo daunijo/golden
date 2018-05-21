@@ -1,8 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.18.1'
+__version__ = '1.18.2'
 
+# 1.18.2
+#   - Update Script Sales Order
+#   - Update Script Purchase Order
+#   - Add item_query in stock.py
+#   - Rename status 'In Packing' to 'Packed' in Sales Order and Packing
+#   - Delete Packer & Packer Name in Packing
 # 1.18.1
 #   - Update field Picker, Packer, Checker in Packing
 # 1.18.0

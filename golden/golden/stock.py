@@ -36,6 +36,22 @@ def default_location(doctype, txt, searchfield, start, page_len, filters):
             'cond': filters.get("parent")
         })
 
+def item_query(doctype, txt, searchfield, start, page_len, filters):
+    return frappe.db.sql("""select i.`name`, i.item_name, concat('<br>Current Stock: ', cast((select sum(actual_qty) from `tabBin` where item_code = i.`name`) as int), ' ', i.stock_uom) as current_stock, concat('<br>Available Stock: ', cast((select sum(actual_qty - ito_qty) from `tabBin` where item_code = i.`name`) as int), ' ', i.stock_uom) as available_stock, concat('<br>SO Qty: ', cast((select sum(soi.stock_qty) from `tabSales Order` so inner join `tabSales Order Item` soi on so.`name` = soi.parent where so.docstatus = '1' and soi.item_code = i.`name` and so.`status` in ('To Deliver and Bill', 'To Deliver')) as int), ' ', i.stock_uom) as so_qty, concat('<br>PO Qty: ', cast((select sum(stock_qty) from `tabPurchase Order` po inner join `tabPurchase Order Item` poi on po.`name` = poi.parent where po.docstatus = '1' and poi.item_code = i.`name` and po.`status` in ('To Receive and Bill', 'To Receive')) as int), ' ', i.stock_uom) as po_qty
+        from `tabItem` i
+        where i.disabled = '0'
+            and (i.`name` like %(txt)s or i.item_name like %(txt)s)
+            {mcond}
+        limit %(start)s, %(page_len)s""".format(**{
+            'key': searchfield,
+            'mcond':get_match_cond(doctype)
+        }), {
+            'txt': "%%%s%%" % txt,
+            '_txt': txt.replace("%", ""),
+            'start': start,
+            'page_len': page_len
+        })
+
 @frappe.whitelist()
 def make_material_transfer(source_name, target_doc=None):
     def set_missing_values(source, target):
@@ -113,3 +129,17 @@ def get_packing_list(source_name, target_doc=None):
 		},
 	}, target_doc, set_missing_values)
     return doc
+
+@frappe.whitelist()
+def set_qty_stock(name):
+    a = frappe.db.sql("""select (select sum(actual_qty) from `tabBin` where item_code = i.`name`) as current_stock from `tabItem` i where i.disabled = '0' and i.item_code = %s""", name)[0][0]
+    b = frappe.db.sql("""select (select sum(actual_qty - ito_qty) from `tabBin` where item_code = i.`name`) as available_stock from `tabItem` i where i.disabled = '0' and i.item_code = %s""", name)[0][0]
+    c = frappe.db.sql("""select (select sum(soi.stock_qty) from `tabSales Order` so inner join `tabSales Order Item` soi on so.`name` = soi.parent where so.docstatus = '1' and soi.item_code = i.`name` and so.`status` in ('To Deliver and Bill', 'To Deliver')) as so_qty from `tabItem` i where i.disabled = '0' and i.item_code = %s""", name)[0][0]
+    d = frappe.db.sql("""select (select sum(stock_qty) from `tabPurchase Order` po inner join `tabPurchase Order Item` poi on po.`name` = poi.parent where po.docstatus = '1' and poi.item_code = i.`name` and po.`status` in ('To Receive and Bill', 'To Receive')) as po_qty from `tabItem` i where i.disabled = '0' and i.item_code = %s""", name)[0][0]
+    si_rate = {
+		'total_current_stock': a,
+		'total_available_stock': b,
+		'total_so_qty': c,
+		'total_po_qty': d
+	}
+    return si_rate
