@@ -5,7 +5,14 @@ frappe.ui.form.on('Transfer Order', {
 	setup: function(frm){
 		frm.set_query('picker', function(doc) {
 			return {
-				filters: { 'department': 'Picker' }
+				query: "golden.golden.doctype.employee_settings.employee_settings.employee_query",
+				filters: { 'department': 'picker' }
+			}
+		});
+		frm.set_query('receiver', function(doc) {
+			return {
+				query: "golden.golden.doctype.employee_settings.employee_settings.employee_query",
+				filters: { 'department': 'receiver' }
 			}
 		});
 	},
