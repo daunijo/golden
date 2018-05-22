@@ -26,7 +26,7 @@ class Packing(Document):
 
 	def update_so(self):
 		if self.is_new() and self.sales_order:
-			frappe.db.sql("""update `tabSales Order` set golden_status = 'In Packing' where `name` = %s""", self.sales_order)
+			frappe.db.sql("""update `tabSales Order` set golden_status = 'Packed' where `name` = %s""", self.sales_order)
 
 	def box_shorted(self):
 		temp = []

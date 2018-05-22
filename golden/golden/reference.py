@@ -430,7 +430,7 @@ def cancel_sales_invoice(doc, method):
             frappe.throw(_("You can not cancel this invoice"))
         elif row.sales_order:
             update_packing = frappe.db.sql("""update `tabPacking` set is_completed = '0' where sales_order = %s""", row.sales_order)
-            update_so = frappe.db.sql("""update `tabSales Order` set golden_status = 'In Packing' where `name` = %s""", row.sales_order)
+            update_so = frappe.db.sql("""update `tabSales Order` set golden_status = 'Packed' where `name` = %s""", row.sales_order)
 
 def submit_stock_entry(doc, method):
     if doc.transfer_order:
