@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.18.2'
+__version__ = '1.18.3'
 
+# 1.18.3
+#   - Update fixtures
+#   - Update Picking
+#   - Update Transfer Order
 # 1.18.2
 #   - Update Script Sales Order
 #   - Update Script Purchase Order

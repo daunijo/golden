@@ -74,6 +74,7 @@ class Packing(Document):
 		for row in self.items:
 			soi = frappe.db.get_value("Sales Order Item", row.so_detail, ["rate"], as_dict=1)
 			dn.append("items", {
+				"rss_item_code": row.item_code,
 				"item_code": row.item_code,
 				"item_name": row.item_name,
 				"description": row.description,

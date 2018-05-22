@@ -74,6 +74,7 @@ class ReceiveOrder(Document):
 					final_qty = flt(row.qty) * flt(row.conversion_factor)
 					pr_uom = row.stock_uom
 				pr.append("items", {
+					"rss_item_code": row.item_code,
 					"item_code": row.item_code,
 					"item_name": row.item_name,
 					"description": row.description,

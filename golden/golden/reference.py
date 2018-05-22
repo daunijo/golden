@@ -27,7 +27,10 @@ def change_sales_order(doc, method):
                     row.default_location = wh[0][1]
                     row.warehouse = wh[0][1]
             else:
-                frappe.throw(_("Item <b>{0}</b> has never been transaction in warehouse <b>{1}</b>").format(row.item_code, doc.rss_warehouse))
+                row.default_gudang = doc.rss_warehouse
+                row.default_section = None
+                row.default_location = None
+            #     frappe.throw(_("Item <b>{0}</b> has never been transaction in warehouse <b>{1}</b>").format(row.item_code, doc.rss_warehouse))
 
 def submit_sales_order(doc, method):
     count = frappe.db.sql("""select count(distinct(default_section)) from `tabSales Order Item` where parent = %s""", doc.name)[0][0]
@@ -46,6 +49,19 @@ def submit_sales_order(doc, method):
     		})
     		picking.save()
 
+    count_null_section = frappe.db.sql("""select count(*) from `tabSales Order Item` where parent = %s and default_section is null""", doc.name)[0][0]
+    if flt(count_null_section) == 1:
+    	picking = frappe.get_doc({
+    		"doctype": "Picking Order",
+    		"sales_order": doc.name,
+            "customer": doc.customer,
+            "customer_name": doc.customer_name,
+    		"transaction_date": doc.transaction_date,
+    		"company": doc.company,
+            "action": "Auto"
+    	})
+    	picking.save()
+
 def submit_sales_order_2(doc, method):
     so = doc.name
     pick = frappe.db.sql("""select `name`, section from `tabPicking Order` where docstatus = '0' and sales_order = %s""", doc.name, as_dict=1)
@@ -61,6 +77,20 @@ def submit_sales_order_2(doc, method):
                 "uom": row.uom,
                 "conversion_factor": row.conversion_factor,
     			"location": row.default_location,
+                "sales_order": row.parent,
+                "so_detail": row.name
+            })
+            picking_item.save()
+        item_wo_section = frappe.db.sql("""select * from `tabSales Order Item` where parent = %s and default_section is null order by idx asc""", doc.name, as_dict=1)
+        for row in item_wo_section:
+            picking_item = frappe.get_doc("Picking Order", picking.name)
+            picking_item.append("items", {
+    			"item_code": row.item_code,
+    			"item_name": row.item_name,
+    			"qty": row.qty,
+                "stock_uom": row.stock_uom,
+                "uom": row.uom,
+                "conversion_factor": row.conversion_factor,
                 "sales_order": row.parent,
                 "so_detail": row.name
             })
@@ -107,11 +137,15 @@ def submit_sales_order_5(doc, method):
         whwh = wh_list.replace("*-", "'")
 
         for row in doc.items:
-            stock_in_location = frappe.db.get_value("Bin", {"item_code": row.item_code, "warehouse": row.default_location}, "(actual_qty - ito_qty)")
-            diff_qty = flt(row.stock_qty) - flt(stock_in_location)
+            if row.default_location:
+                stock_in_location = frappe.db.get_value("Bin", {"item_code": row.item_code, "warehouse": row.default_location}, "(actual_qty - ito_qty)")
+                diff_qty = flt(row.stock_qty) - flt(stock_in_location)
+            else:
+                diff_qty = flt(row.stock_qty)
             if flt(diff_qty) >= 1:
-                stock_bin = frappe.db.get_value("Bin", {"item_code": row.item_code, "warehouse": row.default_location}, "actual_qty")
-                frappe.db.sql("""update `tabBin` set ito_qty = %s where item_code = %s and warehouse = %s""", (stock_bin, row.item_code, row.default_location))
+                if row.default_location:
+                    stock_bin = frappe.db.get_value("Bin", {"item_code": row.item_code, "warehouse": row.default_location}, "(actual_qty - ito_qty)")
+                    frappe.db.sql("""update `tabBin` set ito_qty = %s where item_code = %s and warehouse = %s""", (stock_bin, row.item_code, row.default_location))
                 count1 = frappe.db.sql("select sum(b.actual_qty - b.ito_qty) from `tabBin` b inner join `tabWarehouse` w1 on b.warehouse = w1.`name` inner join `tabWarehouse` w2 on w1.parent_warehouse = w2.`name` inner join `tabWarehouse` w3 on w2.parent_warehouse = w3.`name` where b.item_code = %s and w3.`name` in ("+whwh+")", (row.item_code))[0][0]
                 if flt(count1) >= flt(diff_qty):
                     ada = 0
@@ -129,7 +163,7 @@ def submit_sales_order_5(doc, method):
                                     "qty_need": diff_qty,
                                     "stock_uom": row.stock_uom,
                                     "from_location": rw,
-                                    "to_location": row.warehouse,
+                                    "to_location": row.default_location,
                                     "so_detail": row.name,
                                     "sales_order": doc.name
                                 })
@@ -156,7 +190,7 @@ def submit_sales_order_5(doc, method):
                                             "qty_need": update_qty,
                                             "stock_uom": row.stock_uom,
                                             "from_location": lol.warehouse,
-                                            "to_location": row.warehouse,
+                                            "to_location": row.default_location,
                                             "so_detail": row.name,
                                             "sales_order": doc.name
                                         })
@@ -194,9 +228,10 @@ def submit_sales_order_5(doc, method):
                 else:
                     frappe.throw(_("Stock not enough in all <b>Replenishment Warehouse</b> for item {0}").format(row.item_code))
             else:
-                stock_bin = frappe.db.get_value("Bin", {"item_code": row.item_code, "warehouse": row.default_location}, "ito_qty")
-                update_qty = flt(stock_bin) + flt(row.stock_qty)
-                frappe.db.sql("""update `tabBin` set ito_qty = %s where item_code = %s and warehouse = %s""", (update_qty, row.item_code, row.default_location))
+                if row.default_location:
+                    stock_bin = frappe.db.get_value("Bin", {"item_code": row.item_code, "warehouse": row.default_location}, "ito_qty")
+                    update_qty = flt(stock_bin) + flt(row.stock_qty)
+                    frappe.db.sql("""update `tabBin` set ito_qty = %s where item_code = %s and warehouse = %s""", (update_qty, row.item_code, row.default_location))
 
 def submit_sales_order_5_old(doc, method):
     count_ito = frappe.db.sql("""select count(*) from `tabTransfer Order` where docstatus = '0' and action = 'Auto'""")[0][0]
@@ -241,7 +276,8 @@ def submit_sales_order_6(doc, method):
                     "qty": transfer_qty,
                     "transfer_uom": largest_uom,
                     "from_location": item.from_location,
-                    "to_location": item.to_location
+                    "to_location": item.to_location,
+                    "conversion_factor": largest_conversion
                 })
                 ito_item.save()
 

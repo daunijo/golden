@@ -67,6 +67,7 @@ def get_items_from_dn(sales_order):
     for d in dn:
         item = frappe.db.get_value("Item", d.item_code, ["income_account", "expense_account"], as_dict=1)
         si_list.append(frappe._dict({
+            'rss_item_code': d.rss_item_code,
             'item_code': d.item_code,
             'item_name': d.item_name,
             'description': d.description,

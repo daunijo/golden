@@ -15,6 +15,8 @@ class TransferOrder(Document):
 
 	def on_submit(self):
 		frappe.db.set(self, 'status', 'Submitted')
+		self.check_from_location()
+		self.check_to_location()
 		self.check_picker()
 		self.check_batch()
 		self.make_stock_entry()
@@ -23,6 +25,8 @@ class TransferOrder(Document):
 		self.delete_stock_entry_item_so()
 		self.update_bin()
 		self.update_picking()
+		self.update_picking_location()
+		self.update_picking2()
 
 	def on_cancel(self):
 		if self.action == "Auto":
@@ -36,6 +40,16 @@ class TransferOrder(Document):
 			if row.stock_uom == row.transfer_uom:
 				if flt(row.qty) < flt(row.qty_need):
 					frappe.throw(_("Transfer Qty in <b>{0}</b> is smaller than <b>{1} {2}</b>").format(row.item_code, row.qty_need, row.stock_uom))
+
+	def check_from_location(self):
+		for row in self.items:
+			if not row.from_location:
+				frappe.throw(_("From Location is mandatory"))
+
+	def check_to_location(self):
+		for row in self.items:
+			if not row.to_location:
+				frappe.throw(_("To Location is mandatory"))
 
 	def check_qty(self):
 		for row in self.items:
@@ -97,6 +111,21 @@ class TransferOrder(Document):
 	def update_picking(self):
 		for i in self.detail:
 			frappe.db.sql("""update `tabPicking Item` set transfer_order = %s where so_detail = %s""", (self.name, i.so_detail))
+
+	def update_picking_location(self):
+		for i in self.items:
+			check_piking = frappe.db.sql("""select count(*) from `tabPicking Item` where docstatus = '1' and item_code = %s and location is null""", i.item_code)[0][0]
+			if flt(check_piking) != 0:
+				frappe.db.sql("""update `tabPicking Item` set location = %s where docstatus = '1' and item_code = %s and location is null""", (i.to_location, i.item_code))
+
+	def update_picking2(self):
+		check_piking = frappe.db.sql("""select count(*) from `tabPicking Order` where docstatus = '1' and section is null""")[0][0]
+		if flt(check_piking) != 0:
+			a = frappe.db.sql("""select `name` from `tabPicking Order` where docstatus = '1' and section is null""", as_dict=1)
+			for b in a:
+				location = frappe.db.sql("""select location from `tabPicking Item` where docstatus = '1' and parent = %s limit 1""", b.name)[0][0]
+				section = frappe.db.sql("""select parent_warehouse from `tabWarehouse` where `name` = %s""", location)[0][0]
+				frappe.db.sql("""update `tabPicking Order` set section = %s where `name` =%s""", (section, b.name))
 
 	def cancel_bin(self):
 		for row in self.items:
