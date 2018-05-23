@@ -90,6 +90,8 @@ frappe.ui.form.on('Packing', {
 	get_picking_order: function(frm){
 		if(frm.doc.docstatus == 0 || frm.doc.__islocal) {
 			frm.add_custom_button(__("Get Picking Order"), function() {
+				items = $.map( cur_frm.doc.items, function(item,idx) { return item.picking } )
+				added_items = items.join(",")
 				erpnext.utils.map_current_doc({
 					method: "golden.golden.doctype.packing.packing.get_picking_list",
 					source_doctype: "Picking Order",
@@ -100,7 +102,8 @@ frappe.ui.form.on('Packing', {
 					},
 					get_query_filters: {
 						docstatus: 1,
-						packing: ""
+						packing: "",
+						name: ["not in", added_items]
 //						sales_order: frm.doc.sales_order
 					}
 				})

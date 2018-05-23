@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.19.0'
+__version__ = '1.19.1'
 
+# 1.19.1
+#   - Update Get Picking Order in Packing
 # 1.19.0
 #   - Add Doctype: Warehouse Routing & Warehouse Routing Detail
 #   - Delete Doctype: Template Warehouse & Template Warehouse Detail
