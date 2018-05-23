@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.18.3'
+__version__ = '1.19.0'
 
+# 1.19.0
+#   - Add Doctype: Warehouse Routing & Warehouse Routing Detail
+#   - Delete Doctype: Template Warehouse & Template Warehouse Detail
 # 1.18.3
 #   - Update fixtures
 #   - Update Picking
