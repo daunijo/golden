@@ -93,8 +93,8 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Template Warehouse",
-					"description": _("Template Warehouse.")
+					"name": "Warehouse Routing",
+					"description": _("Warehouse Routing.")
 				},
 			]
 		},
