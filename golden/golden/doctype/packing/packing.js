@@ -85,6 +85,7 @@ frappe.ui.form.on('Packing', {
 		if(frm.doc.docstatus == 0 || frm.doc.__islocal){
 			frm.events.set_read_only(frm);
 			frm.events.get_picking_order(frm);
+			frm.events.customer_read_only(frm)
 		}
 	},
 	get_picking_order: function(frm){
@@ -98,16 +99,24 @@ frappe.ui.form.on('Packing', {
 					target: frm,
 					setters:  {
 						customer: frm.doc.customer || undefined,
-//						sales_order: undefined,
 					},
 					get_query_filters: {
 						docstatus: 1,
 						packing: "",
 						name: ["not in", added_items]
-//						sales_order: frm.doc.sales_order
 					}
 				})
 			});
+		}
+	},
+	customer_read_only(frm){
+		added_items = 0
+		items = $.map( cur_frm.doc.items, function(item,idx) { return item.picking } )
+		added_items = items.join(",")
+		if(added_items != 0){
+			cur_frm.set_df_property("customer", "read_only", 1);
+		}else{
+			cur_frm.set_df_property("customer", "read_only", 0);
 		}
 	},
 	validate: function(frm){
@@ -127,19 +136,21 @@ frappe.ui.form.on('Packing', {
 	},
 	customer: function(frm){
 		frm.events.get_customer_name(frm);
-	//	frm.events.get_picking_order(frm);
+		// frm.events.get_picking_order(frm);
 	},
 	get_customer_name: function(frm){
-		frappe.call({
-			"method": "frappe.client.get",
-			args: {
-				doctype: "Customer",
-				name: frm.doc.customer
-			},
-			callback: function (data) {
-				frm.set_value("customer_name", data.message.customer_name);
-			}
-		})
+		if(frm.doc.customer){
+			frappe.call({
+				"method": "frappe.client.get",
+				args: {
+					doctype: "Customer",
+					name: frm.doc.customer
+				},
+				callback: function (data) {
+					frm.set_value("customer_name", data.message.customer_name);
+				}
+			})
+		}
 	},
 	posting_date: function(frm){
 		frm.set_value("transaction_date", frm.doc.posting_date);
@@ -233,5 +244,8 @@ frappe.ui.form.on("Packing Item", {
 		if(row.is_full){
 			frappe.model.set_value(cdt, cdn, "qty_packing", row.qty);
 		}
+	},
+	items_remove: function(frm, cdt, cdn){
+		frm.events.customer_read_only(frm)
 	}
 });
