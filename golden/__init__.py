@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.19.1'
+__version__ = '1.19.2'
 
+# 1.19.2
+#   - Fix issue #63 & #64
 # 1.19.1
 #   - Update Get Picking Order in Packing
 # 1.19.0
