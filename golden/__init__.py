@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.19.2'
+__version__ = '1.19.3'
 
+# 1.19.3
+#   - Fix issue #67, #68, #69
 # 1.19.2
 #   - Fix issue #63 & #64
 # 1.19.1
