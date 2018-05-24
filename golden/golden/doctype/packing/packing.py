@@ -168,7 +168,45 @@ class Packing(Document):
 				temp.append(pick.picking)
 
 @frappe.whitelist()
-def get_picking_list(source_name, target_doc=None):
+def get_picking_items(sales_order):
+	si_list = []
+	picking_order = frappe.db.sql("""select * from `tabPicking Order` where sales_order = %s order by `name` asc""", sales_order, as_dict=1)
+	for p in picking_order:
+		picking_item = frappe.db.sql("""select * from `tabPicking Item` where parent = %s""", p.name, as_dict=1)
+		for pi in picking_item:
+			description = frappe.db.get_value("Sales Order Item", pi.so_detail, "description")
+			# image_view = frappe.db.get_value("Sales Order Item", pi.so_detail, "image_view")
+			si_list.append(frappe._dict({
+		        'item_code': pi.item_code,
+		        'item_name': pi.item_name,
+				'warehouse': pi.location,
+				'against_sales_order': pi.sales_order,
+				'so_detail': pi.so_detail,
+				'picking_detail': pi.name,
+				'description': description,
+				# 'image_view': image_view
+				'stock_uom': pi.stock_uom,
+				'uom': pi.uom,
+				'qty': pi.qty,
+				'conversion_factor': pi.conversion_factor,
+				'picking': p.name
+		    }))
+	return si_list
+
+@frappe.whitelist()
+def get_picking_simple(sales_order):
+	si_list = []
+	picking_order = frappe.db.sql("""select * from `tabPicking Order` where sales_order = %s order by `name` asc""", sales_order, as_dict=1)
+	for p in picking_order:
+		picking_item = frappe.db.sql("""select * from `tabPicking Simple` where parent = %s""", p.name, as_dict=1)
+		for pi in picking_item:
+			si_list.append(frappe._dict({
+		        'picking': pi.picking,
+		    }))
+	return si_list
+
+@frappe.whitelist()
+def get_picking_list_old(source_name, target_doc=None):
 	def set_missing_values(source, target):
 		target.run_method("set_missing_values")
 

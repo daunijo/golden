@@ -8,6 +8,14 @@ frappe.ui.form.on('Packing', {
 				filters: { 'disabled': 0 }
 			}
 		});
+		frm.set_query('sales_order', function(doc) {
+			return {
+				filters: {
+					'docstatus': 1,
+					'golden_status': 'In Picking'
+				}
+			}
+		});
 		frm.set_query('packer', function(doc) {
 			return {
 				query: "golden.golden.doctype.employee_settings.employee_settings.employee_query",
@@ -84,43 +92,115 @@ frappe.ui.form.on('Packing', {
 	refresh: function(frm) {
 		if(frm.doc.docstatus == 0 || frm.doc.__islocal){
 			frm.events.set_read_only(frm);
-			frm.events.get_picking_order(frm);
-			frm.events.customer_read_only(frm)
+			// frm.events.get_picking_order(frm);
+			// frm.events.customer_read_only(frm)
 		}
 	},
 	get_picking_order: function(frm){
-		if(frm.doc.docstatus == 0 || frm.doc.__islocal) {
-			frm.add_custom_button(__("Get Picking Order"), function() {
-				items = $.map( cur_frm.doc.items, function(item,idx) { return item.picking } )
-				added_items = items.join(",")
-				erpnext.utils.map_current_doc({
-					method: "golden.golden.doctype.packing.packing.get_picking_list",
-					source_doctype: "Picking Order",
-					target: frm,
-					setters:  {
-						customer: frm.doc.customer || undefined,
-					},
-					get_query_filters: {
-						docstatus: 1,
-						packing: "",
-						name: ["not in", added_items]
-					}
-				})
-			});
-		}
+		frm.events.get_picking_items(frm);
+		frm.events.get_picking_simple(frm);
 	},
-	customer_read_only(frm){
-		added_items = 0
-		items = $.map( cur_frm.doc.items, function(item,idx) { return item.picking } )
-		added_items = items.join(",")
-		if(added_items != 0){
-			cur_frm.set_df_property("customer", "read_only", 1);
-		}else{
-			cur_frm.set_df_property("customer", "read_only", 0);
-		}
+	get_picking_items: function(frm){
+		frm.clear_table("items");
+		return frappe.call({
+			method: 'golden.golden.doctype.packing.packing.get_picking_items',
+			args: {
+				sales_order: frm.doc.sales_order || undefined
+			},
+			callback: function(r, rt) {
+				if(r.message) {
+					$.each(r.message, function(i, d) {
+						var c = frm.add_child("items");
+						c.item_code = d.item_code;
+						c.item_name = d.item_name;
+						c.warehouse = d.warehouse;
+						c.against_sales_order = d.against_sales_order;
+						c.so_detail = d.so_detail;
+						c.picking_detail = d.picking_detail;
+						c.description = d.description;
+						// c.image_view = d.image_view;
+						c.stock_uom = d.stock_uom;
+						c.uom = d.uom;
+						c.qty = d.qty;
+						c.conversion_factor = d.conversion_factor;
+						c.picking = d.picking;
+					})
+					frm.refresh_fields();
+				}
+			}
+		});
+	// 	if(frm.doc.docstatus == 0 || frm.doc.__islocal) {
+	// 		frm.add_custom_button(__("Get Picking Order"), function() {
+	// 			items = $.map( cur_frm.doc.items, function(item,idx) { return item.picking } )
+	// 			added_items = items.join(",")
+	// 			erpnext.utils.map_current_doc({
+	// 				method: "golden.golden.doctype.packing.packing.get_picking_list",
+	// 				source_doctype: "Picking Order",
+	// 				target: frm,
+	// 				setters:  {
+	// 					customer: frm.doc.customer || undefined,
+	// 					sales_order: undefined
+	// 				},
+	// 				get_query_filters: {
+	// 					docstatus: 1,
+	// 					packing: "",
+	// 					name: ["not in", added_items],
+	// 					customer: frm.doc.customer || undefined
+	// 				}
+	// 			})
+	// 		});
+	// 	}
 	},
+	get_picking_simple: function(frm){
+		frm.clear_table("picking_list");
+		return frappe.call({
+			method: 'golden.golden.doctype.packing.packing.get_picking_simple',
+			args: {
+				sales_order: frm.doc.sales_order || undefined
+			},
+			callback: function(r, rt) {
+				if(r.message) {
+					$.each(r.message, function(i, d) {
+						var c = frm.add_child("picking_list");
+						c.picking = d.picking;
+					})
+					frm.refresh_fields();
+				}
+			}
+		});
+	},
+	// customer_read_only(frm){
+	// 	added_items = 0
+	// 	items = $.map( cur_frm.doc.items, function(item,idx) { return item.picking } )
+	// 	added_items = items.join(",")
+	// 	if(added_items != 0){
+	// 		cur_frm.set_df_property("customer", "read_only", 1);
+	// 	}else{
+	// 		cur_frm.set_df_property("customer", "read_only", 0);
+	// 	}
+	// },
+
 	validate: function(frm){
 		frm.clear_table("simple");
+	},
+	sales_order: function(frm){
+		if(frm.doc.sales_order){
+			frappe.call({
+				"method": "frappe.client.get",
+				args: {
+					doctype: "Sales Order",
+					name: frm.doc.sales_order
+				},
+				callback: function (data) {
+					frm.set_value("customer", data.message.customer);
+					frm.set_value("customer_name", data.message.customer_name);
+					frm.set_value("selling_price_list", data.message.selling_price_list);
+				}
+			})
+		}else{
+			frm.set_value("customer", "");
+			frm.set_value("customer_name", "");
+		}
 	},
 	set_posting_time: function(frm){
 		frm.events.set_read_only(frm);
@@ -135,23 +215,23 @@ frappe.ui.form.on('Packing', {
 		}
 	},
 	customer: function(frm){
-		frm.events.get_customer_name(frm);
+		// frm.events.get_customer_name(frm);
 		// frm.events.get_picking_order(frm);
 	},
-	get_customer_name: function(frm){
-		if(frm.doc.customer){
-			frappe.call({
-				"method": "frappe.client.get",
-				args: {
-					doctype: "Customer",
-					name: frm.doc.customer
-				},
-				callback: function (data) {
-					frm.set_value("customer_name", data.message.customer_name);
-				}
-			})
-		}
-	},
+	// get_customer_name: function(frm){
+	// 	if(frm.doc.customer){
+	// 		frappe.call({
+	// 			"method": "frappe.client.get",
+	// 			args: {
+	// 				doctype: "Customer",
+	// 				name: frm.doc.customer
+	// 			},
+	// 			callback: function (data) {
+	// 				frm.set_value("customer_name", data.message.customer_name);
+	// 			}
+	// 		})
+	// 	}
+	// },
 	posting_date: function(frm){
 		frm.set_value("transaction_date", frm.doc.posting_date);
 	},
@@ -245,7 +325,7 @@ frappe.ui.form.on("Packing Item", {
 			frappe.model.set_value(cdt, cdn, "qty_packing", row.qty);
 		}
 	},
-	items_remove: function(frm, cdt, cdn){
-		frm.events.customer_read_only(frm)
-	}
+	// items_remove: function(frm, cdt, cdn){
+	// 	frm.events.customer_read_only(frm)
+	// }
 });
