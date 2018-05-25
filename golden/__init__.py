@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.19.4'
+__version__ = '1.19.5'
 
+# 1.19.5
+#   - Update script Sales Order
 # 1.19.4
 #   - Update Packing
 # 1.19.3
