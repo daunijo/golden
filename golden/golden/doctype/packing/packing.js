@@ -317,6 +317,9 @@ frappe.ui.form.on("Packing Item", {
 				sisa = row.box;
 			}
 			frappe.model.set_value(cdt, cdn, "maks_box", sisa);
+			frappe.model.set_value(cdt, cdn, "qty_packing", row.qty);
+		}else{
+			frappe.model.set_value(cdt, cdn, "qty_packing", "");
 		}
 	},
 	is_full: function(frm, cdt, cdn){
