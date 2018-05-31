@@ -146,6 +146,12 @@ def get_data():
 					"doctype": "Purchase Budget",
 					"is_query_report": True
 				},
+				{
+					"type": "report",
+					"name": "Purchase & Sales Trends",
+					"doctype": "Item",
+					"is_query_report": True
+				},
 			]
 		},
 	]
