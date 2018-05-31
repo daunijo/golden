@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.19.6'
+__version__ = '1.19.7'
 
+# 1.19.7
+#   - Add report: Purchase & Sales Trends
 # 1.19.6
 #   - Hide check in packing, #77
 # 1.19.5

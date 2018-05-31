@@ -37,7 +37,8 @@ def execute(filters=None):
 			record = 0
 		else:
 			record = diff
-		data.append([cl.name, cl.minimum_item, count_actual, stock_qty, stock_value, count_po, record])
+		button = "<a href='/desk#query-report/Purchase Analysis Per Item?item_group="+cl.name+"'>Link</a>"
+		data.append([cl.name, cl.minimum_item, count_actual, stock_qty, stock_value, count_po, record, button])
 
 	return columns, data
 
@@ -52,6 +53,7 @@ def get_columns():
 		_("Stock Value")+":Currency:120",
 		_("Purchase Order")+":Int:100",
 		_("Record")+":Int:100",
+		_("Purchase Analysis Per Item")+":Data:170",
 	]
 
 	return columns
