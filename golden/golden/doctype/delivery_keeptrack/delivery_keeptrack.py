@@ -109,32 +109,6 @@ def get_delivery_order(source_name, target_doc=None):
 	return doc
 
 @frappe.whitelist()
-def get_packing(source_name, target_doc=None):
-	def set_missing_values(source, target):
-		target.run_method("set_missing_values")
-
-	# packing = frappe.db.get_value("Delivery Order Detail", source_name, "packing")
-	#
-	# def update_item(source, target, source_parent):
-	# 	target.delivery_order = source_name
-	# 	target.expedition = frappe.db.get_value("Delivery Order Detail", source_name, "expedition")
-
-	doc = get_mapped_doc("Packing", source_name, {
-		"Packing": {
-			"doctype": "Delivery Keeptrack",
-			"validation": {
-				"docstatus": ["=", 1],
-			},
-            "field_no_map": ["posting_date", "posting_time", "set_posting_time", "total_box"]
-		},
-		"Packing Simple": {
-			"doctype": "Delivery Keeptrack Detail"
-			# "postprocess": update_item
-		},
-	}, target_doc, set_missing_values)
-	return doc
-
-@frappe.whitelist()
 def make_delivery_return(source_name, target_doc=None):
     def set_missing_values(source, target):
         target.run_method("set_missing_values")
