@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.19.7'
+__version__ = '1.19.8'
 
+# 1.19.8
+#   - Fix issue #78, 79, 81, 85
 # 1.19.7
 #   - Add report: Purchase & Sales Trends
 # 1.19.6
