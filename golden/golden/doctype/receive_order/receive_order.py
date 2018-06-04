@@ -17,6 +17,7 @@ class ReceiveOrder(Document):
 
 	def on_submit(self):
 		if not self.from_stock_reconciliation:
+			self.check_packaging()
 			self.create_purchase_receipt()
 			self.insert_pr_item()
 			self.insert_pr_taxes()
@@ -36,6 +37,14 @@ class ReceiveOrder(Document):
 	def update_stock_qty(self):
 		for row in self.items:
 			row.stock_qty = flt(row.qty) * flt(row.conversion_factor)
+
+	def check_packaging(self):
+		pack = 0
+		for row in self.items:
+			pack = flt(pack) + flt(row.packaging)
+
+		if flt(pack) != flt(self.packaging):
+			frappe.throw(_("Please recheck your Packaging"))
 
 	def create_purchase_receipt(self):
 		purchase_order = frappe.db.sql("""select distinct(purchase_order) as po_name from `tabReceive Order Item` where parent = %s and qty != 0""", self.name, as_dict=1)

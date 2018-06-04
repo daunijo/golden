@@ -57,12 +57,13 @@ def get_packing_list(source_name, target_doc=None):
 		target.run_method("set_missing_values")
 
 	def update_item(source, target, source_parent):
-		st = frappe.db.get_value("Packing", source.parent, ["customer", "customer_name", "posting_date", "total_box"], as_dict=1)
+		st = frappe.db.get_value("Packing", source.parent, ["customer", "customer_name", "posting_date", "total_box", "sales_order"], as_dict=1)
 		target.packing_date = st.posting_date
 		# target.do_no = "DO-"+source.parent[3::]
 		target.customer = st.customer
 		target.customer_name = st.customer_name
 		target.total_box = st.total_box
+		target.sales_order = st.sales_order
 
 	doclist = get_mapped_doc("Packing", source_name, {
 		"Packing": {
