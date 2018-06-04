@@ -189,6 +189,7 @@ def get_item_code(doctype, txt, searchfield, start, page_len, filters):
 def get_list_purchase_order(doctype, txt, searchfield, start, page_len, filters):
     return frappe.db.sql("""select distinct(parent), concat("Qty PO: ",cast(qty as int)) from `tabPurchase Order Item`
         where docstatus = '1'
+			and qty > received_qty
             and parent like %(txt)s
 			and item_code = %(item_code)s
             {mcond}
@@ -202,3 +203,16 @@ def get_list_purchase_order(doctype, txt, searchfield, start, page_len, filters)
             'page_len': page_len,
 			'item_code': filters.get("item_code")
         })
+
+@frappe.whitelist()
+def get_conversion_factor(parent, uom):
+	cd = frappe.db.sql("""select count(*) from `tabUOM Conversion Detail` where parent = %s and uom = %s""",(parent, uom))[0][0]
+	if flt(cd) == 0:
+		conv = 1
+	else:
+		det = frappe.db.sql("""select conversion_factor from `tabUOM Conversion Detail` where parent = %s and uom = %s""",(parent, uom))[0][0]
+		conv = det
+	conversion_factor = {
+		'conversion_factor': conv
+	}
+	return conversion_factor
