@@ -32,6 +32,18 @@ frappe.ui.form.on('Delivery Keeptrack', {
 					}
 				})
 			}, __("Get details from"));
+			frm.add_custom_button(__("Packing List"), function() {
+				erpnext.utils.map_current_doc({
+					method: "golden.golden.doctype.delivery_keeptrack.delivery_keeptrack.get_packing",
+					source_doctype: "Packing",
+					target: frm,
+					setters:  {
+					},
+					get_query_filters: {
+						docstatus: 1
+					}
+				})
+			}, __("Get details from"));
 		}
 		if(frm.doc.docstatus == 1) {
 			if(frm.doc.is_completed == 0 && frm.doc.delivery_return == undefined){
