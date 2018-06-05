@@ -29,6 +29,8 @@ frappe.ui.form.on('Receive Order', {
 	refresh: function(frm) {
 		if(frm.doc.docstatus == 0 || frm.doc.__islocal) {
 			frm.add_custom_button(__("Get Purchase Order"), function() {
+				items = $.map( cur_frm.doc.items, function(item,idx) { return item.purchase_order } )
+				added_items = items.join(",")
 				erpnext.utils.map_current_doc({
 					method: "golden.golden.doctype.receive_order.receive_order.get_purchase_order",
 					source_doctype: "Purchase Order",
@@ -39,7 +41,8 @@ frappe.ui.form.on('Receive Order', {
 					get_query_filters: {
 						docstatus: 1,
 						company: frm.doc.company,
-						status: ["in", "To Receive and Bill, To Receive"]
+						status: ["in", "To Receive and Bill, To Receive"],
+						name: ["not in", added_items]
 					}
 				})
 			});
