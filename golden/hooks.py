@@ -103,6 +103,7 @@ doc_events = {
 		"on_change":[
 			"golden.golden.reference.change_sales_order"
 		],
+		"validate": "golden.golden.reference.validate_sales_order",
         "on_submit": [
             "golden.golden.reference.submit_sales_order",
             "golden.golden.reference.submit_sales_order_2",
