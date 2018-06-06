@@ -167,7 +167,7 @@ def get_purchase_order(source_name, target_doc=None):
 				"qty": "po_qty",
 				"uom": "po_uom"
 			},
-			"condition":lambda doc: doc.qty > doc.receive_qty,
+			"condition":lambda doc: doc.qty > doc.received_qty,
 			"postprocess": update_item
 		},
 	}, target_doc, set_missing_values)
