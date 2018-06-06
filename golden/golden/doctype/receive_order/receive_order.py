@@ -22,6 +22,7 @@ class ReceiveOrder(Document):
 			self.insert_pr_item()
 			self.insert_pr_taxes()
 			self.submit_purchase_receipt()
+			self.update_transaction_date()
 
 	def on_cancel(self):
 		self.delete_purchase_receipt()
@@ -128,6 +129,9 @@ class ReceiveOrder(Document):
 				submit_pr = frappe.get_doc("Purchase Receipt", pr.name)
 				submit_pr.submit()
 
+	def update_transaction_date(self):
+		self.transaction_date = self.posting_date
+
 	def delete_purchase_receipt(self):
 		count = frappe.db.sql("""select count(*) from `tabPurchase Receipt` where docstatus = '1' and receive_order = %s""", self.name)[0][0]
 		if flt(count) >= 1:
@@ -163,6 +167,7 @@ def get_purchase_order(source_name, target_doc=None):
 				"qty": "po_qty",
 				"uom": "po_uom"
 			},
+			"condition":lambda doc: doc.qty > doc.receive_qty,
 			"postprocess": update_item
 		},
 	}, target_doc, set_missing_values)
@@ -225,3 +230,36 @@ def get_conversion_factor(parent, uom):
 		'conversion_factor': conv
 	}
 	return conversion_factor
+
+@frappe.whitelist()
+def get_items_for_pi(source_name, target_doc=None):
+	def set_missing_values(source, target):
+		target.run_method("set_missing_values")
+
+	def update_item(source, target, source_parent):
+		target.supplier = frappe.db.sql("""select supplier from `tabPurchase Order` where `name` = %s""", source.parent)[0][0]
+		target.supplier_name = frappe.db.sql("""select supplier_name from `tabPurchase Order` where `name` = %s""", source.parent)[0][0]
+		target.qty = flt(frappe.db.sql("""select qty from `tabPurchase Order Item` where `name` = %s""", source.name)[0][0]) - flt(frappe.db.sql("""select received_qty from `tabPurchase Order Item` where `name` = %s""", source.name)[0][0])
+
+	doclist = get_mapped_doc("Receive Order", source_name, {
+		"Receive Order": {
+			"doctype": "Purchase Invoice",
+			"validation": {
+				"docstatus": ["=", 1],
+			},
+            "field_no_map": ["naming_series", "posting_date", "posting_time", "set_posting_time"]
+		},
+		"Receive Order Item": {
+			"doctype": "Purchase Invoice Item",
+			"field_map": {
+				"parent": "purchase_order",
+				"name": "po_detail",
+				"qty": "po_qty",
+				"uom": "po_uom"
+			},
+			"condition":lambda doc: doc.qty > doc.receive_qty,
+			"postprocess": update_item
+		},
+	}, target_doc, set_missing_values)
+
+	return doclist

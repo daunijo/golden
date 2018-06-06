@@ -25,7 +25,7 @@ class DeliveryReturn(Document):
 	def on_submit(self):
 		self.update_delivery_order()
 		self.update_delivery_keeptrack()
-		self.update_status_so()
+		# self.update_status_so()
 
 	def update_delivery_order(self):
 		for row in self.details:

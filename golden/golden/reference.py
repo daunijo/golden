@@ -468,6 +468,13 @@ def cancel_sales_invoice(doc, method):
             update_packing = frappe.db.sql("""update `tabPacking` set is_completed = '0' where sales_order = %s""", row.sales_order)
             update_so = frappe.db.sql("""update `tabSales Order` set golden_status = 'Packed' where `name` = %s""", row.sales_order)
 
+def validate_purchase_invoice(doc, method):
+    for row in doc.items:
+        if row.purchase_order and doc.non_inventory_item == 1:
+            frappe.throw(_("Item no. {0} is inventory item").format(row.idx))
+        if not row.purchase_order and doc.non_inventory_item == 0:
+            frappe.throw(_("Item no. {0} is non inventory item").format(row.idx))
+
 def submit_stock_entry(doc, method):
     if doc.transfer_order:
         frappe.db.sql("""update `tabBin` set ito = null, ito_qty = 0 where ito = %s""", doc.transfer_order)
