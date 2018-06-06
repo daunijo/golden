@@ -140,6 +140,9 @@ doc_events = {
             "golden.golden.reference.cancel_sales_invoice"
         ]
     },
+    "Purchase Invoice": {
+        "validate": "golden.golden.reference.validate_purchase_invoice"
+    },
     "Stock Entry": {
         "on_submit": [
             "golden.golden.reference.submit_stock_entry"
