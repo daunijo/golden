@@ -34,9 +34,9 @@ def change_sales_order(doc, method):
 
 def validate_sales_order(doc, method):
     for row in doc.items:
-        check_item = frappe.db.sql("""select count(*) from `tabSales Order` so inner join `tabSales Order Item` soi on so.`name` = soi.parent where so.docstatus != '2' and so.customer = %s and so.status in ("Draft", "To Deliver and Bill") and soi.item_code = %s""", (doc.customer, row.rss_item_code))[0][0]
+        check_item = frappe.db.sql("""select count(*) from `tabSales Order` so inner join `tabSales Order Item` soi on so.`name` = soi.parent where so.docstatus != '2' and so.customer = %s and so.status in ("Draft", "To Deliver and Bill") and soi.item_code = %s and soi.`name` != %s""", (doc.customer, row.rss_item_code, row.name))[0][0]
         if flt(check_item) >= 1:
-            so = frappe.db.sql("""select so.`name` from `tabSales Order` so inner join `tabSales Order Item` soi on so.`name` = soi.parent where so.docstatus != '2' and so.customer = %s and so.status in ("Draft", "To Deliver and Bill") and soi.item_code = %s limit 1""", (doc.customer, row.rss_item_code))[0][0]
+            so = frappe.db.sql("""select so.`name` from `tabSales Order` so inner join `tabSales Order Item` soi on so.`name` = soi.parent where so.docstatus != '2' and so.customer = %s and so.status in ("Draft", "To Deliver and Bill") and soi.item_code = %s and soi.`name` != %s limit 1""", (doc.customer, row.rss_item_code, row.name))[0][0]
             frappe.throw(_("Customer {0} has order item {1} on sales order {2}").format(doc.customer, row.rss_item_code, so))
 
 def submit_sales_order(doc, method):
