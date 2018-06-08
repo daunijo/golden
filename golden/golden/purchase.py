@@ -61,3 +61,20 @@ def pi_query(doctype, txt, searchfield, start, page_len, filters):
             'supplier': filters.get("supplier"),
             'item_code': filters.get("item_code")
         })
+
+def receive_order_query(doctype, txt, searchfield, start, page_len, filters):
+    return frappe.db.sql("""select distinct(ro.`name`), ro.expedition from `tabReceive Order` ro inner join `tabReceive Order Item` roi on ro.`name` = roi.parent inner join `tabPurchase Order` po on roi.purchase_order = po.`name`
+        where ro.docstatus = '1'
+            and ro.`name` like %(txt)s
+            and po.supplier = %(supplier)s
+            {mcond}
+        limit %(start)s, %(page_len)s""".format(**{
+            'key': searchfield,
+            'mcond':get_match_cond(doctype)
+        }), {
+            'txt': "%%%s%%" % txt,
+            '_txt': txt.replace("%", ""),
+            'start': start,
+            'page_len': page_len,
+            'supplier': filters.get("supplier")
+        })
