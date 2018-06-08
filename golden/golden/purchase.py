@@ -64,7 +64,7 @@ def pi_query(doctype, txt, searchfield, start, page_len, filters):
 
 def receive_order_query(doctype, txt, searchfield, start, page_len, filters):
     return frappe.db.sql("""select distinct(ro.`name`), ro.expedition from `tabReceive Order` ro inner join `tabReceive Order Item` roi on ro.`name` = roi.parent inner join `tabPurchase Order` po on roi.purchase_order = po.`name`
-        where ro.docstatus = '1'
+        where ro.docstatus = '1' and ro.is_completed = '0'
             and ro.`name` like %(txt)s
             and po.supplier = %(supplier)s
             {mcond}

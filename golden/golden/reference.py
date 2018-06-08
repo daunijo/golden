@@ -482,6 +482,35 @@ def validate_purchase_invoice(doc, method):
         if not row.purchase_order and doc.non_inventory_item == 0:
             frappe.throw(_("Item no. {0} is non inventory item").format(row.idx))
 
+def submit_purchase_invoice_1(doc, method):
+    for row in doc.items:
+        if row.receive_order_item:
+            frappe.db.sql("""update `tabReceive Order Item` set purchase_invoice = %s where `name` = %s""", (doc.name, row.receive_order_item))
+
+def submit_purchase_invoice_2(doc, method):
+    if doc.receive_order_1:
+        count1 = frappe.db.sql("""select count(*) from `tabReceive Order Item` where purchase_invoice is not null and `name` = %s""", doc.receive_order_1)[0][0]
+        count2 = frappe.db.sql("""select count(*) from `tabReceive Order Item` where `name` = %s""", doc.receive_order_1)[0][0]
+        if flt(count1) == flt(count2):
+            frappe.db.sql("""update `tabReceive Order` set is_completed = '1' where name = %s""", doc.receive_order_1)
+
+    if doc.receive_order_2:
+        count1 = frappe.db.sql("""select count(*) from `tabReceive Order Item` where purchase_invoice is not null and `name` = %s""", doc.receive_order_2)[0][0]
+        count2 = frappe.db.sql("""select count(*) from `tabReceive Order Item` where `name` = %s""", doc.receive_order_2)[0][0]
+        if flt(count1) == flt(count2):
+            frappe.db.sql("""update `tabReceive Order` set is_completed = '1' where name = %s""", doc.receive_order_2)
+
+def cancel_purchase_invoice_1(doc, method):
+    for row in doc.items:
+        if row.receive_order_item:
+            frappe.db.sql("""update `tabReceive Order Item` set purchase_invoice = null where `name` = %s""",  row.receive_order_item)
+
+def cancel_purchase_invoice_2(doc, method):
+    if doc.receive_order_1:
+        frappe.db.sql("""update `tabReceive Order` set is_completed = '0' where name = %s""", doc.receive_order_1)
+    if doc.receive_order_2:
+        frappe.db.sql("""update `tabReceive Order` set is_completed = '0' where name = %s""", doc.receive_order_2)
+
 def submit_stock_entry(doc, method):
     if doc.transfer_order:
         frappe.db.sql("""update `tabBin` set ito = null, ito_qty = 0 where ito = %s""", doc.transfer_order)
