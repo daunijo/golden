@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.19.15'
+__version__ = '1.19.16'
 
+# 1.19.16
+#   - Update expedition
+#   - Update Delivery Order
 # 1.19.15
 #   - Update reference
 # 1.19.14
