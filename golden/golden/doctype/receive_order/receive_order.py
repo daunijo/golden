@@ -263,3 +263,29 @@ def get_items_for_pi(source_name, target_doc=None):
 	}, target_doc, set_missing_values)
 
 	return doclist
+
+@frappe.whitelist()
+def get_picking_items(supplier, ro):
+	si_list = []
+	if ro.count('||') == 1:
+		a,b = ro.split("||")
+		items = frappe.db.sql("""select roi.item_code, roi.item_name, roi.po_detail, roi.qty, roi.po_uom, roi.stock_uom, roi.purchase_order, ro.accepted_location from `tabReceive Order` ro inner join `tabReceive Order Item` roi on ro.`name` = roi.parent inner join `tabPurchase Order` po on roi.purchase_order = po.`name` where ro.docstatus = '1' and po.supplier = %s and (ro.`name` = %s or ro.`name` = %s) order by po.`name` asc""", (supplier, a, b), as_dict=1)
+	else:
+		items = frappe.db.sql("""select roi.item_code, roi.item_name, roi.po_detail, roi.qty, roi.po_uom, roi.stock_uom, roi.purchase_order, ro.accepted_location from `tabReceive Order` ro inner join `tabReceive Order Item` roi on ro.`name` = roi.parent inner join `tabPurchase Order` po on roi.purchase_order = po.`name` where ro.docstatus = '1' and po.supplier = %s and ro.`name` = %s order by po.`name` asc""", (supplier, ro), as_dict=1)
+	for row in items:
+		description = frappe.db.get_value("Purchase Order Item", row.po_detail, "description")
+		rate = frappe.db.get_value("Purchase Order Item", row.po_detail, "rate")
+		amount = flt(rate) * flt(row.qty)
+		si_list.append(frappe._dict({
+	        'item_code': row.item_code,
+			'item_name': row.item_name,
+			'description': description,
+			'qty': row.qty,
+			'uom': row.po_uom,
+			'stock_uom': row.stock_uom,
+			'rate': rate,
+			'purchase_order': row.purchase_order,
+			'warehouse': row.accepted_location,
+			'amount': amount
+	    }))
+	return si_list
