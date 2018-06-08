@@ -5,6 +5,9 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+from frappe import msgprint, _
 
 class Expedition(Document):
-	pass
+	def validate(self):
+		if not self.buying and not self.selling:
+			frappe.throw(_("You must check buying and/or selling"))

@@ -8,7 +8,8 @@ frappe.ui.form.on('Delivery Order', {
 			return {
 				filters: {
 					'docstatus': 1,
-					'delivery_order': ""
+					'delivery_order': "",
+					'is_completed': 1
 				}
 			}
 		});
