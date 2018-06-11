@@ -7,6 +7,8 @@ frappe.ui.form.on('Delivery Keeptrack', {
 		calculate_total_box(frm);
 		if(frm.doc.docstatus == 0 || frm.doc.__islocal){
 			frm.add_custom_button(__("Delivery Order"), function() {
+				items = $.map( cur_frm.doc.details, function(item,idx) { return item.delivery_order } )
+				added_items = items.join(",")
 				erpnext.utils.map_current_doc({
 					method: "golden.golden.doctype.delivery_keeptrack.delivery_keeptrack.get_delivery_order",
 					source_doctype: "Delivery Order Detail",
@@ -15,7 +17,9 @@ frappe.ui.form.on('Delivery Keeptrack', {
 					},
 					get_query_filters: {
 						docstatus: 1,
-						delivery_keeptrack: ""
+						delivery_keeptrack: "",
+						sales_invoice: ["!=", ""],
+						name: ["not in", added_items]
 					}
 				})
 			}, __("Get details from"));
