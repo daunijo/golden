@@ -22,6 +22,7 @@ class DeliveryOrder(Document):
 		self.check_packing()
 		self.update_packing()
 		self.update_detail()
+		self.update_sales_order()
 
 	def check_detail(self):
 		temp = []
@@ -44,12 +45,25 @@ class DeliveryOrder(Document):
 		for row in self.details:
 			frappe.db.sql("""update `tabDelivery Order Detail` set transaction_date = %s where `name` = %s""", (row.packing_date, row.name))
 
+	def update_sales_order(self):
+		for row in self.details:
+			if row.sales_order:
+				frappe.db.sql("""update `tabSales Order` set golden_status = 'Wait for Delivery and Bill' where `name` = %s""", row.sales_order)
+				frappe.db.sql("""update `tabPacking` set delivery_order = %s, is_completed = '1' where `name` = %s""", (self.name, row.packing))
+
 	def on_cancel(self):
 		self.delete_packing()
+		self.cancel_sales_order()
 
 	def delete_packing(self):
 		for row in self.details:
 			frappe.db.sql("""update `tabPacking` set delivery_order = null where `name` = %s""", row.packing)
+
+	def cancel_sales_order(self):
+		for row in self.details:
+			if row.sales_order:
+				frappe.db.sql("""update `tabSales Order` set golden_status = 'Packed' where `name` = %s""", row.sales_order)
+				frappe.db.sql("""update `tabPacking` set delivery_order = null, is_completed = '0' where `name` = %s""", row.packing)
 
 @frappe.whitelist()
 def get_packing_list(source_name, target_doc=None):

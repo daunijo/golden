@@ -463,17 +463,21 @@ def submit_sales_invoice(doc, method):
         if row.sales_order:
             # so_status = frappe.db.sql("""select `status` from `tabSales Order` where `name` = %s""", row.sales_order)[0][0]
             # if so_status == "Completed":
-            update_packing = frappe.db.sql("""update`tabPacking` set is_completed = '1' where sales_order = %s""", row.sales_order)
-            update_so = frappe.db.sql("""update`tabSales Order` set golden_status = 'Wait for Delivery and Bill' where `name` = %s""", row.sales_order)
+            # update_packing = frappe.db.sql("""update`tabPacking` set is_completed = '1' where sales_order = %s""", row.sales_order)
+            update_so = frappe.db.sql("""update`tabSales Order` set rss_sales_invoice = %s where docstatus = '1' and `name` = %s""", (doc.name, row.sales_order))
+            update_do = frappe.db.sql("""update`tabDelivery Order Detail` set sales_invoice = %s where docstatus = '1' and sales_order = %s""", (doc.name, row.sales_order))
 
 def cancel_sales_invoice(doc, method):
     for row in doc.items:
-        so_status = frappe.db.get_value("Sales Order", row.sales_order, "golden_status")
-        if so_status != 'Wait for Delivery and Bill':
-            frappe.throw(_("You can not cancel this invoice"))
-        elif row.sales_order:
-            update_packing = frappe.db.sql("""update `tabPacking` set is_completed = '0' where sales_order = %s""", row.sales_order)
-            update_so = frappe.db.sql("""update `tabSales Order` set golden_status = 'Packed' where `name` = %s""", row.sales_order)
+        if row.sales_order:
+            update_so = frappe.db.sql("""update`tabSales Order` set rss_sales_invoice = null where docstatus = '1' and `name` = %s""", row.sales_order)
+            update_do = frappe.db.sql("""update`tabDelivery Order Detail` set sales_invoice = null where docstatus = '1' and sales_order = %s""", row.sales_order)
+        # so_status = frappe.db.get_value("Sales Order", row.sales_order, "golden_status")
+        # if so_status != 'Wait for Delivery and Bill':
+        #     frappe.throw(_("You can not cancel this invoice"))
+        # elif row.sales_order:
+        #     update_packing = frappe.db.sql("""update `tabPacking` set is_completed = '0' where sales_order = %s""", row.sales_order)
+        #     update_so = frappe.db.sql("""update `tabSales Order` set golden_status = 'Packed' where `name` = %s""", row.sales_order)
 
 def validate_purchase_invoice(doc, method):
     for row in doc.items:

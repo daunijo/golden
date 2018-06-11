@@ -8,8 +8,7 @@ frappe.ui.form.on('Delivery Order', {
 			return {
 				filters: {
 					'docstatus': 1,
-					'delivery_order': "",
-					'is_completed': 1
+					'delivery_order': ""
 				}
 			}
 		});
@@ -52,6 +51,8 @@ frappe.ui.form.on('Delivery Order', {
 	get_packing_list: function(frm){
 		if(frm.doc.docstatus == 0 || frm.doc.__islocal) {
 			frm.add_custom_button(__("Get Packing List"), function() {
+				items = $.map( cur_frm.doc.details, function(item,idx) { return item.packing } )
+				added_items = items.join(",")
 				erpnext.utils.map_current_doc({
 					method: "golden.golden.doctype.delivery_order.delivery_order.get_packing_list",
 					source_doctype: "Packing",
@@ -62,7 +63,7 @@ frappe.ui.form.on('Delivery Order', {
 					get_query_filters: {
 						docstatus: 1,
 						delivery_order: "",
-						is_completed: 1
+						name: ["not in", added_items]
 					}
 				})
 			});
