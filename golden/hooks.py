@@ -134,6 +134,9 @@ doc_events = {
         ]
     },
     "Sales Invoice": {
+        "validate": [
+            "golden.golden.reference.validate_sales_invoice"
+        ],
         "on_submit": [
             "golden.golden.reference.submit_sales_invoice"
         ],
