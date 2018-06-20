@@ -5,6 +5,7 @@ __version__ = '1.19.20'
 
 # 1.19.20
 #   - Update Sales Order
+#   - Update Sales Order (Allow Double Order)
 # 1.20.1
 #   - Update Sales Invoice
 # 1.20.0
