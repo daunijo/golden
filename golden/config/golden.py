@@ -79,16 +79,6 @@ def get_data():
 			]
 		},
 		{
-			"label": _("KPI"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "KPI",
-					"description": _("KPI")
-				},
-			]
-		},
-		{
 			"label": _("Masters"),
 			"items": [
 				{

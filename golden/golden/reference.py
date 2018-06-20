@@ -40,9 +40,9 @@ def validate_sales_order(doc, method):
             frappe.throw(_("Customer {0} has order item {1} on sales order {2}").format(doc.customer, row.rss_item_code, so))
 
 def submit_sales_order(doc, method):
-    count = frappe.db.sql("""select count(distinct(default_section)) from `tabSales Order Item` where parent = %s""", doc.name)[0][0]
+    count = frappe.db.sql("""select count(distinct(default_section)) from `tabSales Order Item` where parent = %s and default_section is not null""", doc.name)[0][0]
     if flt(count) != 0:
-        section = frappe.db.sql("""select distinct(default_section) from `tabSales Order Item` where parent = %s""", doc.name, as_dict=1)
+        section = frappe.db.sql("""select distinct(default_section) from `tabSales Order Item` where parent = %s and default_section is not null""", doc.name, as_dict=1)
         for row in section:
     		picking = frappe.get_doc({
     			"doctype": "Picking Order",
@@ -57,7 +57,7 @@ def submit_sales_order(doc, method):
     		picking.save()
 
     count_null_section = frappe.db.sql("""select count(*) from `tabSales Order Item` where parent = %s and default_section is null""", doc.name)[0][0]
-    if flt(count_null_section) == 1:
+    if flt(count_null_section) >= 1:
     	picking = frappe.get_doc({
     		"doctype": "Picking Order",
     		"sales_order": doc.name,
@@ -70,8 +70,7 @@ def submit_sales_order(doc, method):
     	picking.save()
 
 def submit_sales_order_2(doc, method):
-    so = doc.name
-    pick = frappe.db.sql("""select `name`, section from `tabPicking Order` where docstatus = '0' and sales_order = %s""", doc.name, as_dict=1)
+    pick = frappe.db.sql("""select `name`, section from `tabPicking Order` where docstatus = '0' and sales_order = %s and section is not null""", doc.name, as_dict=1)
     for picking in pick:
         item = frappe.db.sql("""select * from `tabSales Order Item` where parent = %s and default_section = %s order by idx asc""", (doc.name, picking.section), as_dict=1)
         for row in item:
@@ -88,8 +87,32 @@ def submit_sales_order_2(doc, method):
                 "so_detail": row.name
             })
             picking_item.save()
-        item_wo_section = frappe.db.sql("""select * from `tabSales Order Item` where parent = %s and default_section is null order by idx asc""", doc.name, as_dict=1)
-        for row in item_wo_section:
+        # item_wo_section = frappe.db.sql("""select * from `tabSales Order Item` where parent = %s and default_section is null order by idx asc""", doc.name, as_dict=1)
+        # for row in item_wo_section:
+        #     picking_item = frappe.get_doc("Picking Order", picking.name)
+        #     picking_item.append("items", {
+    	# 		"item_code": row.item_code,
+    	# 		"item_name": row.item_name,
+    	# 		"qty": row.qty,
+        #         "stock_uom": row.stock_uom,
+        #         "uom": row.uom,
+        #         "conversion_factor": row.conversion_factor,
+        #         "sales_order": row.parent,
+        #         "so_detail": row.name
+        #     })
+        #     picking_item.save()
+        simple = frappe.get_doc("Picking Order", picking.name)
+        simple.append("simple", {
+            "picking": picking.name
+        })
+        simple.save()
+        submit_picking = frappe.get_doc("Picking Order", picking.name)
+        submit_picking.submit()
+
+    pick = frappe.db.sql("""select `name`, section from `tabPicking Order` where docstatus = '0' and sales_order = %s and section is null""", doc.name, as_dict=1)
+    for picking in pick:
+        item = frappe.db.sql("""select * from `tabSales Order Item` where parent = %s and default_section is null order by idx asc""", doc.name, as_dict=1)
+        for row in item:
             picking_item = frappe.get_doc("Picking Order", picking.name)
             picking_item.append("items", {
     			"item_code": row.item_code,
@@ -98,6 +121,7 @@ def submit_sales_order_2(doc, method):
                 "stock_uom": row.stock_uom,
                 "uom": row.uom,
                 "conversion_factor": row.conversion_factor,
+    			# "location": row.default_location,
                 "sales_order": row.parent,
                 "so_detail": row.name
             })
