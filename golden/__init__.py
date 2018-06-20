@@ -1,8 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.19.19'
+__version__ = '1.19.20'
 
+# 1.19.20
+#   - Update Sales Order
+# 1.20.1
+#   - Update Sales Invoice
+# 1.20.0
+#   - Add doctype: KPI
 # 1.19.19
 #   - Update Delivery Order
 #   - Update Delivery keeptrack
