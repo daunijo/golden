@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.19.20'
+__version__ = '1.19.21'
 
+# 1.19.21
+#   - Update Stock Reconciliation
 # 1.19.20
 #   - Update Sales Order
 #   - Update Sales Order (Allow Double Order)
