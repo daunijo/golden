@@ -124,7 +124,7 @@ class TransferOrder(Document):
 			a = frappe.db.sql("""select `name` from `tabPicking Order` where docstatus = '1' and section is null""", as_dict=1)
 			for b in a:
 				for i in self.items:
-					c = frappe.db.sql("""select count(*) from `tabPicking Order Item` where parent = %s and item_code = %s""", (b.name, i.item_code))[0][0]
+					c = frappe.db.sql("""select count(*) from `tabPicking Item` where parent = %s and item_code = %s""", (b.name, i.item_code))[0][0]
 					if flt(c) == 1:
 						section = frappe.db.sql("""select parent_warehouse from `tabWarehouse` where `name` = %s""", i.location)[0][0]
 						frappe.db.sql("""update `tabPicking Order` set section = %s where `name` = %s""", (section, b.name))
