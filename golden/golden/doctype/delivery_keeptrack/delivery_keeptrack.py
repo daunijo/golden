@@ -99,7 +99,7 @@ def get_delivery_order(source_name, target_doc=None):
 			"validation": {
 				"docstatus": ["=", 1],
 			},
-            "field_no_map": ["posting_date", "posting_time", "set_posting_time", "total_box"]
+            "field_no_map": ["posting_date", "posting_time", "set_posting_time", "total_box", "customer", "sales_order"]
 		},
 		"Packing Simple": {
 			"doctype": "Delivery Keeptrack Detail",

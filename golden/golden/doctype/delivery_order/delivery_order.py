@@ -85,7 +85,7 @@ def get_packing_list(source_name, target_doc=None):
 			"validation": {
 				"docstatus": ["=", 1],
 			},
-            "field_no_map": ["naming_series", "posting_date", "posting_time", "set_posting_time"]
+            "field_no_map": ["naming_series", "posting_date", "posting_time", "set_posting_time", "customer", "sales_order"]
 		},
 		"Packing Item": {
 			"doctype": "Delivery Order Detail",
@@ -114,6 +114,23 @@ def contact_query(doctype, txt, searchfield, start, page_len, filters):
             'start': start,
             'page_len': page_len,
             'cond': filters.get("link_name")
+        })
+
+def packing_query(doctype, txt, searchfield, start, page_len, filters):
+    return frappe.db.sql("""select `name`, concat('Customer: ', customer), concat('<br>Sales Order: ', sales_order) from `tabPacking`
+        where docstatus = '1' and delivery_order is null
+            and (`name` like %(txt)s or customer like %(txt)s)
+			and `name` not in (%(cond)s)
+            {mcond}
+        limit %(start)s, %(page_len)s""".format(**{
+            'key': searchfield,
+            'mcond':get_match_cond(doctype)
+        }), {
+            'txt': "%%%s%%" % txt,
+            '_txt': txt.replace("%", ""),
+            'start': start,
+            'page_len': page_len,
+            'cond': filters.get("not_in")
         })
 
 @frappe.whitelist()

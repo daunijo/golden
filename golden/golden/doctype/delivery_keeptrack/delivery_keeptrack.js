@@ -14,11 +14,13 @@ frappe.ui.form.on('Delivery Keeptrack', {
 					source_doctype: "Delivery Order Detail",
 					target: frm,
 					setters:  {
+						customer: frm.doc.customer || undefined,
+						sales_order: frm.doc.sales_order || undefined
 					},
 					get_query_filters: {
 						docstatus: 1,
 						delivery_keeptrack: "",
-						sales_invoice: ["!=", ""],
+						// sales_invoice: ["!=", ""],
 						name: ["not in", added_items]
 					}
 				})
@@ -29,6 +31,8 @@ frappe.ui.form.on('Delivery Keeptrack', {
 					source_doctype: "Delivery Order Detail",
 					target: frm,
 					setters:  {
+						customer: frm.doc.customer || undefined,
+						sales_order: frm.doc.sales_order || undefined
 					},
 					get_query_filters: {
 						docstatus: 1,
