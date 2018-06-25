@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.19.21'
+__version__ = '1.19.22'
 
+# 1.19.22
+#   - Update Get Item in Delivery Order
+#   - Update Get Item in Delivery Keeptrack
 # 1.19.21
 #   - Update Stock Reconciliation
 # 1.19.20

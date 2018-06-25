@@ -5,10 +5,12 @@ frappe.ui.form.on('Delivery Order', {
 	setup: function(frm){
 		frm.set_query("packing", "details", function (doc, cdt, cdn) {
 			var c_doc= locals[cdt][cdn];
+			items = $.map( cur_frm.doc.details, function(item,idx) { return item.packing } );
+			added_items = items.join(",");
 			return {
+				query: "golden.golden.doctype.delivery_order.delivery_order.packing_query",
 				filters: {
-					'docstatus': 1,
-					'delivery_order': ""
+					'not_in': added_items
 				}
 			}
 		});
@@ -18,6 +20,14 @@ frappe.ui.form.on('Delivery Order', {
 				query: "golden.golden.doctype.delivery_order.delivery_order.contact_query",
 				filters: {
 					'link_name': c_doc.expedition
+				}
+			}
+		});
+		frm.set_query("expedition", "details", function (doc, cdt, cdn) {
+			var c_doc= locals[cdt][cdn];
+			return {
+				filters: {
+					'selling': 1
 				}
 			}
 		});
@@ -58,7 +68,9 @@ frappe.ui.form.on('Delivery Order', {
 					source_doctype: "Packing",
 					target: frm,
 					setters:  {
-						company: frm.doc.company || undefined,
+						// company: frm.doc.company || undefined,
+						customer: frm.doc.customer || undefined,
+						sales_order: frm.doc.sales_order || undefined,
 					},
 					get_query_filters: {
 						docstatus: 1,
@@ -83,12 +95,13 @@ frappe.ui.form.on("Delivery Order Detail", {
 					}
 				},
 				callback: function (data) {
-					no_do = data.message.name.replace('PL-', 'DO-');
-					frappe.model.set_value(cdt, cdn, "do_no", no_do);
+					// no_do = data.message.name.replace('PL-', 'DO-');
+					// frappe.model.set_value(cdt, cdn, "do_no", no_do);
 					frappe.model.set_value(cdt, cdn, "packing_date", data.message.posting_date);
 					frappe.model.set_value(cdt, cdn, "customer", data.message.customer);
 					frappe.model.set_value(cdt, cdn, "customer_name", data.message.customer_name);
 					frappe.model.set_value(cdt, cdn, "total_box", data.message.total_box);
+					frappe.model.set_value(cdt, cdn, "sales_order", data.message.sales_order);
 				}
 			})
 		}
