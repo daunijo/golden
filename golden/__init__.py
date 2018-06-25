@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.19.22'
+__version__ = '1.19.23'
 
+# 1.19.23
+#   - Update on_submit in Transfer Order
 # 1.19.22
 #   - Update Get Item in Delivery Order
 #   - Update Get Item in Delivery Keeptrack
