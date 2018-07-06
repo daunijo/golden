@@ -81,6 +81,68 @@ frappe.ui.form.on('Delivery Order', {
 			});
 		}
 	},
+	// barcode: function(frm){
+	// 	frm.doc.barcode.keyup(function() {
+	// 		msgprint(frm.doc.naming_series)
+	// 	})
+	// },
+	// onload_post_render: function(frm) {
+	// 	cur_frm.fields_dict.barcode.$input.on("change", function(evt){
+	// 		frm.events.get_barcode(frm);
+	// 	});
+	// },
+	get_barcode: function(frm){
+		// frm.clear_table("bcode");
+		items = $.map( cur_frm.doc.bcode, function(item,idx) { return "'"+item.barcode_1+"'" } )
+		added_items = items.join(",")
+		return frappe.call({
+			method: 'golden.golden.doctype.delivery_order.delivery_order.get_packing_barcode',
+			args: {
+				barc: frm.doc.barcode,
+				notin: added_items || "-"
+			},
+			callback: function(r, rt) {
+				if(r.message){
+					$.each(r.message, function(i, d){
+						var c = frm.add_child("bcode");
+						c.barcode = d.barcode;
+						c.barcode_1 = d.barcode_1;
+						c.box = d.box;
+						c.packing = d.packing;
+					})
+					frm.events.set_details(frm);
+					frm.set_value("barcode", "");
+				}else{
+					frm.set_value("barcode", "");
+				}
+				frm.refresh_fields();
+			}
+		})
+	},
+	set_details: function(frm){
+		pc = $.map( cur_frm.doc.details, function(item,idx) { return "'"+item.packing+"'" } );
+		pc_list = pc.join(",")
+		return frappe.call({
+			method: 'golden.golden.doctype.delivery_order.delivery_order.get_packing_from_barcode',
+			args: {
+				bcode: frm.doc.barcode,
+				pl: pc_list || "-"
+			},
+			callback: function(r, rt) {
+				if(r.message) {
+					$.each(r.message, function(i, d) {
+						var c = frm.add_child("details");
+						c.packing = d.packing;
+						c.customer = d.customer;
+						c.customer_name = d.customer_name;
+						c.packing_date = d.packing_date;
+						c.total_box = d.total_box;
+					})
+					frm.refresh_fields();
+				}
+			}
+		});
+	},
 });
 frappe.ui.form.on("Delivery Order Detail", {
 	packing: function(doc, cdt, cdn){

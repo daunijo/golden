@@ -18,6 +18,7 @@ class Packing(Document):
 		self.box_shorted()
 		self.check_completed()
 		self.check_picking()
+		# self.create_barcode()
 
 	def check_items(self):
 		for row in self.items:
@@ -55,6 +56,7 @@ class Packing(Document):
 		self.update_packing_simple()
 		self.update_bin()
 		self.update_picking()
+		self.create_barcode()
 
 	def delivery_note_insert(self):
 		so = frappe.db.get_value("Sales Order", self.sales_order, ["rss_sales_person", "rss_sales_name"], as_dict=1)
@@ -129,6 +131,19 @@ class Packing(Document):
 	def update_picking(self):
 		for row in self.picking_list:
 			frappe.db.sql("""update `tabPicking Order` set packing = %s where `name` = %s""", (self.name, row.picking))
+
+	def create_barcode(self):
+		if flt(self.total_box) > 0:
+			for i in range(self.total_box):
+				box = flt(i) + 1
+				self.append("bcode", {
+					"box": box
+				})
+				self.save()
+			list_bc = frappe.db.sql("""select * from `tabPacking Barcode` where parent = %s""",self.name, as_dict=1)
+			for row in list_bc:
+				link = "https://barcode.tec-it.com/barcode.ashx?data="+row.name+"&code=EAN13&dpi=100"
+				frappe.db.sql("""update `tabPacking Barcode` set barcode_1 = `name`, barcode_2 = %s where `name` = %s""", (link, row.name))
 
 	def on_cancel(self):
 		self.delete_dn()
