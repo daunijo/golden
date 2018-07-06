@@ -16,13 +16,73 @@ class DeliveryOrder(Document):
 		for row in self.details:
 			row.do_no = row.name
 			# frappe.db.sql("""update `tabDelivery Order Detail` set do_no = %s where `name` = %s""", (row.name, row.name))
+	def validate(self):
+		pass
+		# if self.bcode:
+		# 	packing_list = []
+		# 	for pl in self.bcode:
+		# 		if pl.packing not in packing_list:
+		# 			packing_list.append(pl.packing)
+		# 	ff = ", ".join(packing_list)
+		#
+		# 	det_list = []
+		# 	for det in self.details:
+		# 		det_list.append(det.packing)
+
+			# for rt in packing_list:
+			# 	if rt not in det_list:
+			# 		packing = frappe.db.get_value("Packing", rt, ["posting_date", "customer", "customer_name", "total_box"], as_dict=1)
+			# 		self.append("details", {
+			# 			"packing": rt,
+			# 			"packing_date": packing.posting_date,
+			# 			"customer": packing.customer,
+			# 			"customer_name": packing.customer_name,
+			# 			"total_box": packing.total_box
+			# 		})
+			# 		self.save()
+		# else:
+		# 	frappe.throw("gak pake cabe")
 
 	def on_submit(self):
+		self.check_expedition()
+		self.check_barcode()
+		self.check_barcode2()
+		self.update_barcode()
 		self.check_detail()
 		self.check_packing()
 		self.update_packing()
 		self.update_detail()
 		self.update_sales_order()
+
+	def check_expedition(self):
+		for row in self.details:
+			if not row.expedition:
+				frappe.throw(_("Expedition is mandatory in row {0}").format(row.idx))
+
+	def check_barcode(self):
+		if self.bcode:
+			packing = []
+			for row in self.bcode:
+				if row.packing not in packing:
+					packing.append(row.packing)
+
+			for i in packing:
+				count_packing = frappe.db.sql("""select total_box from `tabPacking` where `name` = %s""", i)[0][0]
+				count_barcode = frappe.db.sql("""select count(*) from `tabDelivery Order Barcode` where parent = %s and packing = %s""", (self.name, i))[0][0]
+				if flt(count_packing != count_barcode):
+					frappe.throw(_("Packing {0} have {1} box(s) but you only insert {2} box(s) in barcode").format(i, int(count_packing), int(count_barcode)))
+
+	def check_barcode2(self):
+		if self.bcode:
+			for row in self.bcode:
+				check_do = frappe.db.sql("""select count(*) from `tabPacking Barcode` where `name` = %s and delivery_order is not null""", row.barcode_1)[0][0]
+				if flt(check_do) == 1:
+					frappe.throw(_("Barcode {0} in row {1} already delivered").format(row.barcode, row.idx))
+
+	def update_barcode(self):
+		if self.bcode:
+			for row in self.bcode:
+				frappe.db.sql("""update `tabPacking Barcode` set delivery_order = %s where `name` = %s""", (self.name, row.barcode_1))
 
 	def check_detail(self):
 		temp = []
@@ -52,8 +112,14 @@ class DeliveryOrder(Document):
 				frappe.db.sql("""update `tabPacking` set delivery_order = %s, is_completed = '1' where `name` = %s""", (self.name, row.packing))
 
 	def on_cancel(self):
+		self.delete_barcode()
 		self.delete_packing()
 		self.cancel_sales_order()
+
+	def delete_barcode(self):
+		if self.bcode:
+			for row in self.bcode:
+				frappe.db.sql("""update `tabPacking Barcode` set delivery_order = null where `name` = %s""", row.barcode_1)
 
 	def delete_packing(self):
 		for row in self.details:
@@ -142,3 +208,49 @@ def get_expedition_detail(name):
 		'email_id': exp.email_id
 	}
 	return si_rate
+
+@frappe.whitelist()
+def get_packing_barcode(barc, notin):
+	si_list = []
+	bcode = barc[0:12]
+	if notin != "-":
+		check_bcode = frappe.db.sql("select count(*) from `tabPacking Barcode` where docstatus = '1' and delivery_order is null and barcode_1 = %s and barcode_1 not in ("+notin+")", bcode)[0][0]
+	else:
+		check_bcode = frappe.db.sql("select count(*) from `tabPacking Barcode` where docstatus = '1' and delivery_order is null and barcode_1 = %s", bcode)[0][0]
+	if flt(check_bcode) == 1:
+		list = frappe.db.get_value("Packing Barcode", bcode, ["barcode_1", "box", "parent"], as_dict=1)
+		si_list.append(frappe._dict({
+			'barcode': barc,
+			'barcode_1': list.barcode_1,
+			'box': list.box,
+			'packing': list.parent
+		}))
+	return si_list
+
+@frappe.whitelist()
+def get_packing_from_barcode(bcode, pl):
+	si_list = []
+	bcode = bcode[0:12]
+	if pl != "-":
+		check_packing = frappe.db.sql("select count(*) from `tabPacking Barcode` where parent in ("+pl+") and barcode_1 = %s", bcode)[0][0]
+		if flt(check_packing) == 0:
+			parent = frappe.db.get_value("Packing Barcode", bcode, "parent")
+			packing = frappe.db.get_value("Packing", parent, ["customer", "customer_name", "posting_date", "total_box"], as_dict=1)
+			si_list.append(frappe._dict({
+				'packing': parent,
+				'customer': packing.customer,
+				'customer_name': packing.customer_name,
+				'packing_date': packing.posting_date,
+				'total_box': packing.total_box
+			}))
+	else:
+		parent = frappe.db.get_value("Packing Barcode", bcode, "parent")
+		packing = frappe.db.get_value("Packing", parent, ["customer", "customer_name", "posting_date", "total_box"], as_dict=1)
+		si_list.append(frappe._dict({
+			'packing': parent,
+			'customer': packing.customer,
+			'customer_name': packing.customer_name,
+			'packing_date': packing.posting_date,
+			'total_box': packing.total_box
+		}))
+	return si_list

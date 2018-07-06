@@ -1,8 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.19.23'
+__version__ = '1.19.24'
 
+# 1.19.24
+#   - Add doctype Delivery Order Barcode
+#   - Add Barcode in Delivery Order
+#   - Update doctype Packing Barcode
+#   - Update doctype Delivery Order Detail
+#   - Update doctype Packing Picking
 # 1.19.23
 #   - Update on_submit in Transfer Order
 # 1.19.22
