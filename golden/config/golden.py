@@ -79,6 +79,21 @@ def get_data():
 			]
 		},
 		{
+			"label": _("Payment"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Payment Entry Receive",
+					"description": _("Payment Entry Receive.")
+				},
+				{
+					"type": "doctype",
+					"name": "Payment Entry Pay",
+					"description": _("Payment Entry Pay.")
+				},
+			]
+		},
+		{
 			"label": _("Masters"),
 			"items": [
 				{

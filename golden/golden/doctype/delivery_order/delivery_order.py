@@ -18,30 +18,6 @@ class DeliveryOrder(Document):
 			# frappe.db.sql("""update `tabDelivery Order Detail` set do_no = %s where `name` = %s""", (row.name, row.name))
 	def validate(self):
 		pass
-		# if self.bcode:
-		# 	packing_list = []
-		# 	for pl in self.bcode:
-		# 		if pl.packing not in packing_list:
-		# 			packing_list.append(pl.packing)
-		# 	ff = ", ".join(packing_list)
-		#
-		# 	det_list = []
-		# 	for det in self.details:
-		# 		det_list.append(det.packing)
-
-			# for rt in packing_list:
-			# 	if rt not in det_list:
-			# 		packing = frappe.db.get_value("Packing", rt, ["posting_date", "customer", "customer_name", "total_box"], as_dict=1)
-			# 		self.append("details", {
-			# 			"packing": rt,
-			# 			"packing_date": packing.posting_date,
-			# 			"customer": packing.customer,
-			# 			"customer_name": packing.customer_name,
-			# 			"total_box": packing.total_box
-			# 		})
-			# 		self.save()
-		# else:
-		# 	frappe.throw("gak pake cabe")
 
 	def on_submit(self):
 		self.check_expedition()
