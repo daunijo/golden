@@ -47,7 +47,7 @@ class InvoiceKeeptrack(Document):
 			if flt(row.payment_amount) >= 1:
 				account = frappe.db.sql("""select default_cash_account from `tabCompany` where `name` = %s""", self.company)[0][0]
 				pe = frappe.get_doc({
-					"doctype": "Payment Entry",
+					"doctype": "Payment Entry Receive",
 					"payment_type": "Receive",
 		            "posting_date": self.posting_date,
 		            "mode_of_payment": row.mode_of_payment,
@@ -62,14 +62,14 @@ class InvoiceKeeptrack(Document):
 				pe.insert()
 
 	def check_payment(self):
-		count = frappe.db.sql("""select count(*) from `tabPayment Entry` where invoice_keeptrack = %s and docstatus = '1'""", self.name)[0][0]
+		count = frappe.db.sql("""select count(*) from `tabPayment Entry Receive` where invoice_keeptrack = %s and docstatus = '1'""", self.name)[0][0]
 		if flt(count) >= 1:
-			frappe.throw(_("Payment Entry has been submitted"))
+			frappe.throw(_("Payment Entry Receive has been submitted"))
 
 	def delete_payment(self):
-		pe = frappe.db.sql("""select `name` from `tabPayment Entry` where invoice_keeptrack = %s""", self.name, as_dict=1)
+		pe = frappe.db.sql("""select `name` from `tabPayment Entry Receive` where invoice_keeptrack = %s""", self.name, as_dict=1)
 		for row in pe:
-			payment_entry = frappe.get_doc("Payment Entry", row.name)
+			payment_entry = frappe.get_doc("Payment Entry Receive", row.name)
 			payment_entry.delete()
 
 

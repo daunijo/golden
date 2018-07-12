@@ -1,8 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.19.24'
+__version__ = '1.20.1'
 
+# 1.20.1
+#   - Add doctype Payment Entry Receive
+#   - Add doctype Payment Entry Receive Reference
+#   - Add doctype Payment Entry Receive Deduction
+#   - Add doctype Payment Entry Pay
+#   - Add doctype Payment Entry Pay Reference
+#   - Add doctype Payment Entry Pay Deduction
 # 1.19.24
 #   - Add doctype Delivery Order Barcode
 #   - Add Barcode in Delivery Order
