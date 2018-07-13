@@ -18,33 +18,58 @@ def execute(filters=None):
 
 	for sle in sl_entries:
 		item_detail = item_details[sle.item_code]
-
-		data.append([sle.date, sle.item_code, item_detail.item_name, item_detail.item_group,
-			item_detail.brand, item_detail.description, sle.parent_warehouse_rss,sle.parent_section_rss,sle.warehouse,
-			item_detail.stock_uom, sle.actual_qty, sle.qty_after_transaction,
+		if sle.voucher_type == "Stock Entry":
+			custom_voucher_type = "Transfer Order"
+			custom_voucher_no = frappe.db.get_value("Stock Entry", sle.voucher_no, "transfer_order")
+		elif sle.voucher_type == "Delivery Note":
+			custom_voucher_type = "Packing"
+			custom_voucher_no = frappe.db.get_value("Delivery Note", sle.voucher_no, "packing")
+		else:
+			custom_voucher_type = sle.voucher_type
+			custom_voucher_no = sle.voucher_no
+		data.append([sle.date,
+			sle.item_code,
+			item_detail.item_name,
+			sle.warehouse,
+			sle.actual_qty,
+			sle.qty_after_transaction,
+			sle.valuation_rate,
+			custom_voucher_type,
+			custom_voucher_no,
+			item_detail.item_group,
+			item_detail.brand,
+			item_detail.description,
+			sle.parent_warehouse_rss,
+			sle.parent_section_rss,
+			item_detail.stock_uom,
 			(sle.incoming_rate if sle.actual_qty > 0 else 0.0),
-			sle.valuation_rate, sle.stock_value, sle.voucher_type, sle.voucher_no])
+			sle.stock_value
+			])
 
 	return columns, data
 
 def get_columns():
 	columns = [
-		_("Date") + ":Datetime:95", _("Item") + ":Link/Item:130",
-		_("Item Name") + "::100", _("Item Group") + ":Link/Item Group:100",
-		_("Brand") + ":Link/Brand:100", _("Description") + "::200",
-		_("Warehouse") + "::150",
-		_("Section") + ":Link/Warehouse:150",
-		_("Location") + ":Link/Warehouse:150", _("Stock UOM") + ":Link/UOM:100",
-		_("Qty") + ":Float:50", _("Balance Qty") + ":Float:100",
-		{"label": _("Incoming Rate"), "fieldtype": "Currency", "width": 110,
-			"options": "Company:company:default_currency"},
+		_("Date") + ":Datetime:95",
+		_("Item") + ":Link/Item:130",
+		_("Item Name") + "::100",
+		_("Location") + ":Link/Warehouse:150",
+		_("Qty") + ":Float:50",
+		_("Balance Qty") + ":Float:100",
 		{"label": _("Valuation Rate"), "fieldtype": "Currency", "width": 110,
 			"options": "Company:company:default_currency"},
-		{"label": _("Balance Value"), "fieldtype": "Currency", "width": 110,
-			"options": "Company:company:default_currency"},
 		_("Voucher Type") + "::110",
-		_("Voucher #") + ":Dynamic Link/" + _("Voucher Type") + ":100"
-
+		_("Voucher #") + ":Dynamic Link/" + _("Voucher Type") + ":100",
+		_("Item Group") + ":Link/Item Group:100",
+		_("Brand") + ":Link/Brand:100",
+		_("Description") + "::200",
+		_("Warehouse") + "::150",
+		_("Section") + ":Link/Warehouse:150",
+		_("Stock UOM") + ":Link/UOM:100",
+		{"label": _("Incoming Rate"), "fieldtype": "Currency", "width": 110,
+			"options": "Company:company:default_currency"},
+		{"label": _("Balance Value"), "fieldtype": "Currency", "width": 110,
+			"options": "Company:company:default_currency"}
 	]
 
 	return columns
