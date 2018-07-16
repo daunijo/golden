@@ -578,7 +578,36 @@ frappe.ui.form.on('Payment Entry Receive', {
 			}
 		});
 	},
-
+	with_so: function(frm){
+		if(frm.doc.with_so == 1){
+			frm.events.get_outstanding_documents(frm);
+		}else{
+			var tbl = frm.doc.references || [];
+			var i = tbl.length;
+			while (i--)
+			{
+					if(tbl[i].reference_doctype == 'Sales Order')
+					{
+							cur_frm.get_field("references").grid.grid_rows[i].remove();
+					}
+			}
+			frm.refresh_fields();
+		}
+	},
+	mode_of_payment: function(frm){
+		frappe.call({
+			method: "frappe.client.get",
+			args: {
+				doctype: "Mode of Payment",
+				filters:{
+					name: frm.doc.mode_of_payment,
+				}
+			},
+			callback: function (data) {
+				frm.set_value("need_reference", data.message.need_reference);
+			}
+		})
+	},
 	allocate_payment_amount: function(frm) {
 		if(frm.doc.payment_type == 'Internal Transfer'){
 			return
@@ -818,9 +847,6 @@ frappe.ui.form.on('Payment Entry Receive', {
 			})
 		}
 	},
-	with_so: function(frm){
-		frm.refresh_fields();
-	}
 });
 
 

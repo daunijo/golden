@@ -1,8 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.20.2'
+__version__ = '1.20.3'
 
+# 1.20.3
+#   - Update Payment Entry Receive
+#   - Update Payment Entry Pay
+#   - Add report Stock Card Sales
+#   - Add report Stock Card Purchasing
+#   - Update doctype Sales Invoice Summary
 # 1.20.2
 #   - Update report Stock Card
 # 1.20.1

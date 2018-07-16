@@ -173,6 +173,18 @@ def get_data():
 					"doctype": "Stock Ledger Entry",
 					"is_query_report": True
 				},
+				{
+					"type": "report",
+					"name": "Stock Card Sales",
+					"doctype": "Stock Ledger Entry",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Stock Card Purchasing",
+					"doctype": "Stock Ledger Entry",
+					"is_query_report": True
+				},
 			]
 		},
 	]
