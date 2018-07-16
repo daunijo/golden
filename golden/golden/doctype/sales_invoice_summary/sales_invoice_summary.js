@@ -21,6 +21,8 @@ frappe.ui.form.on('Sales Invoice Summary', {
 		return frappe.call({
 			method: 'golden.golden.doctype.sales_invoice_summary.sales_invoice_summary.get_sales_invoice',
 			args: {
+				start: frm.doc.start_date,
+				end: frm.doc.end_date,
 				sales_person: frm.doc.sales || undefined
 			},
 			callback: function(r, rt) {

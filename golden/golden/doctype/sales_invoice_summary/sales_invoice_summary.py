@@ -31,9 +31,9 @@ class SalesInvoiceSummary(Document):
 			frappe.db.sql("""update `tabSales Invoice` set sales_invoice_summary = null where `name` = %s""", row.sales_invoice)
 
 @frappe.whitelist()
-def get_sales_invoice(sales_person):
+def get_sales_invoice(start, end, sales_person):
     si_list = []
-    invoice_list = frappe.db.sql("""select * from `tabSales Invoice` where docstatus = '1' and status != 'Paid' and rss_sales_person = %s and sales_invoice_summary is null""", sales_person, as_dict=True)
+    invoice_list = frappe.db.sql("""select * from `tabSales Invoice` where docstatus = '1' and status != 'Paid' and rss_sales_person = %s and sales_invoice_summary is null and posting_date >= %s and posting_date <= %s""", (sales_person, start, end), as_dict=True)
     for d in invoice_list:
 		count_payment = frappe.db.sql("""select count(*) from `tabPayment Entry Reference` where docstatus = '1' and reference_name = %s""", d.name)[0][0]
 		si_list.append(frappe._dict({

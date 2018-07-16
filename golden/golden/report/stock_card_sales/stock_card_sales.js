@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Stock Card"] = {
+frappe.query_reports["Stock Card Sales"] = {
 	"filters": [
 		{
 			"fieldname":"company",
@@ -99,16 +99,5 @@ frappe.query_reports["Stock Card"] = {
 				{ "value": "Purchase Return", "label": __("Purchase Return") }
 			],
 		},
-		// {
-		// 	"fieldname":"voucher_no",
-		// 	"label": __("Voucher #"),
-		// 	"fieldtype": "Data"
-		// },
 	]
 }
-
-// $(function() {
-// 	$(wrapper).bind("show", function() {
-// 		frappe.query_report.load();
-// 	});
-// });
