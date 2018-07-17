@@ -24,33 +24,37 @@ def execute(filters=None):
 			rate = ""
 			discount = ""
 			pricelist = ""
+			customer = ""
 		elif cl.voucher_type == "Delivery Note":
 			vt = "Delivery Order"
 			pc = frappe.db.get_value("Delivery Note", cl.voucher_no, "packing")
 			vn = frappe.db.get_value("Delivery Order Detail", {"packing": pc, "docstatus": 1}, "parent")
 			sod = frappe.db.get_value("Delivery Note Item", cl.voucher_detail_no, "so_detail")
 			soi = frappe.db.get_value("Sales Order Item", sod, ["price_list_rate", "discount_percentage", "parent"], as_dict=1)
-			so = frappe.db.get_value("Sales Order", soi.parent, "selling_price_list")
+			so = frappe.db.get_value("Sales Order", soi.parent, ["selling_price_list", "customer"], as_dict=1)
 			# rate = soi.parent
 			# discount = ""
 			# pricelist = ""
 			rate = soi.price_list_rate
 			discount = soi.discount_percentage
-			pricelist = so
+			pricelist = so.selling_price_list
+			customer = so.customer
 		elif cl.voucher_type == "Purchase Receipt":
 			vt = "Receive Order"
 			vn = frappe.db.get_value("Purchase Receipt", cl.voucher_no, "receive_order")
 			rate = ""
 			discount = ""
 			pricelist = ""
+			customer = ""
 		else:
 			vt = cl.voucher_type
 			vn = cl.voucher_no
 			rate = ""
 			discount = ""
 			pricelist = ""
+			customer = ""
 
-		data.append([cl.date, cl.item_code, item_name, cl.location, qty, cl.qty_after_transaction, cl.valuation_rate, vt, vn, cl.stock_uom, rate, discount, pricelist])
+		data.append([cl.date, cl.item_code, item_name, cl.location, qty, cl.qty_after_transaction, cl.valuation_rate, vt, vn, cl.stock_uom, rate, discount, pricelist, customer])
 
 	return columns, data
 
@@ -71,6 +75,7 @@ def get_columns():
 		_("Price List Rate") + ":Float:80",
 		_("Discount") + ":Percent:60",
 		_("Price List") + ":Link/Price List:120",
+		_("Customer") + ":Link/Customer:150",
 	]
 
 	return columns
@@ -95,11 +100,13 @@ def get_conditions(filters):
 		conditions += " and i.item_group = '%s'" % frappe.db.escape(filters["item_group"])
 	if filters.get("brand"):
 		conditions += " and i.brand = '%s'" % frappe.db.escape(filters["brand"])
-	if filters.get("voucher_type"):
+	if filters.get("voucher_type") and filters.get("voucher_type") != 'All':
 		if filters.get("voucher_type") == "Transfer Order":
 			conditions += " and sle.voucher_type = 'Stock Entry'"
 		elif filters.get("voucher_type") == "Delivery Order":
 			conditions += " and sle.voucher_type = 'Delivery Note'"
+		elif filters.get("voucher_type") == "Receive Order":
+			conditions += " and sle.voucher_type = 'Purchase Receipt'"
 		else:
 			conditions += " and sle.voucher_type = '%s'" % frappe.db.escape(filters["voucher_type"])
 

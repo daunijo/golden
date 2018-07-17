@@ -74,11 +74,13 @@ def get_conditions(filters):
 		conditions += " and i.item_group = '%s'" % frappe.db.escape(filters["item_group"])
 	if filters.get("brand"):
 		conditions += " and i.brand = '%s'" % frappe.db.escape(filters["brand"])
-	if filters.get("voucher_type"):
+	if filters.get("voucher_type") and filters.get("voucher_type") != 'All':
 		if filters.get("voucher_type") == "Transfer Order":
 			conditions += " and sle.voucher_type = 'Stock Entry'"
 		elif filters.get("voucher_type") == "Delivery Order":
 			conditions += " and sle.voucher_type = 'Delivery Note'"
+		elif filters.get("voucher_type") == "Receive Order":
+			conditions += " and sle.voucher_type = 'Purchase Receipt'"
 		else:
 			conditions += " and sle.voucher_type = '%s'" % frappe.db.escape(filters["voucher_type"])
 

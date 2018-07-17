@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.20.3'
+__version__ = '1.20.4'
 
+# 1.20.4
+#   - Update report Stock Card
+#   - Update report Stock Card Sales
+#   - Update report Stock Card Purchasing
+#   - [Fix] expedition checkbox filter in Receive Order & Delivery Order #108
 # 1.20.3
 #   - Update Payment Entry Receive
 #   - Update Payment Entry Pay
