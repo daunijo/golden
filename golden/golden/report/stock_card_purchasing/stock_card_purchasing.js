@@ -91,6 +91,7 @@ frappe.query_reports["Stock Card Purchasing"] = {
 			"label": __("Voucher Type"),
 			"fieldtype": "Select",
 			"options": [
+				{ "value": "All", "label": __("All") },
 				{ "value": "Transfer Order", "label": __("Transfer Order") },
 				{ "value": "Delivery Order", "label": __("Delivery Order") },
 				{ "value": "Stock Reconciliation", "label": __("Stock Reconciliation") },
@@ -98,6 +99,7 @@ frappe.query_reports["Stock Card Purchasing"] = {
 				{ "value": "Receive Order", "label": __("Receive Order") },
 				{ "value": "Purchase Return", "label": __("Purchase Return") }
 			],
+			"default": "All",
 		},
 	]
 }

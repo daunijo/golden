@@ -8,6 +8,13 @@ frappe.ui.form.on('Receive Order', {
 				filters: { 'is_group': 0 }
 			}
 		});
+		frm.set_query("expedition", function (doc) {
+			return {
+				filters: {
+					'selling': 1
+				}
+			}
+		});
 	},
 	onload: function(frm) {
 		frm.set_query("item_code", "items", function(doc, cdt, cdn) {
