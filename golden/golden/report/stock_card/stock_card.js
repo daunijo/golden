@@ -97,7 +97,7 @@ frappe.query_reports["Stock Card"] = {
 				{ "value": "Stock Reconciliation", "label": __("Stock Reconciliation") },
 				{ "value": "Sales Return", "label": __("Sales Return") },
 				{ "value": "Receive Order", "label": __("Receive Order") },
-				{ "value": "Purchase Return", "label": __("Purchase Return") }
+				{ "value": "Purchase Return", "label": __("Purchase Return") },
 			],
 			"default": "All",
 		},
