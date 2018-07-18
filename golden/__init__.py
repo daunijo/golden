@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.20.4'
+__version__ = '1.20.5'
 
+# 1.20.5
+#   - Update report Stock Card
+#   - Update report Stock Card Sales
+#   - Update report Stock Card Purchasing
 # 1.20.4
 #   - Update report Stock Card
 #   - Update report Stock Card Sales

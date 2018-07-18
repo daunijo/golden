@@ -4,13 +4,28 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import flt
 
 def execute(filters=None):
 	columns = get_columns()
 	data = []
 
 	conditions = get_conditions(filters)
-	sl_entries = frappe.db.sql("""select concat_ws(" ", sle.posting_date, sle.posting_time) as date, sle.`name`, sle.item_code, sle.actual_qty, sle.qty_after_transaction, sle.warehouse as location, s.parent_warehouse as section, w.parent_warehouse, sle.valuation_rate, sle.voucher_type, sle.voucher_no, i.stock_uom from `tabStock Ledger Entry` sle inner join `tabWarehouse` s on sle.warehouse = s.`name` inner join `tabWarehouse` w on s.parent_warehouse = w.`name` inner join `tabItem` i on sle.item_code = i.item_code where sle.docstatus = '1' %s order by date asc""" % conditions, as_dict=1)
+	vouchers = get_voucher(filters)
+	if vouchers == "All":
+		sl_entries = frappe.db.sql("""select concat_ws(' ', sle.posting_date, sle.posting_time) as date, sle.`name`, sle.item_code, sle.actual_qty, sle.qty_after_transaction, sle.warehouse as location, s.parent_warehouse as section, w.parent_warehouse, sle.valuation_rate, sle.voucher_type, sle.voucher_no, i.stock_uom, sle.voucher_detail_no from `tabStock Ledger Entry` sle inner join `tabWarehouse` s on sle.warehouse = s.`name` inner join `tabWarehouse` w on s.parent_warehouse = w.`name` inner join `tabItem` i on sle.item_code = i.item_code where sle.docstatus = '1' %s order by date asc""" % conditions, as_dict=1)
+	elif vouchers == "Transfer Order":
+		sl_entries = frappe.db.sql("""select concat_ws(' ', sle.posting_date, sle.posting_time) as date, sle.`name`, sle.item_code, sle.actual_qty, sle.qty_after_transaction, sle.warehouse as location, s.parent_warehouse as section, w.parent_warehouse, sle.valuation_rate, sle.voucher_type, sle.voucher_no, i.stock_uom, sle.voucher_detail_no from `tabStock Ledger Entry` sle inner join `tabWarehouse` s on sle.warehouse = s.`name` inner join `tabWarehouse` w on s.parent_warehouse = w.`name` inner join `tabItem` i on sle.item_code = i.item_code inner join `tabStock Entry` se on se.`name` = sle.voucher_no where sle.docstatus = '1' %s and se.purpose = 'Material Transfer' order by date asc""" % conditions, as_dict=1)
+	elif vouchers == "Sales Return":
+		sl_entries = frappe.db.sql("""select concat_ws(' ', sle.posting_date, sle.posting_time) as date, sle.`name`, sle.item_code, sle.actual_qty, sle.qty_after_transaction, sle.warehouse as location, s.parent_warehouse as section, w.parent_warehouse, sle.valuation_rate, sle.voucher_type, sle.voucher_no, i.stock_uom, sle.voucher_detail_no from `tabStock Ledger Entry` sle inner join `tabWarehouse` s on sle.warehouse = s.`name` inner join `tabWarehouse` w on s.parent_warehouse = w.`name` inner join `tabItem` i on sle.item_code = i.item_code inner join `tabStock Entry` se on se.`name` = sle.voucher_no where sle.docstatus = '1' %s and se.purpose = 'Material Receipt' order by date asc""" % conditions, as_dict=1)
+	elif vouchers == "Purchase Return":
+		sl_entries = frappe.db.sql("""select concat_ws(' ', sle.posting_date, sle.posting_time) as date, sle.`name`, sle.item_code, sle.actual_qty, sle.qty_after_transaction, sle.warehouse as location, s.parent_warehouse as section, w.parent_warehouse, sle.valuation_rate, sle.voucher_type, sle.voucher_no, i.stock_uom, sle.voucher_detail_no from `tabStock Ledger Entry` sle inner join `tabWarehouse` s on sle.warehouse = s.`name` inner join `tabWarehouse` w on s.parent_warehouse = w.`name` inner join `tabItem` i on sle.item_code = i.item_code inner join `tabStock Entry` se on se.`name` = sle.voucher_no where sle.docstatus = '1' %s and se.purpose = 'Material Issue' order by date asc""" % conditions, as_dict=1)
+	elif vouchers == "Delivery Order":
+		sl_entries = frappe.db.sql("""select concat_ws(' ', sle.posting_date, sle.posting_time) as date, sle.`name`, sle.item_code, sle.actual_qty, sle.qty_after_transaction, sle.warehouse as location, s.parent_warehouse as section, w.parent_warehouse, sle.valuation_rate, sle.voucher_type, sle.voucher_no, i.stock_uom, sle.voucher_detail_no from `tabStock Ledger Entry` sle inner join `tabWarehouse` s on sle.warehouse = s.`name` inner join `tabWarehouse` w on s.parent_warehouse = w.`name` inner join `tabItem` i on sle.item_code = i.item_code where sle.docstatus = '1' %s and sle.voucher_type = 'Delivery Note' order by date asc""" % conditions, as_dict=1)
+	elif vouchers == "Stock Reconciliation":
+		sl_entries = frappe.db.sql("""select concat_ws(' ', sle.posting_date, sle.posting_time) as date, sle.`name`, sle.item_code, sle.actual_qty, sle.qty_after_transaction, sle.warehouse as location, s.parent_warehouse as section, w.parent_warehouse, sle.valuation_rate, sle.voucher_type, sle.voucher_no, i.stock_uom, sle.voucher_detail_no from `tabStock Ledger Entry` sle inner join `tabWarehouse` s on sle.warehouse = s.`name` inner join `tabWarehouse` w on s.parent_warehouse = w.`name` inner join `tabItem` i on sle.item_code = i.item_code where sle.docstatus = '1' %s and sle.voucher_type = 'Stock Reconciliation' order by date asc""" % conditions, as_dict=1)
+	elif vouchers == "Receive Order":
+		sl_entries = frappe.db.sql("""select concat_ws(' ', sle.posting_date, sle.posting_time) as date, sle.`name`, sle.item_code, sle.actual_qty, sle.qty_after_transaction, sle.warehouse as location, s.parent_warehouse as section, w.parent_warehouse, sle.valuation_rate, sle.voucher_type, sle.voucher_no, i.stock_uom, sle.voucher_detail_no from `tabStock Ledger Entry` sle inner join `tabWarehouse` s on sle.warehouse = s.`name` inner join `tabWarehouse` w on s.parent_warehouse = w.`name` inner join `tabItem` i on sle.item_code = i.item_code where sle.docstatus = '1' %s and sle.voucher_type = 'Purchase Receipt' order by date asc""" % conditions, as_dict=1)
 	for cl in sl_entries:
 		item_name = frappe.db.get_value("Item", cl.item_code, "item_name")
 		if cl.voucher_type == "Stock Reconciliation":
@@ -18,16 +33,27 @@ def execute(filters=None):
 		else:
 			qty = cl.actual_qty
 
-		if cl.voucher_type == "Stock Entry":
-			vt = "Transfer Order"
-			vn = frappe.db.get_value("Stock Entry", cl.voucher_no, "transfer_order")
-		elif cl.voucher_type == "Delivery Note":
+		if cl.voucher_type == "Delivery Note":
 			vt = "Delivery Order"
 			pc = frappe.db.get_value("Delivery Note", cl.voucher_no, "packing")
 			vn = frappe.db.get_value("Delivery Order Detail", {"packing": pc, "docstatus": 1}, "parent")
 		elif cl.voucher_type == "Purchase Receipt":
 			vt = "Receive Order"
 			vn = frappe.db.get_value("Purchase Receipt", cl.voucher_no, "receive_order")
+		elif cl.voucher_type == "Stock Entry":
+			purpose = frappe.db.get_value("Stock Entry", cl.voucher_no, "purpose")
+			if purpose == "Material Transfer":
+				vt = "Transfer Order"
+				vn = frappe.db.get_value("Stock Entry", cl.voucher_no, "transfer_order")
+			elif purpose == "Material Receipt":
+				vt = "Sales Return"
+				vn = frappe.db.get_value("Stock Entry", cl.voucher_no, "sales_return")
+			elif purpose == "Material Issue":
+				vt = "Purchase Return"
+				vn = frappe.db.get_value("Stock Entry", cl.voucher_no, "purchase_return")
+			else:
+				vt = cl.voucher_type
+				vn = cl.voucher_no
 		else:
 			vt = cl.voucher_type
 			vn = cl.voucher_no
@@ -74,20 +100,26 @@ def get_conditions(filters):
 		conditions += " and i.item_group = '%s'" % frappe.db.escape(filters["item_group"])
 	if filters.get("brand"):
 		conditions += " and i.brand = '%s'" % frappe.db.escape(filters["brand"])
-	if filters.get("voucher_type") and filters.get("voucher_type") != 'All':
-		if filters.get("voucher_type") == "Transfer Order":
-			conditions += " and sle.voucher_type = 'Stock Entry'"
-		elif filters.get("voucher_type") == "Delivery Order":
-			conditions += " and sle.voucher_type = 'Delivery Note'"
-		elif filters.get("voucher_type") == "Receive Order":
-			conditions += " and sle.voucher_type = 'Purchase Receipt'"
-		else:
-			conditions += " and sle.voucher_type = '%s'" % frappe.db.escape(filters["voucher_type"])
-
-	# if filters.get("voucher_no"):
-	# 	conditions += " and item_code like '%%%s%%'" % frappe.db.escape(filters["voucher_no"])
 	return conditions
 
+def get_voucher(filters):
+	vouchers = ""
+	if filters.get("voucher_type"):
+		if filters.get("voucher_type") == "All":
+			vouchers = "All"
+		elif filters.get("voucher_type") == "Transfer Order":
+			vouchers = "Transfer Order"
+		elif filters.get("voucher_type") == "Delivery Order":
+			vouchers = "Delivery Order"
+		elif filters.get("voucher_type") == "Stock Reconciliation":
+			vouchers = "Stock Reconciliation"
+		elif filters.get("voucher_type") == "Sales Return":
+			vouchers = "Sales Return"
+		elif filters.get("voucher_type") == "Receive Order":
+			vouchers = "Receive Order"
+		elif filters.get("voucher_type") == "Purchase Return":
+			vouchers = "Purchase Return"
+	return vouchers
 # def execute(filters=None):
 # 	columns = get_columns()
 # 	sl_entries = get_stock_ledger_entries(filters)
