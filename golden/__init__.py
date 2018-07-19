@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.20.5'
+__version__ = '1.21.1'
 
+# 1.21.1
+#   - Add doctype City
+#   - Add doctype Region
+#   - Add doctype Summary Generator
+#   - Minor update in few doctype & script
 # 1.20.5
 #   - Update report Stock Card
 #   - Update report Stock Card Sales

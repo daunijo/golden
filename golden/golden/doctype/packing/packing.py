@@ -148,6 +148,7 @@ class Packing(Document):
 	def on_cancel(self):
 		self.delete_dn()
 		self.delete_picking()
+		self.delete_barcode()
 
 	def delete_dn(self):
 		if self.status == "Submitted":
@@ -165,6 +166,11 @@ class Packing(Document):
 	def delete_picking(self):
 		for row in self.picking_list:
 			frappe.db.sql("""update `tabPicking Order` set packing = null where `name` = %s""", row.picking)
+
+	def delete_barcode(self):
+		for b in self.bcode:
+			bc = frappe.get_doc("Packing Barcode", b.name)
+			bc.delete()
 
 	def on_trash(self):
 		if self.sales_order and self.docstatus == 0:

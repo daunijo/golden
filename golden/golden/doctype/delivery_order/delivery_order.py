@@ -211,22 +211,24 @@ def get_packing_from_barcode(bcode, pl):
 		check_packing = frappe.db.sql("select count(*) from `tabPacking Barcode` where parent in ("+pl+") and barcode_1 = %s", bcode)[0][0]
 		if flt(check_packing) == 0:
 			parent = frappe.db.get_value("Packing Barcode", bcode, "parent")
-			packing = frappe.db.get_value("Packing", parent, ["customer", "customer_name", "posting_date", "total_box"], as_dict=1)
+			packing = frappe.db.get_value("Packing", parent, ["customer", "customer_name", "posting_date", "total_box", "sales_order"], as_dict=1)
 			si_list.append(frappe._dict({
 				'packing': parent,
 				'customer': packing.customer,
 				'customer_name': packing.customer_name,
 				'packing_date': packing.posting_date,
-				'total_box': packing.total_box
+				'total_box': packing.total_box,
+				'sales_order': packing.sales_order
 			}))
 	else:
 		parent = frappe.db.get_value("Packing Barcode", bcode, "parent")
-		packing = frappe.db.get_value("Packing", parent, ["customer", "customer_name", "posting_date", "total_box"], as_dict=1)
+		packing = frappe.db.get_value("Packing", parent, ["customer", "customer_name", "posting_date", "total_box", "sales_order"], as_dict=1)
 		si_list.append(frappe._dict({
 			'packing': parent,
 			'customer': packing.customer,
 			'customer_name': packing.customer_name,
 			'packing_date': packing.posting_date,
-			'total_box': packing.total_box
+			'total_box': packing.total_box,
+			'sales_order': packing.sales_order
 		}))
 	return si_list

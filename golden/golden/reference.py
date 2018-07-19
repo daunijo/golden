@@ -487,7 +487,7 @@ def validate_sales_invoice(doc, method):
     for row in doc.items:
         if row.sales_order:
             g_status = frappe.db.sql("""select golden_status from `tabSales Order` where `name` = %s""", row.sales_order)[0][0]
-            if g_status != "Delivering":
+            if g_status not in ["Wait for Delivery and Bill", "Delivering", "Finished"]:
                 frappe.throw(_("Sales Order {0} has not been made Delivery Order").format(row.sales_order))
 
 def submit_sales_invoice(doc, method):

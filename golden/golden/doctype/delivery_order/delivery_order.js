@@ -137,6 +137,7 @@ frappe.ui.form.on('Delivery Order', {
 						c.customer_name = d.customer_name;
 						c.packing_date = d.packing_date;
 						c.total_box = d.total_box;
+						c.sales_order = d.sales_order;
 					})
 					frm.refresh_fields();
 				}

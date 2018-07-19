@@ -16,32 +16,55 @@ class SalesInvoiceSummary(Document):
 
 	def check_is_invoice_summary(self):
 		for row in self.invoices:
-			check_si = frappe.db.sql("""select invoice_keeptrack from `tabSales Invoice` where docstatus = '1' and `name` = %s""", row.sales_invoice)[0][0]
-			if check_si:
-				frappe.throw(_("Invoice {0} already used in Invoice Keeptrack").format(row.sales_invoice))
+			if row.reference_doctype == "Sales Invoice":
+				check_si = frappe.db.sql("""select invoice_keeptrack from `tabSales Invoice` where docstatus = '1' and `name` = %s""", row.reference_name)[0][0]
+				if check_si:
+					frappe.throw(_("Invoice {0} already used in Invoice Keeptrack").format(row.reference_name))
+			elif row.reference_doctype == "Sales Return":
+				check_si = frappe.db.sql("""select sales_invoice_summary from `tabSales Return` where docstatus = '1' and `name` = %s""", row.reference_name)[0][0]
+				if check_si:
+					frappe.throw(_("Sales Return {0} already used in other Sales Invoice Summary").format(row.reference_name))
 
 	def on_submit(self):
 		frappe.db.set(self, 'status', 'Submitted')
 		for row in self.invoices:
-			frappe.db.sql("""update `tabSales Invoice` set sales_invoice_summary = %s where `name` = %s""", (self.name, row.sales_invoice))
+			if row.reference_doctype == "Sales Invoice":
+				frappe.db.sql("""update `tabSales Invoice` set sales_invoice_summary = %s where `name` = %s""", (self.name, row.reference_name))
+			elif row.reference_doctype == "Sales Return":
+				frappe.db.sql("""update `tabSales Return` set sales_invoice_summary = %s where `name` = %s""", (self.name, row.reference_name))
 
 	def on_cancel(self):
 		frappe.db.set(self, 'status', 'Cancelled')
 		for row in self.invoices:
-			frappe.db.sql("""update `tabSales Invoice` set sales_invoice_summary = null where `name` = %s""", row.sales_invoice)
+			if row.reference_doctype == "Sales Invoice":
+				frappe.db.sql("""update `tabSales Invoice` set sales_invoice_summary = null where `name` = %s""", row.reference_name)
+			elif row.reference_doctype == "Sales Return":
+				frappe.db.sql("""update `tabSales Return` set sales_invoice_summary = null where `name` = %s""", row.reference_name)
 
 @frappe.whitelist()
-def get_sales_invoice(start, end, sales_person):
-    si_list = []
-    invoice_list = frappe.db.sql("""select * from `tabSales Invoice` where docstatus = '1' and status != 'Paid' and rss_sales_person = %s and sales_invoice_summary is null and posting_date >= %s and posting_date <= %s""", (sales_person, start, end), as_dict=True)
-    for d in invoice_list:
-		count_payment = frappe.db.sql("""select count(*) from `tabPayment Entry Reference` where docstatus = '1' and reference_name = %s""", d.name)[0][0]
+def get_sales_invoice(customer, start, end):
+	si_list = []
+	invoice_list = frappe.db.sql("""select si.`name` as si_name, si.customer, si.customer_name, si.posting_date, si.grand_total, si.due_date from `tabSales Invoice` si inner join `tabCustomer` c on c.`name` = si.customer where si.docstatus = '1' and si.`status` != 'Paid' and si.sales_invoice_summary is null and si.customer = %s and si.posting_date >= %s and si.posting_date <= %s""", (customer, start, end), as_dict=True)
+	for d in invoice_list:
+		# count_payment = frappe.db.sql("""select count(*) from `tabPayment Entry Reference` where docstatus = '1' and reference_name = %s""", d.name)[0][0]
 		si_list.append(frappe._dict({
-            'customer': d.customer,
-            'customer_name': d.customer_name,
-			'si_name': d.name,
+			'customer': d.customer,
+			'customer_name': d.customer_name,
+			'reference_doctype': "Sales Invoice",
+			'reference_name': d.si_name,
 			'posting_date': d.posting_date,
 			'amount': d.grand_total,
-			'due_date': d.due_date,
-        }))
-    return si_list
+			'due_date': d.due_date
+		}))
+	return_list = frappe.db.sql("""select si.`name` as si_name, si.customer, si.customer_name, si.posting_date, si.total_2 from `tabSales Return` si inner join `tabCustomer` c on c.`name` = si.customer where si.docstatus = '1' and si.sales_invoice_summary is null and si.customer = %s and si.posting_date >= %s and si.posting_date <= %s""", (customer, start, end), as_dict=True)
+	for e in return_list:
+		si_list.append(frappe._dict({
+			'customer': e.customer,
+			'customer_name': e.customer_name,
+			'reference_doctype': "Sales Return",
+			'reference_name': e.si_name,
+			'posting_date': e.posting_date,
+			'amount': e.total_2,
+			'due_date': ""
+		}))
+	return si_list
