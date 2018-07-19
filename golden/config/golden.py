@@ -28,6 +28,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Summary Generator",
+					"description": _("Summary Generator.")
+				},
+				{
+					"type": "doctype",
 					"name": "Invoice Keeptrack",
 					"description": _("Invoice Keeptrack.")
 				},
@@ -98,6 +103,11 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
+					"name": "City",
+					"description": _("City.")
+				},
+				{
+					"type": "doctype",
 					"name": "Employee Settings",
 					"description": _("Employee Settings.")
 				},
@@ -105,6 +115,11 @@ def get_data():
 					"type": "doctype",
 					"name": "Expedition",
 					"description": _("Expedition.")
+				},
+				{
+					"type": "doctype",
+					"name": "Region",
+					"description": _("Region.")
 				},
 				{
 					"type": "doctype",

@@ -21,9 +21,9 @@ frappe.ui.form.on('Sales Invoice Summary', {
 		return frappe.call({
 			method: 'golden.golden.doctype.sales_invoice_summary.sales_invoice_summary.get_sales_invoice',
 			args: {
+				customer: frm.doc.customer,
 				start: frm.doc.start_date,
 				end: frm.doc.end_date,
-				sales_person: frm.doc.sales || undefined
 			},
 			callback: function(r, rt) {
 				if(r.message) {
@@ -32,7 +32,8 @@ frappe.ui.form.on('Sales Invoice Summary', {
 						var c = frm.add_child("invoices");
 						c.customer = d.customer;
 						c.customer_name = d.customer_name;
-						c.sales_invoice = d.si_name;
+						c.reference_doctype = d.reference_doctype;
+						c.reference_name = d.reference_name;
 						c.invoice_date = d.posting_date;
 						c.amount = d.amount;
 						c.due_date = d.due_date;
@@ -46,7 +47,11 @@ frappe.ui.form.on('Sales Invoice Summary', {
 	set_total_invoice: function(frm) {
 		var total_inv = 0.0;
 		$.each(frm.doc.invoices, function(i, row) {
-			total_inv += flt(row.amount);
+			if(row.reference_doctype == "Sales Invoice"){
+				total_inv += flt(row.amount);
+			}else{
+				total_inv -= flt(row.amount);
+			}
 		})
 		frm.set_value("total_invoice", Math.abs(total_inv));
 	},

@@ -182,6 +182,7 @@ frappe.ui.form.on('Packing', {
 
 	validate: function(frm){
 		frm.clear_table("simple");
+		frm.clear_table("bcode");
 	},
 	sales_order: function(frm){
 		if(frm.doc.sales_order){
