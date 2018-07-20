@@ -52,6 +52,7 @@ frappe.ui.form.on('Summary Generator', {
 						var c = frm.add_child("customers");
 						c.customer = d.customer;
 						c.customer_name = d.customer_name;
+						// c.sales = d.sales;
 					})
 					frm.refresh_fields();
 				}
@@ -79,6 +80,7 @@ frappe.ui.form.on('Summary Generator', {
 						c.invoice_date = d.posting_date;
 						c.amount = d.amount;
 						c.due_date = d.due_date;
+						c.sales_name = d.sales_name;
 					})
 					frm.refresh_fields();
 				}

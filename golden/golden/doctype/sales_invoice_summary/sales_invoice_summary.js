@@ -17,6 +17,22 @@ frappe.ui.form.on('Sales Invoice Summary', {
 			frm.set_df_property("posting_time", "read_only", true);
 		}
 	},
+	sales: function(frm){
+		if(frm.doc.sales){
+			frappe.call({
+				method: "frappe.client.get",
+				args: {
+					doctype: "Employee",
+					filters:{
+						name: frm.doc.sales,
+					}
+				},
+				callback: function (data) {
+					frm.set_value("sales_name", data.message.employee_name);
+				}
+			})
+		}
+	},
 	get_sales_invoice: function(frm){
 		return frappe.call({
 			method: 'golden.golden.doctype.sales_invoice_summary.sales_invoice_summary.get_sales_invoice',
@@ -24,6 +40,7 @@ frappe.ui.form.on('Sales Invoice Summary', {
 				customer: frm.doc.customer,
 				start: frm.doc.start_date,
 				end: frm.doc.end_date,
+				sales: frm.doc.sales || "",
 			},
 			callback: function(r, rt) {
 				if(r.message) {
@@ -37,6 +54,7 @@ frappe.ui.form.on('Sales Invoice Summary', {
 						c.invoice_date = d.posting_date;
 						c.amount = d.amount;
 						c.due_date = d.due_date;
+						c.sales_name = d.sales_name;
 					})
 					frm.refresh_fields();
 					frm.events.set_total_invoice(frm);

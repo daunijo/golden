@@ -11,6 +11,7 @@ from frappe import msgprint, _
 class SummaryGenerator(Document):
 	def validate(self):
 		self.check_is_invoice_summary()
+		self.insert_sales()
 
 	def check_is_invoice_summary(self):
 		for row in self.details:
@@ -22,6 +23,16 @@ class SummaryGenerator(Document):
 				check_si = frappe.db.sql("""select sales_invoice_summary from `tabSales Return` where docstatus = '1' and `name` = %s""", row.reference_name)[0][0]
 				if check_si:
 					frappe.throw(_("Sales Return {0} already used in other Sales Invoice Summary").format(row.reference_name))
+
+	def insert_sales(self):
+		for row in self.customers:
+			sales = []
+			for det in self.details:
+				if det.customer == row.customer and det.reference_doctype == "Sales Invoice":
+					if det.sales_name != "" and det.sales_name not in sales:
+						sales.append(det.sales_name)
+				sales_list = ", ".join(sales)
+				row.sales = sales_list
 
 	def on_submit(self):
 		for row in self.customers:
@@ -36,7 +47,8 @@ class SummaryGenerator(Document):
 				"set_posting_time": self.set_posting_time,
 				"company": self.company,
 				"status": "Draft",
-				"summary_generator": self.name
+				"summary_generator": self.name,
+				"sales_name": row.sales
 			})
 			summary.save()
 			si_summary = frappe.get_doc("Sales Invoice Summary", summary.name)
@@ -54,12 +66,14 @@ class SummaryGenerator(Document):
 						"reference_name": det.reference_name,
 						"invoice_date": det.invoice_date,
 						"amount": det.amount,
-						"due_date": det.due_date
+						"due_date": det.due_date,
+						"sales_name": det.sales_name
 					})
 					si_summary.save()
 			si_summary.total_invoice = total_invoice
 			si_summary.save()
 			si_summary.submit()
+			frappe.db.sql("""update `tabSummary Generator Customer` set si_summary = %s where `name` = %s""", (summary.name, row.name))
 
 	def on_cancel(self):
 		for row in self.customers:
@@ -106,7 +120,7 @@ def get_details(start, end, city, region):
 		conditions += " and c.rss_city = '%s'" % frappe.db.escape(city)
 	if region != "":
 		conditions += " and c.rss_region = '%s'" % frappe.db.escape(region)
-	invoice_list = frappe.db.sql("""select si.`name` as si_name, si.customer, si.customer_name, si.posting_date, si.grand_total, si.due_date from `tabSales Invoice` si inner join `tabCustomer` c on c.`name` = si.customer where si.docstatus = '1' and si.`status` != 'Paid' and si.sales_invoice_summary is null %s""" % conditions, as_dict=True)
+	invoice_list = frappe.db.sql("""select si.`name` as si_name, si.customer, si.customer_name, si.posting_date, si.grand_total, si.due_date, si.rss_sales_name from `tabSales Invoice` si inner join `tabCustomer` c on c.`name` = si.customer where si.docstatus = '1' and si.`status` != 'Paid' and si.sales_invoice_summary is null %s""" % conditions, as_dict=True)
 	for d in invoice_list:
 		# count_payment = frappe.db.sql("""select count(*) from `tabPayment Entry Reference` where docstatus = '1' and reference_name = %s""", d.name)[0][0]
 		si_list.append(frappe._dict({
@@ -117,6 +131,7 @@ def get_details(start, end, city, region):
 			'posting_date': d.posting_date,
 			'amount': d.grand_total,
 			'due_date': d.due_date,
+			'sales_name': d.rss_sales_name
         }))
 	return_list = frappe.db.sql("""select si.`name` as si_name, si.customer, si.customer_name, si.posting_date, si.total_2 from `tabSales Return` si inner join `tabCustomer` c on c.`name` = si.customer where si.docstatus = '1' and si.sales_invoice_summary is null %s""" % conditions, as_dict=True)
 	for e in return_list:
@@ -128,5 +143,6 @@ def get_details(start, end, city, region):
 			'posting_date': e.posting_date,
 			'amount': e.total_2,
 			'due_date': "",
+			'sales_name': ""
         }))
 	return si_list
