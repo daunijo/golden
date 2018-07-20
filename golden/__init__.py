@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.21.1'
+__version__ = '1.21.2'
 
+# 1.21.2
+#   - Add sales_name in Summary Generator
+#   - Add sales in Summary Generator Customer
+#   - Add sales_name in Summary Generator Detail
+#   - Add sales_name in Sales Invoice Summary Detail
 # 1.21.1
 #   - Add doctype City
 #   - Add doctype Region

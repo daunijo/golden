@@ -42,9 +42,16 @@ class SalesInvoiceSummary(Document):
 				frappe.db.sql("""update `tabSales Return` set sales_invoice_summary = null where `name` = %s""", row.reference_name)
 
 @frappe.whitelist()
-def get_sales_invoice(customer, start, end):
+def get_sales_invoice(customer, start, end, sales):
 	si_list = []
-	invoice_list = frappe.db.sql("""select si.`name` as si_name, si.customer, si.customer_name, si.posting_date, si.grand_total, si.due_date from `tabSales Invoice` si inner join `tabCustomer` c on c.`name` = si.customer where si.docstatus = '1' and si.`status` != 'Paid' and si.sales_invoice_summary is null and si.customer = %s and si.posting_date >= %s and si.posting_date <= %s""", (customer, start, end), as_dict=True)
+	conditions = ""
+	conditions += " and si.customer = '%s'" % frappe.db.escape(customer)
+	conditions += " and si.posting_date >= '%s'" % frappe.db.escape(start)
+	conditions += " and si.posting_date <= '%s'" % frappe.db.escape(end)
+	if sales != "":
+		conditions += " and si.rss_sales_person = '%s'" % frappe.db.escape(sales)
+
+	invoice_list = frappe.db.sql("""select si.`name` as si_name, si.customer, si.customer_name, si.posting_date, si.grand_total, si.due_date, si.rss_sales_name from `tabSales Invoice` si inner join `tabCustomer` c on c.`name` = si.customer where si.docstatus = '1' and si.`status` != 'Paid' and si.sales_invoice_summary is null %s""" % conditions, as_dict=True)
 	for d in invoice_list:
 		# count_payment = frappe.db.sql("""select count(*) from `tabPayment Entry Reference` where docstatus = '1' and reference_name = %s""", d.name)[0][0]
 		si_list.append(frappe._dict({
@@ -54,7 +61,8 @@ def get_sales_invoice(customer, start, end):
 			'reference_name': d.si_name,
 			'posting_date': d.posting_date,
 			'amount': d.grand_total,
-			'due_date': d.due_date
+			'due_date': d.due_date,
+			'sales_name': d.rss_sales_name
 		}))
 	return_list = frappe.db.sql("""select si.`name` as si_name, si.customer, si.customer_name, si.posting_date, si.total_2 from `tabSales Return` si inner join `tabCustomer` c on c.`name` = si.customer where si.docstatus = '1' and si.sales_invoice_summary is null and si.customer = %s and si.posting_date >= %s and si.posting_date <= %s""", (customer, start, end), as_dict=True)
 	for e in return_list:
@@ -65,6 +73,7 @@ def get_sales_invoice(customer, start, end):
 			'reference_name': e.si_name,
 			'posting_date': e.posting_date,
 			'amount': e.total_2,
-			'due_date': ""
+			'due_date': "",
+			'sales_name': ""
 		}))
 	return si_list
