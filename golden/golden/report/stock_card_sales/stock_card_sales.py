@@ -76,7 +76,7 @@ def execute(filters=None):
 			pricelist = ""
 			customer = ""
 
-		data.append([cl.date, cl.item_code, item_name, cl.location, qty, cl.qty_after_transaction, cl.valuation_rate, vt, vn, cl.stock_uom, rate, discount, pricelist, customer])
+		data.append([cl.date, cl.item_code, item_name, cl.location, qty, cl.qty_after_transaction, vt, vn, cl.stock_uom, rate, discount, pricelist, customer])
 
 	return columns, data
 
@@ -86,15 +86,14 @@ def get_columns():
 	columns = [
 		_("Date") + ":Datetime:95",
 		_("Item") + ":Link/Item:130",
-		_("Item Name") + "::150",
+		_("Item Name") + "::200",
 		_("Location") + ":Link/Warehouse:150",
 		_("Qty") + ":Float:50",
 		_("Balance Qty") + ":Float:80",
-		{"label": _("Valuation Rate"), "fieldtype": "Currency", "width": 110, "options":"Company:company:default_currency"},
 		_("Voucher Type") + "::125",
 		_("Voucher #") + ":Dynamic Link/" + _("Voucher Type") + ":100",
 		_("Stock UOM") + ":Link/UOM:80",
-		_("Price List Rate") + ":Float:80",
+		_("Price List Rate") + ":Float:100",
 		_("Discount") + ":Percent:60",
 		_("Price List") + ":Link/Price List:120",
 		_("Customer") + ":Link/Customer:150",

@@ -58,7 +58,7 @@ def execute(filters=None):
 			vt = cl.voucher_type
 			vn = cl.voucher_no
 
-		data.append([cl.date, cl.item_code, item_name, cl.location, qty, cl.qty_after_transaction, cl.valuation_rate, vt, vn, cl.stock_uom])
+		data.append([cl.date, cl.item_code, item_name, cl.location, qty, cl.qty_after_transaction, vt, vn, cl.stock_uom])
 
 	return columns, data
 
@@ -68,11 +68,10 @@ def get_columns():
 	columns = [
 		_("Date") + ":Datetime:95",
 		_("Item") + ":Link/Item:130",
-		_("Item Name") + "::150",
+		_("Item Name") + "::200",
 		_("Location") + ":Link/Warehouse:150",
 		_("Qty") + ":Float:50",
 		_("Balance Qty") + ":Float:80",
-		{"label": _("Valuation Rate"), "fieldtype": "Currency", "width": 110, "options":"Company:company:default_currency"},
 		_("Voucher Type") + "::130",
 		_("Voucher #") + ":Dynamic Link/" + _("Voucher Type") + ":100",
 		_("Stock UOM") + ":Link/UOM:80",
