@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.22.1'
+__version__ = '1.22.2'
 
+# 1.22.2
+#   - Update report Stock Card
+#   - Update report Stock Card Sales
+#   - Update report Stock Card Purchasing
 # 1.22.1
 #   - Add doctype Commission Percentage
 #   - Add doctype Commission Percentage Detail
