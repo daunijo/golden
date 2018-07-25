@@ -133,8 +133,18 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
+					"name": "Commission Percentage",
+					"description": _("Commission Percentage.")
+				},
+				{
+					"type": "doctype",
 					"name": "Purchase Budget",
 					"description": _("Purchase Budget.")
+				},
+				{
+					"type": "doctype",
+					"name": "Sales Commission",
+					"description": _("Sales Commission.")
 				},
 				{
 					"type": "doctype",

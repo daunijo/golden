@@ -1,8 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.21.2'
+__version__ = '1.22.1'
 
+# 1.22.1
+#   - Add doctype Commission Percentage
+#   - Add doctype Commission Percentage Detail
+#   - Add doctype Sales Commission
+#   - Add doctype Sales Commission Invoice
+#   - Add doctype Sales Commission Return
 # 1.21.2
 #   - Add sales_name in Summary Generator
 #   - Add sales in Summary Generator Customer
