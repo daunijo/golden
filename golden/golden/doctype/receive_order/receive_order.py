@@ -181,7 +181,8 @@ def get_po_detail(po, item_code):
 	supplier = frappe.db.sql("""select supplier from `tabPurchase Order` where docstatus = '1' and `name` = %s""", po)[0][0]
 	supplier_name = frappe.db.sql("""select supplier_name from `tabPurchase Order` where docstatus = '1' and `name` = %s""", po)[0][0]
 	poi_uom = frappe.db.sql("""select uom from `tabPurchase Order Item` where docstatus = '1' and parent = %s and item_code = %s""", (po, item_code))[0][0]
-	return poi_name, poi_qty, supplier, supplier_name, poi_uom
+	receive_qty = frappe.db.sql("""select received_qty from `tabPurchase Order Item` where docstatus = '1' and parent = %s and item_code = %s""", (po, item_code))[0][0]
+	return poi_name, poi_qty, supplier, supplier_name, poi_uom, receive_qty
 
 def get_item_code(doctype, txt, searchfield, start, page_len, filters):
     return frappe.db.sql("""select item_code, parent, concat("<br />Qty PO: ",cast(qty as int)), concat("<br />Qty: ",cast((qty-received_qty) as int)) from `tabPurchase Order Item`

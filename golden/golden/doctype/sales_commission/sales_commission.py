@@ -35,3 +35,68 @@ def get_returns(sales, sales_target, start_date, end_date):
 			'amount': flt(amt)
 	    }))
 	return si_list
+
+@frappe.whitelist()
+def get_payments(sales, sales_target, start_date, end_date):
+	si_list = []
+	std = frappe.db.sql("""select b.`name` as payment_entry, b.posting_date as payment_date, a.allocated_amount, c.sales_invoice, c.sales_invoice_date, datediff(b.posting_date,c.sales_invoice_date) as range_day from `tabPayment Entry Receive Reference` a inner join `tabPayment Entry Receive` b on b.`name` = a.parent inner join `tabSales Target Detail` c on c.sales_invoice = a.reference_name where b.docstatus = '1' and c.parent = %s""", (sales_target), as_dict=True)
+	for si in std:
+		si_list.append(frappe._dict({
+	        'payment_entry': si.payment_entry,
+	        'payment_date': si.payment_date,
+			'sales_invoice': si.sales_invoice,
+	        'payment_amount': si.allocated_amount,
+			'invoice_date': si.sales_invoice_date,
+			'date_diff': si.range_day
+	    }))
+	return si_list
+
+@frappe.whitelist()
+def calculate_invoice(sales, percentage, total_invoice):
+	check1 = frappe.db.sql("""select count(*) from `tabCommission Percentage` where docstatus = '1' and commission_type = 'SELL' and sales = %s and disabled = '0'""", sales)[0][0]
+	if flt(check1) == 1:
+		check2 = frappe.db.sql("""select count(*) from `tabCommission Percentage` where docstatus = '1' and commission_type = 'SELL' and sales = %s and disabled = '0'""", sales)[0][0]
+		if flt(check2) == 1:
+			cp = frappe.db.sql("""select `name` from `tabCommission Percentage` where docstatus = '1' and commission_type = 'SELL' and sales = %s and disabled = '0'""", sales)[0][0]
+			cpd = frappe.db.sql("""select percentage from `tabCommission Percentage Detail` where parent = %s and from_range <= %s and to_range >= %s""", (cp, percentage, percentage))[0][0]
+			hasil = cpd
+		else:
+			hasil = 0
+	else:
+		check2 = frappe.db.sql("""select count(*) from `tabCommission Percentage` where docstatus = '1' and commission_type = 'SELL' and sales is null and disabled = '0'""")[0][0]
+		if flt(check2) == 1:
+			cp = frappe.db.sql("""select `name` from `tabCommission Percentage` where docstatus = '1' and commission_type = 'SELL' and sales is null and disabled = '0'""")[0][0]
+			cpd = frappe.db.sql("""select percentage from `tabCommission Percentage Detail` where parent = %s and from_range <= %s and to_range >= %s""", (cp, percentage, percentage))[0][0]
+			hasil = cpd
+		else:
+			hasil = 0
+	komisi = (flt(hasil) / 100) * flt(total_invoice)
+	inv_commission = {
+		'invoice_commission': komisi,
+	}
+	return inv_commission
+
+@frappe.whitelist()
+def calculate_return(sales, percentage, total_return):
+	check1 = frappe.db.sql("""select count(*) from `tabCommission Percentage` where docstatus = '1' and commission_type = 'RETURN' and sales = %s and disabled = '0'""", sales)[0][0]
+	if flt(check1) == 1:
+		check2 = frappe.db.sql("""select count(*) from `tabCommission Percentage` where docstatus = '1' and commission_type = 'RETURN' and sales = %s and disabled = '0'""", sales)[0][0]
+		if flt(check2) == 1:
+			cp = frappe.db.sql("""select `name` from `tabCommission Percentage` where docstatus = '1' and commission_type = 'RETURN' and sales = %s and disabled = '0'""", sales)[0][0]
+			cpd = frappe.db.sql("""select percentage from `tabCommission Percentage Detail` where parent = %s and from_range <= %s and to_range >= %s""", (cp, percentage, percentage))[0][0]
+			hasil = cpd
+		else:
+			hasil = 0
+	else:
+		check2 = frappe.db.sql("""select count(*) from `tabCommission Percentage` where docstatus = '1' and commission_type = 'RETURN' and sales is null and disabled = '0'""")[0][0]
+		if flt(check2) == 1:
+			cp = frappe.db.sql("""select `name` from `tabCommission Percentage` where docstatus = '1' and commission_type = 'RETURN' and sales is null and disabled = '0'""")[0][0]
+			cpd = frappe.db.sql("""select percentage from `tabCommission Percentage Detail` where parent = %s and from_range <= %s and to_range >= %s""", (cp, percentage, percentage))[0][0]
+			hasil = cpd
+		else:
+			hasil = 0
+	komisi = (flt(hasil) / 100) * flt(total_return)
+	inv_commission = {
+		'return_commission': komisi,
+	}
+	return inv_commission

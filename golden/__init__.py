@@ -1,8 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.22.2'
+__version__ = '1.22.4'
 
+# 1.22.4
+#   - Fix issue #99 about Receive Order
+#   - Fix issue #108 about Expedition checkbox
+# 1.22.3
+#   - Add doctype Commission Percentage Collect
+#   - Add doctype Sales Commission Payment
 # 1.22.2
 #   - Update report Stock Card
 #   - Update report Stock Card Sales
