@@ -27,7 +27,7 @@ frappe.ui.form.on('Delivery Order', {
 			var c_doc= locals[cdt][cdn];
 			return {
 				filters: {
-					'buying': 1
+					'selling': 1
 				}
 			}
 		});

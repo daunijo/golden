@@ -11,7 +11,7 @@ frappe.ui.form.on('Receive Order', {
 		frm.set_query("expedition", function (doc) {
 			return {
 				filters: {
-					'selling': 1
+					'buying': 1
 				}
 			}
 		});
@@ -89,6 +89,7 @@ frappe.ui.form.on('Receive Order Item', {
 					frappe.model.set_value(cdt, cdn, "po_uom", r.message[4]);
 					frappe.model.set_value(cdt, cdn, "qty", r.message[1]);
 					frappe.model.set_value(cdt, cdn, "uom", r.message[4]);
+					frappe.model.set_value(cdt, cdn, "received_qty", r.message[5]);
 					frappe.model.set_value(cdt, cdn, "conversion_factor", "1");
 				}
 			})
