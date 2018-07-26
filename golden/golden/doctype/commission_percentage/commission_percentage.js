@@ -19,6 +19,15 @@ frappe.ui.form.on('Commission Percentage', {
 			frm.set_df_property("posting_time", "read_only", true);
 		}
 	},
+	commission_type: function(frm){
+		if(frm.doc.commission_type == "SEL"){
+			frm.clear_table("collects");
+		}else if(frm.doc.commission_type == "RETURN"){
+			frm.clear_table("collects");
+		}else{
+			frm.clear_table("details");
+		}
+	},
 	sales: function(frm){
 		if(frm.doc.sales){
 			frappe.call({

@@ -87,6 +87,7 @@ frappe.ui.form.on('Sales Commission', {
 	generate: function(frm){
 		frm.events.get_invoices(frm);
 		frm.events.get_returns(frm);
+		frm.events.get_payments(frm);
 	},
 	get_invoices: function(frm){
 		frm.clear_table("invoices");
@@ -139,6 +140,37 @@ frappe.ui.form.on('Sales Commission', {
 			}
 		});
 	},
+	get_payments: function(frm){
+		frm.clear_table("payments");
+		return frappe.call({
+			method: 'golden.golden.doctype.sales_commission.sales_commission.get_payments',
+			args: {
+				sales: frm.doc.sales,
+				sales_target: frm.doc.sales_target,
+				start_date: frm.doc.start_date,
+				end_date: frm.doc.end_date
+			},
+			callback: function(r, rt) {
+				if(r.message) {
+					$.each(r.message, function(i, d) {
+						var c = frm.add_child("payments");
+						c.payment_entry = d.payment_entry;
+						c.payment_date = d.payment_date;
+						c.sales_invoice = d.sales_invoice;
+						c.payment_amount = d.payment_amount;
+						c.invoice_date = d.invoice_date;
+						c.date_diff = d.date_diff;
+					})
+					frm.events.calculate_total_return(frm);
+					frm.events.calculate_percentage_invoice(frm);
+					frm.events.calculate_percentage_return(frm);
+					frm.events.calculate_invoice_commission(frm);
+					frm.events.calculate_return_commission(frm);
+					frm.refresh_fields();
+				}
+			}
+		});
+	},
 	calculate_total_invoice: function(frm){
 		var total_invoice = frappe.utils.sum(
 			(frm.doc.invoices || []).map(function(i) {
@@ -162,5 +194,35 @@ frappe.ui.form.on('Sales Commission', {
 	calculate_percentage_return: function(frm){
 		var percent_ret = (flt(frm.doc.total_return) / flt(frm.doc.total_invoice)) * 100
 		frm.set_value("percentage_return", percent_ret)
+	},
+	calculate_invoice_commission: function(frm){
+		frappe.call({
+			method: "golden.golden.doctype.sales_commission.sales_commission.calculate_invoice",
+			args:{
+				sales: frm.doc.sales,
+				percentage: frm.doc.percentage_invoice,
+				total_invoice: frm.doc.total_invoice
+			},
+			callback: function (r) {
+				if(r.message) {
+					frm.set_value( r.message);
+				}
+			}
+		})
+	},
+	calculate_return_commission: function(frm){
+		frappe.call({
+			method: "golden.golden.doctype.sales_commission.sales_commission.calculate_return",
+			args:{
+				sales: frm.doc.sales,
+				percentage: frm.doc.percentage_return,
+				total_return: frm.doc.total_return
+			},
+			callback: function (r) {
+				if(r.message) {
+					frm.set_value( r.message);
+				}
+			}
+		})
 	},
 });
