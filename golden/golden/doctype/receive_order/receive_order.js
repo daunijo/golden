@@ -77,20 +77,14 @@ frappe.ui.form.on('Receive Order Item', {
 		if(d.purchase_order){
 			frappe.call({
 				method: "golden.golden.doctype.receive_order.receive_order.get_po_detail",
-				args: {
+				args:{
 					po: d.purchase_order,
 					item_code: d.item_code
 				},
-				callback: function (r, rt) {
-					frappe.model.set_value(cdt, cdn, "po_detail", r.message[0]);
-					frappe.model.set_value(cdt, cdn, "po_qty", r.message[1]);
-					frappe.model.set_value(cdt, cdn, "supplier", r.message[2]);
-					frappe.model.set_value(cdt, cdn, "supplier_name", r.message[3]);
-					frappe.model.set_value(cdt, cdn, "po_uom", r.message[4]);
-					frappe.model.set_value(cdt, cdn, "qty", r.message[1]);
-					frappe.model.set_value(cdt, cdn, "uom", r.message[4]);
-					frappe.model.set_value(cdt, cdn, "received_qty", r.message[5]);
-					frappe.model.set_value(cdt, cdn, "conversion_factor", "1");
+				callback: function (r) {
+					if(r.message) {
+						frappe.model.set_value(cdt, cdn, r.message);
+					}
 				}
 			})
 		}

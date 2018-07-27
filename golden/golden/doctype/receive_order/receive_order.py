@@ -176,13 +176,21 @@ def get_purchase_order(source_name, target_doc=None):
 
 @frappe.whitelist()
 def get_po_detail(po, item_code):
-	poi_name = frappe.db.sql("""select `name` from `tabPurchase Order Item` where docstatus = '1' and parent = %s and item_code = %s""", (po, item_code))[0][0]
-	poi_qty = frappe.db.sql("""select qty from `tabPurchase Order Item` where docstatus = '1' and parent = %s and item_code = %s""", (po, item_code))[0][0]
-	supplier = frappe.db.sql("""select supplier from `tabPurchase Order` where docstatus = '1' and `name` = %s""", po)[0][0]
-	supplier_name = frappe.db.sql("""select supplier_name from `tabPurchase Order` where docstatus = '1' and `name` = %s""", po)[0][0]
-	poi_uom = frappe.db.sql("""select uom from `tabPurchase Order Item` where docstatus = '1' and parent = %s and item_code = %s""", (po, item_code))[0][0]
-	receive_qty = frappe.db.sql("""select received_qty from `tabPurchase Order Item` where docstatus = '1' and parent = %s and item_code = %s""", (po, item_code))[0][0]
-	return poi_name, poi_qty, supplier, supplier_name, poi_uom, receive_qty
+	poi = frappe.db.get_value("Purchase Order Item", {"docstatus": 1, "parent": po, "item_code": item_code}, ["name", "qty", "uom", "received_qty"], as_dict=1)
+	pp = frappe.db.get_value("Purchase Order", po, ["supplier", "supplier_name"], as_dict=1)
+	qty_remaining = flt(poi.qty) - flt(poi.received_qty)
+	si_rate = {
+		'po_detail': poi.name,
+		'po_qty': poi.qty,
+		'supplier': pp.supplier,
+		'supplier_name': pp.supplier_name,
+		'po_uom': poi.uom,
+		'qty': qty_remaining,
+		'uom': poi.uom,
+		'received_qty': poi.received_qty,
+		'conversion_factor': 1
+	}
+	return si_rate
 
 def get_item_code(doctype, txt, searchfield, start, page_len, filters):
     return frappe.db.sql("""select item_code, parent, concat("<br />Qty PO: ",cast(qty as int)), concat("<br />Qty: ",cast((qty-received_qty) as int)) from `tabPurchase Order Item`

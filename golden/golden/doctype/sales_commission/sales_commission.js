@@ -14,7 +14,8 @@ frappe.ui.form.on('Sales Commission', {
 			return {
 				filters: [
 					['sales', '=', frm.doc.sales],
-					['docstatus', '=', 1]
+					['docstatus', '=', 1],
+					['sales_commission', '=', '']
 				]
 			}
 		});
@@ -109,6 +110,7 @@ frappe.ui.form.on('Sales Commission', {
 					})
 					frm.events.calculate_total_invoice(frm);
 					frm.events.calculate_percentage_invoice(frm);
+					// frm.events.calculate_total_commission(frm);
 					frm.refresh_fields();
 				}
 			}
@@ -135,6 +137,7 @@ frappe.ui.form.on('Sales Commission', {
 					frm.events.calculate_total_return(frm);
 					frm.events.calculate_percentage_invoice(frm);
 					frm.events.calculate_percentage_return(frm);
+					// frm.events.calculate_total_commission(frm);
 					frm.refresh_fields();
 				}
 			}
@@ -160,12 +163,15 @@ frappe.ui.form.on('Sales Commission', {
 						c.payment_amount = d.payment_amount;
 						c.invoice_date = d.invoice_date;
 						c.date_diff = d.date_diff;
+						c.payment_commission = d.payment_commission;
 					})
 					frm.events.calculate_total_return(frm);
 					frm.events.calculate_percentage_invoice(frm);
 					frm.events.calculate_percentage_return(frm);
 					frm.events.calculate_invoice_commission(frm);
 					frm.events.calculate_return_commission(frm);
+					frm.events.calculate_total_payment_commission(frm);
+					// frm.events.calculate_total_commission(frm);
 					frm.refresh_fields();
 				}
 			}
@@ -224,5 +230,26 @@ frappe.ui.form.on('Sales Commission', {
 				}
 			}
 		})
+	},
+	calculate_total_payment_commission: function(frm){
+		var total_payment_commission = frappe.utils.sum(
+			(frm.doc.payments || []).map(function(i) {
+				return (flt(i.payment_commission));
+			})
+		);
+		frm.set_value("payment_commission", total_payment_commission);
+	},
+	invoice_commission: function(frm){
+		frm.events.calculate_total_commission(frm);
+	},
+	return_commission: function(frm){
+		frm.events.calculate_total_commission(frm);
+	},
+	payment_commission: function(frm){
+		frm.events.calculate_total_commission(frm);
+	},
+	calculate_total_commission: function(frm){
+		var total_commission = flt(frm.doc.invoice_commission) + flt(frm.doc.return_commission) + flt(frm.doc.payment_commission);
+		frm.set_value("total_commission", total_commission);
 	},
 });
