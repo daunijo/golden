@@ -9,7 +9,23 @@ from frappe.utils import flt
 from frappe import msgprint, _
 
 class SalesCommission(Document):
-	pass
+	def validate(self):
+		self.check_sales_target()
+
+	def check_sales_target(self):
+		st = frappe.db.sql("""select count(*) from `tabSales Target` where `name` = %s and sales_commission is not null""", self.name)[0][0]
+		if flt(st) == 1:
+			frappe.throw(_("Sales Target <b>{0}</b> already used in other Sales Commission").format(self.sales_target))
+
+	def on_submit(self):
+		self.check_sales_target()
+		self.update_sales_target()
+
+	def update_sales_target(self):
+		frappe.db.sql("""update `tabSales Target` set sales_commission = %s where `name` = %s""", (self.name, self.sales_target))
+
+	def on_cancel(self):
+		frappe.db.sql("""update `tabSales Target` set sales_commission = null where `name` = %s""",  self.sales_target)
 
 @frappe.whitelist()
 def get_invoices(sales, sales_target, start_date, end_date):
@@ -41,13 +57,32 @@ def get_payments(sales, sales_target, start_date, end_date):
 	si_list = []
 	std = frappe.db.sql("""select b.`name` as payment_entry, b.posting_date as payment_date, a.allocated_amount, c.sales_invoice, c.sales_invoice_date, datediff(b.posting_date,c.sales_invoice_date) as range_day from `tabPayment Entry Receive Reference` a inner join `tabPayment Entry Receive` b on b.`name` = a.parent inner join `tabSales Target Detail` c on c.sales_invoice = a.reference_name where b.docstatus = '1' and c.parent = %s""", (sales_target), as_dict=True)
 	for si in std:
+		check1 = frappe.db.sql("""select count(*) from `tabCommission Percentage` where docstatus = '1' and commission_type = 'COLLECT' and sales = %s and disabled = '0'""", sales)[0][0]
+		if flt(check1) == 1:
+			check2 = frappe.db.sql("""select count(*) from `tabCommission Percentage` where docstatus = '1' and commission_type = 'COLLECT' and sales = %s and disabled = '0'""", sales)[0][0]
+			if flt(check2) == 1:
+				cp = frappe.db.sql("""select `name` from `tabCommission Percentage` where docstatus = '1' and commission_type = 'COLLECT' and sales = %s and disabled = '0'""", sales)[0][0]
+				cpd = frappe.db.sql("""select percentage from `tabCommission Percentage Collect` where parent = %s and from_day <= %s and to_day >= %s""", (cp, si.range_day, si.range_day))[0][0]
+				hasil = cpd
+			else:
+				hasil = 0
+		else:
+			check2 = frappe.db.sql("""select count(*) from `tabCommission Percentage` where docstatus = '1' and commission_type = 'COLLECT' and sales is null and disabled = '0'""")[0][0]
+			if flt(check2) == 1:
+				cp = frappe.db.sql("""select `name` from `tabCommission Percentage` where docstatus = '1' and commission_type = 'COLLECT' and sales is null and disabled = '0'""")[0][0]
+				cpd = frappe.db.sql("""select percentage from `tabCommission Percentage Collect` where parent = %s and from_day <= %s and to_day >= %s""", (cp, si.range_day, si.range_day))[0][0]
+				hasil = cpd
+			else:
+				hasil = 0
+		komisi = (flt(hasil) / 100) * flt(si.allocated_amount)
 		si_list.append(frappe._dict({
 	        'payment_entry': si.payment_entry,
 	        'payment_date': si.payment_date,
 			'sales_invoice': si.sales_invoice,
 	        'payment_amount': si.allocated_amount,
 			'invoice_date': si.sales_invoice_date,
-			'date_diff': si.range_day
+			'date_diff': si.range_day,
+			'payment_commission': komisi
 	    }))
 	return si_list
 

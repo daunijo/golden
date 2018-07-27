@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.22.4'
+__version__ = '1.22.5'
 
+# 1.22.5
+#   - Update Sales Commission
+#   - Update Receive Order
 # 1.22.4
 #   - Fix issue #99 about Receive Order
 #   - Fix issue #108 about Expedition checkbox
