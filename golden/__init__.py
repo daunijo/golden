@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.22.5'
+__version__ = '1.22.6'
 
+# 1.22.6
+#   - Add doctype Delivery Keeptrack Barcode
+#   - Update Delivery Keeptrack
+#   - Update Receive Order
 # 1.22.5
 #   - Update Sales Commission
 #   - Update Receive Order

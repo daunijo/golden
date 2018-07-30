@@ -193,20 +193,27 @@ def get_po_detail(po, item_code):
 	return si_rate
 
 def get_item_code(doctype, txt, searchfield, start, page_len, filters):
-    return frappe.db.sql("""select item_code, parent, concat("<br />Qty PO: ",cast(qty as int)), concat("<br />Qty: ",cast((qty-received_qty) as int)) from `tabPurchase Order Item`
-        where docstatus = '1'
-            and (item_name like %(txt)s or item_code like %(txt)s)
-			and qty > received_qty
+    # return frappe.db.sql("""select item_code, parent, concat("<br />Qty PO: ",cast(qty as int)), concat("<br />Qty: ",cast((qty-received_qty) as int)) from `tabPurchase Order Item`
+    #     where docstatus = '1'
+    #         and (item_name like %(txt)s or item_code like %(txt)s)
+	# 		and qty > received_qty
+    #         {mcond}
+    #     order by item_code asc limit %(start)s, %(page_len)s""".format(**{
+    #         'key': searchfield,
+    #         'mcond':get_match_cond(doctype)
+    return frappe.db.sql("""select distinct(a.item_code), a.item_name, concat("<br />",(select count(*) from `tabPurchase Order Item` b where b.docstatus = '1' and b.item_code = a.item_code and b.qty > b.received_qty), " PO(S)") from `tabPurchase Order Item` a
+        where a.docstatus = '1'
+            and (a.item_name like %(txt)s or a.item_code like %(txt)s)
+			and a.qty > a.received_qty
             {mcond}
-        order by item_code asc limit %(start)s, %(page_len)s""".format(**{
+        order by a.item_code asc limit %(start)s, %(page_len)s""".format(**{
             'key': searchfield,
             'mcond':get_match_cond(doctype)
         }), {
             'txt': "%%%s%%" % txt,
             '_txt': txt.replace("%", ""),
             'start': start,
-            'page_len': page_len,
-#            'po': filters.get("po")
+            'page_len': page_len
         })
 
 def get_list_purchase_order(doctype, txt, searchfield, start, page_len, filters):

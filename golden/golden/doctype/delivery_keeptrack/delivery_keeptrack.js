@@ -63,6 +63,61 @@ frappe.ui.form.on('Delivery Keeptrack', {
 			frm.set_df_property("posting_time", "read_only", true);
 		}
 	},
+	get_barcode: function(frm){
+		// frm.clear_table("bcode");
+		items = $.map( cur_frm.doc.bcode, function(item,idx) { return "'"+item.barcode_1+"'" } )
+		added_items = items.join(",")
+		return frappe.call({
+			method: 'golden.golden.doctype.delivery_keeptrack.delivery_keeptrack.get_packing_barcode',
+			args: {
+				barc: frm.doc.barcode,
+				notin: added_items || "-"
+			},
+			callback: function(r, rt) {
+				if(r.message){
+					$.each(r.message, function(i, d){
+						var c = frm.add_child("bcode");
+						c.barcode = d.barcode;
+						c.barcode_1 = d.barcode_1;
+						c.box = d.box;
+						c.delivery_order = d.delivery_order;
+						c.do_no = d.do_no;
+					})
+					frm.events.set_details(frm);
+					frm.set_value("barcode", "");
+				}else{
+					frm.set_value("barcode", "");
+				}
+				frm.refresh_fields();
+			}
+		})
+	},
+	set_details: function(frm){
+		pc = $.map( cur_frm.doc.bcode, function(item,idx) { return "'"+item.do_no+"'" } );
+		pc_list = pc.join(",")
+		return frappe.call({
+			method: 'golden.golden.doctype.delivery_keeptrack.delivery_keeptrack.get_packing_from_barcode',
+			args: {
+				bcode: frm.doc.barcode,
+				do: pc_list || "-"
+			},
+			callback: function(r, rt) {
+				if(r.message) {
+					$.each(r.message, function(i, d) {
+						var c = frm.add_child("details");
+						c.delivery_order = d.delivery_order;
+						c.packing = d.packing;
+						c.customer = d.customer;
+						c.customer_name = d.customer_name;
+						c.box = d.box;
+						c.sales_order = d.sales_order;
+						c.expedition = d.expedition
+					})
+					frm.refresh_fields();
+				}
+			}
+		});
+	},
 });
 cur_frm.cscript['Delivery Return'] = function() {
 	frappe.model.open_mapped_doc({
