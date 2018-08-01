@@ -53,7 +53,8 @@ def submit_sales_order(doc, method):
     			"section": row.default_section,
     			"transaction_date": doc.transaction_date,
     			"company": doc.company,
-                "action": "Auto"
+                "action": "Auto",
+                "priority": doc.rss_priority
     		})
     		picking.save()
 

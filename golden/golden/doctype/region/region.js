@@ -3,10 +3,6 @@
 
 frappe.ui.form.on('Region', {
 	setup: function(frm) {
-		frm.set_query('city', function(doc) {
-			return {
-				filters: { 'disabled': 0 }
-			}
-		});
+
 	}
 });

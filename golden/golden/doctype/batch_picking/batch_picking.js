@@ -24,6 +24,7 @@ frappe.ui.form.on('Batch Picking', {
 						c.picking = d.picking;
 						c.delivery_date = d.delivery_date;
 						c.address_display = d.address_display;
+						c.priority = d.priority;
 					})
 					frm.refresh_fields();
 				}

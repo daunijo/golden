@@ -110,6 +110,7 @@ frappe.ui.form.on('Sales Commission', {
 					})
 					frm.events.calculate_total_invoice(frm);
 					frm.events.calculate_percentage_invoice(frm);
+					frm.events.calculate_invoice_commission(frm);
 					// frm.events.calculate_total_commission(frm);
 					frm.refresh_fields();
 				}
@@ -137,6 +138,7 @@ frappe.ui.form.on('Sales Commission', {
 					frm.events.calculate_total_return(frm);
 					frm.events.calculate_percentage_invoice(frm);
 					frm.events.calculate_percentage_return(frm);
+					frm.events.calculate_return_commission(frm);
 					// frm.events.calculate_total_commission(frm);
 					frm.refresh_fields();
 				}

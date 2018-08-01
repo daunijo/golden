@@ -1,8 +1,19 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.22.6'
+__version__ = '1.22.7'
 
+# 1.22.7
+#   - Update script Item
+#   - Update Batck Picking
+#   - Update City
+#   - Update Region
+#   - Update Packing Barcode
+#   - Update Picking Order
+#   - Update Sales Commission
+#   - Update Sales Target
+#   - Update Stock Card
+#   - Update Stock Sales
 # 1.22.6
 #   - Add doctype Delivery Keeptrack Barcode
 #   - Update Delivery Keeptrack
