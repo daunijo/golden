@@ -1573,7 +1573,7 @@
   {
    "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
-   "bold": 1, 
+   "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
    "depends_on": "eval:(doc.paid_from && doc.paid_to)", 
@@ -1633,7 +1633,7 @@
   {
    "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
-   "bold": 1, 
+   "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
    "depends_on": "eval:(doc.paid_from && doc.paid_to)", 
@@ -2009,7 +2009,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-07-16 09:18:33.522207", 
+ "modified": "2018-07-31 11:11:14.044723", 
  "modified_by": "Administrator", 
  "module": "Golden", 
  "name": "Payment Entry Receive", 

@@ -88,12 +88,13 @@ def get_payments(sales, sales_target, start_date, end_date):
 
 @frappe.whitelist()
 def calculate_invoice(sales, percentage, total_invoice):
+	percent_round = round(flt(percentage),0)
 	check1 = frappe.db.sql("""select count(*) from `tabCommission Percentage` where docstatus = '1' and commission_type = 'SELL' and sales = %s and disabled = '0'""", sales)[0][0]
 	if flt(check1) == 1:
 		check2 = frappe.db.sql("""select count(*) from `tabCommission Percentage` where docstatus = '1' and commission_type = 'SELL' and sales = %s and disabled = '0'""", sales)[0][0]
 		if flt(check2) == 1:
 			cp = frappe.db.sql("""select `name` from `tabCommission Percentage` where docstatus = '1' and commission_type = 'SELL' and sales = %s and disabled = '0'""", sales)[0][0]
-			cpd = frappe.db.sql("""select percentage from `tabCommission Percentage Detail` where parent = %s and from_range <= %s and to_range >= %s""", (cp, percentage, percentage))[0][0]
+			cpd = frappe.db.sql("""select percentage from `tabCommission Percentage Detail` where parent = %s and from_range <= %s and to_range >= %s""", (cp, percent_round, percent_round))[0][0]
 			hasil = cpd
 		else:
 			hasil = 0
@@ -101,7 +102,7 @@ def calculate_invoice(sales, percentage, total_invoice):
 		check2 = frappe.db.sql("""select count(*) from `tabCommission Percentage` where docstatus = '1' and commission_type = 'SELL' and sales is null and disabled = '0'""")[0][0]
 		if flt(check2) == 1:
 			cp = frappe.db.sql("""select `name` from `tabCommission Percentage` where docstatus = '1' and commission_type = 'SELL' and sales is null and disabled = '0'""")[0][0]
-			cpd = frappe.db.sql("""select percentage from `tabCommission Percentage Detail` where parent = %s and from_range <= %s and to_range >= %s""", (cp, percentage, percentage))[0][0]
+			cpd = frappe.db.sql("""select percentage from `tabCommission Percentage Detail` where parent = %s and from_range <= %s and to_range >= %s""", (cp, percent_round, percent_round))[0][0]
 			hasil = cpd
 		else:
 			hasil = 0
@@ -113,12 +114,13 @@ def calculate_invoice(sales, percentage, total_invoice):
 
 @frappe.whitelist()
 def calculate_return(sales, percentage, total_return):
+	percent_round = round(flt(percentage),0)
 	check1 = frappe.db.sql("""select count(*) from `tabCommission Percentage` where docstatus = '1' and commission_type = 'RETURN' and sales = %s and disabled = '0'""", sales)[0][0]
 	if flt(check1) == 1:
 		check2 = frappe.db.sql("""select count(*) from `tabCommission Percentage` where docstatus = '1' and commission_type = 'RETURN' and sales = %s and disabled = '0'""", sales)[0][0]
 		if flt(check2) == 1:
 			cp = frappe.db.sql("""select `name` from `tabCommission Percentage` where docstatus = '1' and commission_type = 'RETURN' and sales = %s and disabled = '0'""", sales)[0][0]
-			cpd = frappe.db.sql("""select percentage from `tabCommission Percentage Detail` where parent = %s and from_range <= %s and to_range >= %s""", (cp, percentage, percentage))[0][0]
+			cpd = frappe.db.sql("""select percentage from `tabCommission Percentage Detail` where parent = %s and from_range <= %s and to_range >= %s""", (cp, percent_round, percent_round))[0][0]
 			hasil = cpd
 		else:
 			hasil = 0
@@ -126,7 +128,7 @@ def calculate_return(sales, percentage, total_return):
 		check2 = frappe.db.sql("""select count(*) from `tabCommission Percentage` where docstatus = '1' and commission_type = 'RETURN' and sales is null and disabled = '0'""")[0][0]
 		if flt(check2) == 1:
 			cp = frappe.db.sql("""select `name` from `tabCommission Percentage` where docstatus = '1' and commission_type = 'RETURN' and sales is null and disabled = '0'""")[0][0]
-			cpd = frappe.db.sql("""select percentage from `tabCommission Percentage Detail` where parent = %s and from_range <= %s and to_range >= %s""", (cp, percentage, percentage))[0][0]
+			cpd = frappe.db.sql("""select percentage from `tabCommission Percentage Detail` where parent = %s and from_range <= %s and to_range >= %s""", (cp, percent_round, percent_round))[0][0]
 			hasil = cpd
 		else:
 			hasil = 0

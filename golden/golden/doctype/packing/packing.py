@@ -143,6 +143,10 @@ class Packing(Document):
 			list_bc = frappe.db.sql("""select * from `tabPacking Barcode` where parent = %s""",self.name, as_dict=1)
 			for row in list_bc:
 				link = "https://barcode.tec-it.com/barcode.ashx?data="+row.name+"&code=EAN13&dpi=100"
+				# pb = frappe.get_doc("Packing Barcode", row.name)
+				# pb.barcode_1 = pb.name
+				# pb.barcode_2 = link
+				# pb.save()
 				frappe.db.sql("""update `tabPacking Barcode` set barcode_1 = `name`, barcode_2 = %s where `name` = %s""", (link, row.name))
 
 	def on_cancel(self):

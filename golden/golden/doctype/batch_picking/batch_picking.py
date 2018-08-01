@@ -16,11 +16,12 @@ def get_details(start_from, end_from):
     bp = frappe.db.sql("""select `name`, sales_order from `tabPicking Order` where docstatus = '1' and `name` between %s and %s""", (start_from, end_from), as_dict=True)
     picking_list = []
     for d in bp:
-		so = frappe.db.get_value("Sales Order", d.sales_order, ["delivery_date", "address_display"], as_dict=1)
+		so = frappe.db.get_value("Sales Order", d.sales_order, ["delivery_date", "address_display", "rss_priority"], as_dict=1)
 		picking_list.append(frappe._dict({
             'picking': d.name,
 			'delivery_date': so.delivery_date,
-			'address_display': so.address_display
+			'address_display': so.address_display,
+			'priority': so.rss_priority
         }))
     return picking_list
 
