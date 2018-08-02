@@ -5,9 +5,8 @@ frappe.ui.form.on('Sales Commission', {
 	setup: function(frm){
 		frm.set_query("sales", function (doc) {
 			return {
-				filters: [
-					['department', '=', 'Sales']
-				]
+				query: "golden.golden.doctype.employee_settings.employee_settings.employee_query",
+				filters: { 'department': 'sales' }
 			}
 		});
 		frm.set_query("sales_target", function (doc) {

@@ -5,9 +5,8 @@ frappe.ui.form.on('Sales Target', {
 	setup: function(frm){
 		frm.set_query("sales", function (doc) {
 			return {
-				filters: [
-					['department', '=', 'Sales']
-				]
+				query: "golden.golden.doctype.employee_settings.employee_settings.employee_query",
+				filters: { 'department': 'sales' }
 			}
 		});
 	},
@@ -99,7 +98,7 @@ frappe.ui.form.on('Sales Target', {
 				if(i.difference_day == '-'){
 					return(0)
 				}else{
-					return ((flt(i.difference_day) * flt(i.contribution)) / 100);					
+					return ((flt(i.difference_day) * flt(i.contribution)) / 100);
 				}
 			})
 		);

@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.22.7'
+__version__ = '1.22.8'
 
+# 1.22.8
+#   - [Fix] overlapping in commission percentate, #145
+#   - Update balance in report Stock Card, Stock Card Sales & Stock Card Purchasing
+#   - Hide detail in Purchase Budget, #147
+#   - [Fix] Sales Return error when save, #143
 # 1.22.7
 #   - Update script Item
 #   - Update Batck Picking
-#   - Update City
-#   - Update Region
+#   - [Fix] Customer Rgion above City #139
 #   - Update Packing Barcode
 #   - Update Picking Order
 #   - Update Sales Commission

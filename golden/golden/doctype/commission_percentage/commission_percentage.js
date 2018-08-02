@@ -2,6 +2,14 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Commission Percentage', {
+	setup: function(frm){
+		frm.set_query("sales", function (doc) {
+			return {
+				query: "golden.golden.doctype.employee_settings.employee_settings.employee_query",
+				filters: { 'department': 'sales' }
+			}
+		});
+	},
 	refresh: function(frm) {
 		if(frm.doc.docstatus == 0 || frm.doc.__islocal){
 			frm.events.set_read_only(frm);

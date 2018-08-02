@@ -50,7 +50,7 @@ frappe.query_reports["Stock Card Sales"] = {
 		},
 		{
 			"fieldname":"price_list",
-			"label": __("Price List"),
+			"label": __("Selling Price List"),
 			"fieldtype": "Link",
 			"options": "Price List",
 			"get_query": function() {
