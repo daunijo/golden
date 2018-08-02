@@ -18,8 +18,10 @@ class SalesReturn(Document):
 		self.calculate_rate_and_amount()
 		self.delete_account()
 		self.set_default_account()
+		# self.copy_references()
 
 	def before_submit(self):
+		self.delete_account()
 		self.copy_references()
 
 	def on_submit(self):
@@ -33,7 +35,11 @@ class SalesReturn(Document):
 		self.journal_entry_cancel()
 
 	def delete_account(self):
-		frappe.db.sql("""delete from `tabSales Return Account` where parent = %s""", self.name)
+		count = frappe.db.sql("""select count(*) from `tabSales Return Account` where parent = %s""", self.name)[0][0]
+		if flt(count) != 0:
+			sra = frappe.get_doc("Sales Return Account", {"parent": self.name})
+			sra.delete()
+		# frappe.db.sql("""delete from `tabSales Return Account` where parent = %s""", self.name)
 
 	def set_default_account(self):
 		if not self.debit_account:
@@ -179,11 +185,13 @@ class SalesReturn(Document):
 		if self.get("references"):
 			for d in self.get("references"):
 				self.append("accounts", {
-		            "account": d.account,
+		            "account": self.credit_account,
 		            "party_type": d.party_type,
 		            "party": d.party,
 		            "debit_in_account_currency": d.debit_in_account_currency,
 		            "credit_in_account_currency": d.credit_in_account_currency,
+		            "debit": d.debit_in_account_currency,
+		            "credit": d.credit_in_account_currency,
 					"reference_type": d.reference_type,
 					"reference_name": d.reference_name,
 					"cost_center": cost_center
@@ -195,6 +203,8 @@ class SalesReturn(Document):
 				"party": self.customer,
 				"debit_in_account_currency": 0,
 				"credit_in_account_currency": self.total_2,
+				"debit": 0,
+				"credit": self.total_2,
 				"cost_center": cost_center
 			}).save()
 
@@ -203,8 +213,10 @@ class SalesReturn(Document):
 		else:
 			total_2 = self.total_2
 		self.append("accounts", {
+			"reference_type": "",
             "account": self.debit_account,
             "debit_in_account_currency": total_2,
+            "debit": total_2,
 			"cost_center": cost_center
 		}).save()
 

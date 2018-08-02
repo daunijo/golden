@@ -27,64 +27,11 @@ frappe.query_reports["Stock Card Purchasing"] = {
 			"reqd": 1
 		},
 		{
-			"fieldname":"warehouse",
-			"label": __("Warehouse"),
-			"fieldtype": "Link",
-			"options": "Warehouse",
-			"get_query": function() {
-				return{
-					filters: {
-						'is_group': 1,
-						'type': "Warehouse"
-					}
-				};
-			}
-		},
-		{
-			"fieldname":"section",
-			"label": __("Section"),
-			"fieldtype": "Link",
-			"options": "Warehouse",
-			"get_query": function() {
-				return{
-					filters: {
-						'is_group': 1,
-						'type': "Section"
-					}
-				};
-			}
-		},
-		{
-			"fieldname":"location",
-			"label": __("Location"),
-			"fieldtype": "Link",
-			"options": "Warehouse",
-			"get_query": function() {
-				return{
-					filters: {
-						'is_group': 0,
-						'type': "Location"
-					}
-				};
-			}
-		},
-		{
 			"fieldname":"item_code",
 			"label": __("Item"),
 			"fieldtype": "Link",
-			"options": "Item"
-		},
-		{
-			"fieldname":"item_group",
-			"label": __("Item Group"),
-			"fieldtype": "Link",
-			"options": "Item Group"
-		},
-		{
-			"fieldname":"brand",
-			"label": __("Brand"),
-			"fieldtype": "Link",
-			"options": "Brand"
+			"options": "Item",
+			"reqd": 1
 		},
 		{
 			"fieldname":"voucher_type",
@@ -100,6 +47,20 @@ frappe.query_reports["Stock Card Purchasing"] = {
 				{ "value": "Purchase Return", "label": __("Purchase Return") }
 			],
 			"default": "All",
+		},
+		{
+			"fieldname":"price_list",
+			"label": __("Selling Price List"),
+			"fieldtype": "Link",
+			"options": "Price List",
+			"get_query": function() {
+				return{
+					filters: {
+						'enabled': 1,
+						'selling': 1
+					}
+				};
+			}
 		},
 	]
 }

@@ -9,6 +9,17 @@ from frappe.utils import flt
 from frappe import msgprint, _
 
 class CommissionPercentage(Document):
+	def validate(self):
+		if self.details:
+			start = 0
+			end = 0
+			for row in self.details:
+				if flt(start) != 0 and flt(end) != 0:
+					if start <= row.from_range <= end:
+						frappe.throw(_("From Range in row {0} is overlap").format(row.idx))
+				start = row.from_range
+				end = row.to_range
+
 	def on_submit(self):
 		self.update_other_doc()
 
