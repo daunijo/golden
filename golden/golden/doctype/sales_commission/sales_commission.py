@@ -55,7 +55,7 @@ def get_returns(sales, sales_target, start_date, end_date):
 @frappe.whitelist()
 def get_payments(sales, sales_target, start_date, end_date):
 	si_list = []
-	std = frappe.db.sql("""select b.`name` as payment_entry, b.posting_date as payment_date, a.allocated_amount, c.sales_invoice, c.sales_invoice_date, datediff(b.posting_date,c.sales_invoice_date) as range_day from `tabPayment Entry Receive Reference` a inner join `tabPayment Entry Receive` b on b.`name` = a.parent inner join `tabSales Target Detail` c on c.sales_invoice = a.reference_name where b.docstatus = '1' and c.parent = %s""", (sales_target), as_dict=True)
+	std = frappe.db.sql("""select b.`name` as payment_entry, b.posting_date as payment_date, a.allocated_amount, c.sales_invoice, c.sales_invoice_date, datediff(b.posting_date,c.sales_invoice_date) as range_day from `tabPayment Entry Receive Reference` a inner join `tabPayment Entry Receive` b on b.`name` = a.parent inner join `tabSales Target Detail` c on c.sales_invoice = a.reference_name where b.docstatus = '1' and b.collector = %s""", (sales), as_dict=True)
 	for si in std:
 		check1 = frappe.db.sql("""select count(*) from `tabCommission Percentage` where docstatus = '1' and commission_type = 'COLLECT' and sales = %s and disabled = '0'""", sales)[0][0]
 		if flt(check1) == 1:

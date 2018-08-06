@@ -18,7 +18,7 @@ class SalesReturn(Document):
 		self.calculate_rate_and_amount()
 		self.delete_account()
 		self.set_default_account()
-		# self.copy_references()
+		self.check_allocated_ref()
 
 	def before_submit(self):
 		self.delete_account()
@@ -48,6 +48,11 @@ class SalesReturn(Document):
 				self.debit_account = check_return_account
 			else:
 				frappe.throw(_("You must set <b>Default Sales Return Account</b> in Company"))
+
+	def check_allocated_ref(self):
+		for ref in self.references:
+			if flt(ref.credit_in_account_currency) > flt(ref.outstanding_amount):
+				frappe.throw(_("Allocated amount in row {0} is bigger than Outstanding Amount").format(ref.idx))
 
 	def get_item_details(self, args=None, for_update=False):
 		item = frappe.db.sql("""select stock_uom, description, image, item_name,
@@ -207,16 +212,25 @@ class SalesReturn(Document):
 				"credit": self.total_2,
 				"cost_center": cost_center
 			}).save()
-
-		if self.total_return:
-			total_2 = self.total_return
-		else:
-			total_2 = self.total_2
+		if flt(self.unallocated_amount) > 0:
+			self.append("accounts", {
+				"reference_type": "",
+	            "account": self.write_off_account,
+				"debit_in_account_currency": 0,
+				"credit_in_account_currency": self.unallocated_amount,
+				"debit": 0,
+				"credit": self.unallocated_amount,
+				"cost_center": cost_center
+			}).save()
+		# if self.total_return:
+		# 	total_2 = self.total_return
+		# else:
+		# 	total_2 = self.total_2
 		self.append("accounts", {
 			"reference_type": "",
             "account": self.debit_account,
-            "debit_in_account_currency": total_2,
-            "debit": total_2,
+            "debit_in_account_currency": self.total_2,
+            "debit": self.total_2,
 			"cost_center": cost_center
 		}).save()
 
@@ -246,7 +260,8 @@ class SalesReturn(Document):
 			"company": self.company,
 			"total_debit": self.total_return,
 			"total_credit": self.total_return,
-			"accounts": self.accounts
+			"accounts": self.accounts,
+			"rss_customer": self.customer
 		})
 		journal_entry.save()
 		je = frappe.get_doc("Journal Entry", {"sales_return": self.name})
@@ -292,3 +307,19 @@ def get_item_rate(parent, item_code):
 		'sales_person':sales
 	}
 	return si_rate
+
+@frappe.whitelist()
+def get_references(customer):
+	si_list = []
+	sales_invoice = frappe.db.sql("""select * from `tabSales Invoice` where docstatus = '1' and customer = %s and outstanding_amount > 0""", customer, as_dict=True)
+	for si in sales_invoice:
+		account = frappe.db.get_value("Company", si.company, "default_sales_return_account")
+		si_list.append(frappe._dict({
+	        'reference_name': si.name,
+	        'posting_date': si.posting_date,
+	        'total_amount': si.grand_total,
+			'outstanding_amount': si.outstanding_amount,
+			'party': si.customer,
+			'account': account
+	    }))
+	return si_list

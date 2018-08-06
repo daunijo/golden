@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.22.8'
+__version__ = '1.22.9'
 
+# 1.22.9
+#   - Update Sales Return
+#   - Update Purchase Budget
+#   - Update Sales Commission
+#   - Add report: Stock Card by Location
 # 1.22.8
 #   - [Fix] overlapping in commission percentate, #145
 #   - Update balance in report Stock Card, Stock Card Sales & Stock Card Purchasing
