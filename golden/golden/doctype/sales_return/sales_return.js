@@ -5,6 +5,15 @@ frappe.ui.form.on('Sales Return', {
 	refresh: function(frm) {
 		frm.events.set_read_only(frm);
 	},
+	setup: function(frm){
+		frm.set_query("to_warehouse", function (doc) {
+			return {
+				filters: [
+					['type', '=', 'Location'],
+				]
+			}
+		});
+	},
 	validate: function(frm){
 		frm.clear_table("accounts");
 		frm.events.set_expense_account(frm);
@@ -22,11 +31,14 @@ frappe.ui.form.on('Sales Return', {
 		}
 	},
 	customer: function(frm){
-		$.each(frm.doc.references, function(i, d) {
-			d.party = frm.doc.customer;
-		})
-		frm.refresh_fields("references");
-		frm.events.set_debit_credit_account(frm);
+		if(frm.doc.customer){
+			$.each(frm.doc.references, function(i, d) {
+				d.party = frm.doc.customer;
+			})
+			// frm.refresh_fields("references");
+			frm.events.set_debit_credit_account(frm);
+			frm.events.set_references(frm);
+		}
 	},
 	set_debit_credit_account: function(frm){
 		frappe.call({
@@ -38,8 +50,34 @@ frappe.ui.form.on('Sales Return', {
 			callback: function (data) {
 				frm.set_value("debit_account", data.message.default_sales_return_account);
 				frm.set_value("credit_account", data.message.default_receivable_account);
+				frm.set_value("to_warehouse", data.message.default_return_warehouse);
 			}
 		})
+	},
+	set_references: function(frm){
+		frm.clear_table("references");
+		return frappe.call({
+			method: 'golden.golden.doctype.sales_return.sales_return.get_references',
+			args: {
+				customer: frm.doc.customer
+			},
+			callback: function(r, rt) {
+				if(r.message) {
+					$.each(r.message, function(i, d) {
+						var c = frm.add_child("references");
+						c.reference_name = d.reference_name;
+						c.posting_date = d.posting_date;
+						c.total_amount = d.total_amount;
+						c.outstanding_amount = d.outstanding_amount;
+						c.party = d.party;
+						c.account = d.account;
+					})
+					// calculate_total_return(frm, cdt, cdn);
+					// calculate_unallocated_amount(frm, cdt, cdn);
+					frm.refresh_fields();
+				}
+			}
+		});
 	},
 	customer_address: function(frm){
 		if(frm.doc.customer_address != undefined){
@@ -99,12 +137,13 @@ frappe.ui.form.on('Sales Return Detail', {
 	},
 	items_remove: function(frm, cdt, cdn) {
 		calculate_total_quantity(frm, cdt, cdn);
+		calculate_unallocated_amount(frm, cdt, cdn);
 	},
 	item_code: function(frm, cdt, cdn) {
 		var d = locals[cdt][cdn];
 		frappe.model.set_value(cdt, cdn, "sales_invoice", "");
 		frappe.model.set_value(cdt, cdn, "si_rate", "0");
-		calculate_total_quantity(frm, cdt, cdn);
+		// calculate_total_quantity(frm, cdt, cdn);
 		if(d.item_code) {
 			var args = {
 				'item_code'		: d.item_code,
@@ -160,12 +199,14 @@ frappe.ui.form.on('Sales Return Detail', {
 		refresh_field('amount', d.name, 'items');
 		refresh_field('transfer_qty', d.name, 'items');
 		calculate_total_quantity(frm, cdt, cdn);
+		calculate_unallocated_amount(frm, cdt, cdn);
 	},
 	basic_rate: function(frm, cdt, cdn){
 		var d = locals[cdt][cdn];
 		d.amount = flt(d.qty) * flt(d.basic_rate);
 		refresh_field('amount', d.name, 'items');
 		calculate_total_quantity(frm, cdt, cdn);
+		// calculate_unallocated_amount(frm, cdt, cdn);
 	},
 	conversion_factor: function(frm, cdt, cdn){
 		d.transfer_qty = flt(d.qty) * flt(d.conversion_factor);
@@ -238,12 +279,15 @@ cur_frm.set_query("sales_invoice", "items",  function (doc, cdt, cdn) {
 	}
 });
 cur_frm.set_query("reference_name", "references", function (doc, cdt, cdn) {
+	items = $.map( cur_frm.doc.references, function(item,idx) { return item.reference_name } )
+	added_items = items.join(",")
 	var c_doc= locals[cdt][cdn];
 	return {
 		filters: {
 			'customer': cur_frm.doc.customer,
 			'docstatus': 1,
-			'status': ['!=', 'Paid']
+			'status': ['!=', 'Paid'],
+			'name': ["not in", added_items]
 		}
 	}
 });
@@ -257,13 +301,16 @@ frappe.ui.form.on("Sales Return Reference", {
 				name: row.reference_name
 			},
 			callback: function (data) {
-				frappe.model.set_value(cdt, cdn, "net_total", data.message.net_total);
+				frappe.model.set_value(cdt, cdn, "total_amount", data.message.grand_total);
+				frappe.model.set_value(cdt, cdn, "outstanding_amount", data.message.outstanding_amount);
 			}
 		})
 		calculate_total_return(frm, cdt, cdn);
+		// calculate_unallocated_amount(frm, cdt, cdn);
 	},
 	credit_in_account_currency: function(frm, cdt, cdn) {
 		calculate_total_return(frm, cdt, cdn);
+		calculate_unallocated_amount(frm, cdt, cdn);
 	},
 	references_add: function(frm, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
@@ -273,6 +320,7 @@ frappe.ui.form.on("Sales Return Reference", {
 	},
 	references_remove: function(frm, cdt, cdn) {
 		calculate_total_return(frm, cdt, cdn);
+		calculate_unallocated_amount(frm, cdt, cdn);
 	},
 })
 var calculate_total_return = function(frm) {
@@ -282,4 +330,18 @@ var calculate_total_return = function(frm) {
 		})
 	);
 	frm.set_value("total_return", total_return);
+}
+var calculate_unallocated_amount = function(frm) {
+	var return_amount = frappe.utils.sum(
+		(frm.doc.references || []).map(function(i) {
+			return (flt(i.credit_in_account_currency));
+		})
+	);
+	var total_2 = frappe.utils.sum(
+		(frm.doc.items || []).map(function(i) {
+			return (flt(i.qty) * flt(i.si_rate) * flt(i.conversion_factor));
+		})
+	);
+	var unallocated = flt(total_2) - flt(return_amount);
+	frm.set_value("unallocated_amount", unallocated);
 }

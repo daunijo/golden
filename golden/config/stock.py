@@ -69,6 +69,12 @@ def get_data():
 					"doctype": "Stock Ledger Entry",
 					"is_query_report": True
 				},
+				{
+					"type": "report",
+					"name": "Stock Card by Location",
+					"doctype": "Stock Ledger Entry",
+					"is_query_report": True
+				},
 			]
 		}
     ]
