@@ -24,6 +24,20 @@ frappe.query_reports["Dynamic Item Report"] = {
 			"options": "Item"
 		},
 		{
+			"fieldname":"item_group",
+			"label": __("Item Group"),
+			"fieldtype": "Link",
+			"options": "Item Group",
+			"get_query": function() {
+				return {
+					"doctype": "Item Group",
+					"filters": {
+						"is_group": 0
+					}
+				}
+			}
+		},
+		{
 			"fieldname":"price_list",
 			"label": __("Price List"),
 			"fieldtype": "Link",

@@ -51,6 +51,7 @@ frappe.ui.form.on('Sales Return', {
 				frm.set_value("debit_account", data.message.default_sales_return_account);
 				frm.set_value("credit_account", data.message.default_receivable_account);
 				frm.set_value("to_warehouse", data.message.default_return_warehouse);
+				frm.set_value("write_off_account", data.message.default_sales_return_write_off_account);
 			}
 		})
 	},

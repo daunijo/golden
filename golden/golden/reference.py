@@ -551,7 +551,7 @@ def cancel_purchase_invoice_2(doc, method):
 def submit_stock_entry(doc, method):
     if doc.transfer_order:
         frappe.db.sql("""update `tabBin` set ito = null, ito_qty = 0 where ito = %s""", doc.transfer_order)
-        frappe.db.sql("""update `tabTransfer Order` set status = 'Completed' where `name` = %s""", doc.ito)
+        frappe.db.sql("""update `tabTransfer Order` set status = 'Completed' where `name` = %s""", doc.transfer_order)
 
 def validate_warehouse(doc, method):
     if not doc.parent_warehouse:

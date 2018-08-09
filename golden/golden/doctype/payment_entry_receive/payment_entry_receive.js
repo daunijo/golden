@@ -119,7 +119,7 @@ frappe.ui.form.on('Payment Entry Receive', {
 		erpnext.hide_company();
 		frm.events.hide_unhide_fields(frm);
 		frm.events.set_dynamic_labels(frm);
-		frm.events.show_general_ledger(frm);
+		// frm.events.show_general_ledger(frm);
 	},
 
 	company: function(frm) {
@@ -171,7 +171,7 @@ frappe.ui.form.on('Payment Entry Receive', {
 		frm.set_currency_labels(["base_paid_amount", "base_received_amount", "base_total_allocated_amount",
 			"difference_amount"], company_currency);
 
-		frm.set_currency_labels(["paid_amount"], frm.doc.paid_from_account_currency);
+		frm.set_currency_labels(["paid_amount", "paid_amount2"], frm.doc.paid_from_account_currency);
 		frm.set_currency_labels(["received_amount"], frm.doc.paid_to_account_currency);
 
 		var party_account_currency = frm.doc.payment_type=="Receive" ?
@@ -198,20 +198,20 @@ frappe.ui.form.on('Payment Entry Receive', {
 		frm.refresh_fields();
 	},
 
-	show_general_ledger: function(frm) {
-		if(frm.doc.docstatus==1) {
-			frm.add_custom_button(__('Ledger'), function() {
-				frappe.route_options = {
-					"voucher_no": frm.doc.name,
-					"from_date": frm.doc.posting_date,
-					"to_date": frm.doc.posting_date,
-					"company": frm.doc.company,
-					group_by_voucher: 0
-				};
-				frappe.set_route("query-report", "General Ledger");
-			}, "fa fa-table");
-		}
-	},
+	// show_general_ledger: function(frm) {
+	// 	if(frm.doc.docstatus==1) {
+	// 		frm.add_custom_button(__('Ledger'), function() {
+	// 			frappe.route_options = {
+	// 				"voucher_no": frm.doc.name,
+	// 				"from_date": frm.doc.posting_date,
+	// 				"to_date": frm.doc.posting_date,
+	// 				"company": frm.doc.company,
+	// 				group_by_voucher: 0
+	// 			};
+	// 			frappe.set_route("query-report", "General Ledger");
+	// 		}, "fa fa-table");
+	// 	}
+	// },
 
 	payment_type: function(frm) {
 		if(frm.doc.payment_type == "Internal Transfer") {
@@ -279,6 +279,7 @@ frappe.ui.form.on('Payment Entry Receive', {
 							() => frm.events.get_outstanding_documents(frm),
 							() => frm.events.hide_unhide_fields(frm),
 							() => frm.events.set_dynamic_labels(frm),
+							() => frm.events.set_custom_paid_amount(frm),
 							() => { frm.set_party_account_based_on_party = false; }
 						]);
 					}
@@ -286,7 +287,20 @@ frappe.ui.form.on('Payment Entry Receive', {
 			});
 		}
 	},
-
+	set_custom_paid_amount: function(frm){
+		frappe.call({
+			method: "frappe.client.get",
+			args: {
+				doctype: "Customer",
+				name: frm.doc.party
+			},
+			callback: function (data) {
+				var piut = frm.doc.party_balance - data.message.debt_to_this_customer;
+				frm.set_value("paid_amount2", data.message.debt_to_this_customer);
+				frm.set_value("paid_amount", piut);
+			}
+		})
+	},
 	paid_from: function(frm) {
 		if(frm.set_party_account_based_on_party) return;
 
@@ -651,7 +665,8 @@ frappe.ui.form.on('Payment Entry Receive', {
 						total_negative_outstanding : remaining_outstanding;
 			}
 
-			var allocated_positive_outstanding =  paid_amount + allocated_negative_outstanding;
+			// var allocated_positive_outstanding =  paid_amount + allocated_negative_outstanding;
+			var allocated_positive_outstanding =  frm.doc.paid_amount + frm.doc.paid_amount2;
 		} else if (in_list(["Customer", "Supplier"], frm.doc.party_type)) {
 			if(paid_amount > total_negative_outstanding) {
 				if(total_negative_outstanding == 0) {
@@ -832,7 +847,20 @@ frappe.ui.form.on('Payment Entry Receive', {
 
 						if (!write_off_row.length) {
 							var row = frm.add_child("deductions");
-							row.account = r.message[account];
+							// row.account = r.message[account];
+							frappe.call({
+								method: "frappe.client.get",
+								args: {
+									doctype: "Company",
+									filters:{
+										name: frm.doc.company,
+									}
+								},
+								callback: function (data) {
+									row.account = data.message.default_sales_return_write_off_account;
+								}
+							})
+
 							row.cost_center = r.message["cost_center"];
 						} else {
 							var row = write_off_row[0];

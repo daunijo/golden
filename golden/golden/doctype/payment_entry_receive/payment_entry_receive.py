@@ -12,12 +12,14 @@ class PaymentEntryReceive(Document):
 	def on_submit(self):
 		self.check_reference()
 		self.insert_payment_entry()
+		self.update_piutang_customer()
 
 	def check_reference(self):
 		if self.need_reference:
 			if self.reference_no == None or self.reference_date == None:
 				frappe.throw(_("Check/Reference No and Date is mandatory"))
 
+	@frappe.whitelist()
 	def insert_payment_entry(self):
 		pe = frappe.get_doc({
 			"doctype": "Payment Entry",
@@ -50,10 +52,25 @@ class PaymentEntryReceive(Document):
 		pe.save()
 		pe.submit()
 
+	def update_piutang_customer(self):
+		debt = frappe.db.sql("""select debt_to_this_customer from `tabCustomer` where `name` = %s""", self.party)[0][0]
+		new_debt = flt(debt) - flt(self.total_allocated_amount)
+		customer = frappe.get_doc("Customer", self.party)
+		customer.debt_to_this_customer = new_debt
+		customer.save()
+
 	def on_cancel(self):
 		self.delete_payment_entry()
+		self.update_piutang_customer2()
 
 	def delete_payment_entry(self):
 		pe = frappe.get_doc("Payment Entry", {"payment_entry_receive": self.name})
 		pe.cancel()
 		pe.delete()
+
+	def update_piutang_customer2(self):
+		debt = frappe.db.sql("""select debt_to_this_customer from `tabCustomer` where `name` = %s""", self.party)[0][0]
+		new_debt = flt(debt) + flt(self.total_allocated_amount)
+		customer = frappe.get_doc("Customer", self.party)
+		customer.debt_to_this_customer = new_debt
+		customer.save()

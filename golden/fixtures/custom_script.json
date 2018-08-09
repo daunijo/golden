@@ -39,9 +39,9 @@
   "docstatus": 0, 
   "doctype": "Custom Script", 
   "dt": "Company", 
-  "modified": "2018-08-06 09:49:57.236598", 
+  "modified": "2018-08-07 09:48:41.694534", 
   "name": "Company-Client", 
-  "script": "cur_frm.set_query(\"default_purchase_return_account\", function(frm) {\n\treturn {\n\t\tquery: \"erpnext.controllers.queries.get_expense_account\",\n\t}\n});\ncur_frm.set_query(\"default_selling_return_account\", function(frm) {\n\treturn {\n\t\tquery: \"erpnext.controllers.queries.get_expense_account\",\n\t}\n});\ncur_frm.set_query(\"default_return_warehouse\", function(frm) {\n\treturn {\n\t\tfilters: { 'type': 'Location' }\n\t}\n});", 
+  "script": "cur_frm.set_query(\"default_purchase_return_account\", function(frm) {\n\treturn {\n\t\tquery: \"erpnext.controllers.queries.get_expense_account\",\n\t}\n});\ncur_frm.set_query(\"default_selling_return_account\", function(frm) {\n\treturn {\n\t\tquery: \"erpnext.controllers.queries.get_expense_account\",\n\t}\n});\ncur_frm.set_query(\"default_sales_return_write_off_account\", function(frm) {\n\treturn {\n\t\tquery: \"erpnext.controllers.queries.get_expense_account\",\n\t}\n});\ncur_frm.set_query(\"default_return_warehouse\", function(frm) {\n\treturn {\n\t\tfilters: { 'type': 'Location' }\n\t}\n});", 
   "script_type": "Client"
  }, 
  {
