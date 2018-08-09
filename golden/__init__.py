@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.22.9'
+__version__ = '1.22.10'
 
+# 1.22.10
+#   - Add filter Item Group in Dynamic Item Report
+#   - Update Payment Entry Receive
+#   - Update submit_stock_entry in reference.py
+#   - Update custom script & custom field
 # 1.22.9
 #   - Update Sales Return
 #   - Update Purchase Budget

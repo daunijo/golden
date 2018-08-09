@@ -28,11 +28,13 @@ class SalesReturn(Document):
 #		self.check_total_return()
 		self.stock_entry_insert()
 		self.journal_entry_insert()
+		self.update_customer()
 
 	def on_cancel(self):
 		self.delete_account()
 		self.stock_entry_cancel()
 		self.journal_entry_cancel()
+		self.update_customer2()
 
 	def delete_account(self):
 		count = frappe.db.sql("""select count(*) from `tabSales Return Account` where parent = %s""", self.name)[0][0]
@@ -201,17 +203,17 @@ class SalesReturn(Document):
 					"reference_name": d.reference_name,
 					"cost_center": cost_center
 				}).save()
-		else:
-			self.append("accounts", {
-				"account": self.credit_account,
-				"party_type": "Customer",
-				"party": self.customer,
-				"debit_in_account_currency": 0,
-				"credit_in_account_currency": self.total_2,
-				"debit": 0,
-				"credit": self.total_2,
-				"cost_center": cost_center
-			}).save()
+		# else:
+		# 	self.append("accounts", {
+		# 		"account": self.credit_account,
+		# 		"party_type": "Customer",
+		# 		"party": self.customer,
+		# 		"debit_in_account_currency": 0,
+		# 		"credit_in_account_currency": self.total_2,
+		# 		"debit": 0,
+		# 		"credit": self.total_2,
+		# 		"cost_center": cost_center
+		# 	}).save()
 		if flt(self.unallocated_amount) > 0:
 			self.append("accounts", {
 				"reference_type": "",
@@ -267,6 +269,14 @@ class SalesReturn(Document):
 		je = frappe.get_doc("Journal Entry", {"sales_return": self.name})
 		je.submit()
 
+	def update_customer(self):
+		if flt(self.unallocated_amount) > 0:
+			debt = frappe.db.get_value("Customer", self.customer, "debt_to_this_customer")
+			new_debt = flt(debt) + flt(self.unallocated_amount)
+			customer = frappe.get_doc("Customer", self.customer)
+			customer.debt_to_this_customer = new_debt
+			customer.save()
+
 	def stock_entry_cancel(self):
 		se = frappe.get_doc("Stock Entry", {"sales_return": self.name})
 		se.cancel()
@@ -276,6 +286,14 @@ class SalesReturn(Document):
 		je = frappe.get_doc("Journal Entry", {"sales_return": self.name})
 		je.cancel()
 		je.delete()
+
+	def update_customer2(self):
+		if flt(self.unallocated_amount) > 0:
+			debt = frappe.db.get_value("Customer", self.customer, "debt_to_this_customer")
+			new_debt = flt(debt) - flt(self.unallocated_amount)
+			customer = frappe.get_doc("Customer", self.customer)
+			customer.debt_to_this_customer = new_debt
+			customer.save()
 
 @frappe.whitelist()
 def get_warehouse_details(args):
