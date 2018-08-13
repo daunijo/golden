@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.22.10'
+__version__ = '1.22.11'
 
+# 1.22.11
+#   - Update Commission Percentage, #150
+#   - Update Parent Warehouse & Parent Section in Warehouse, #151
 # 1.22.10
 #   - Add filter Item Group in Dynamic Item Report
 #   - Update Payment Entry Receive
