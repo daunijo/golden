@@ -50,7 +50,7 @@ class PaymentEntryReceive(Document):
 			"payment_entry_receive": self.name
 		})
 		pe.save()
-		pe.submit()
+		# pe.submit()
 
 	def update_piutang_customer(self):
 		debt = frappe.db.sql("""select debt_to_this_customer from `tabCustomer` where `name` = %s""", self.party)[0][0]

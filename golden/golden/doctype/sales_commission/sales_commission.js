@@ -195,12 +195,13 @@ frappe.ui.form.on('Sales Commission', {
 		frm.set_value("total_return", total_returns);
 	},
 	calculate_percentage_invoice: function(frm){
-		var percent_inv = ((flt(frm.doc.total_invoice) - flt(frm.doc.total_return))/ flt(frm.doc.target)) * 100
+		var percent_inv = ((flt(frm.doc.total_invoice) - flt(frm.doc.total_return))/ flt(frm.doc.target)) * 100;
 		frm.set_value("percentage_invoice", percent_inv)
 	},
 	calculate_percentage_return: function(frm){
-		var percent_ret = (flt(frm.doc.total_return) / flt(frm.doc.total_invoice)) * 100
-		frm.set_value("percentage_return", percent_ret)
+		var percent_ret = (flt(frm.doc.total_return) / flt(frm.doc.total_invoice)) * 100;
+		frm.set_value("percentage_return", percent_ret);
+		frm.refresh_fields();
 	},
 	calculate_invoice_commission: function(frm){
 		frappe.call({
@@ -222,7 +223,7 @@ frappe.ui.form.on('Sales Commission', {
 			method: "golden.golden.doctype.sales_commission.sales_commission.calculate_return",
 			args:{
 				sales: frm.doc.sales,
-				percentage: frm.doc.percentage_return,
+				percentage: frm.doc.percentage_return || 0,
 				total_return: frm.doc.total_return
 			},
 			callback: function (r) {
@@ -250,7 +251,11 @@ frappe.ui.form.on('Sales Commission', {
 		frm.events.calculate_total_commission(frm);
 	},
 	calculate_total_commission: function(frm){
-		var total_commission = flt(frm.doc.invoice_commission) + flt(frm.doc.return_commission) + flt(frm.doc.payment_commission);
+		var percentage = flt(frm.doc.percentage_invoice_result) + flt(frm.doc.percentage_return_result);
+		var amount = flt(frm.doc.total_invoice) - flt(frm.doc.total_return);
+		var commission = flt(amount) * (flt(percentage) / 100);
+		var total_commission = flt(commission) + flt(frm.doc.payment_commission);
+		// var total_commission = flt(frm.doc.invoice_commission) + flt(frm.doc.return_commission) + flt(frm.doc.payment_commission);
 		frm.set_value("total_commission", total_commission);
 	},
 });

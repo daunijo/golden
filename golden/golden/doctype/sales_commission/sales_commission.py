@@ -108,6 +108,7 @@ def calculate_invoice(sales, percentage, total_invoice):
 			hasil = 0
 	komisi = (flt(hasil) / 100) * flt(total_invoice)
 	inv_commission = {
+		'percentage_invoice_result': hasil,
 		'invoice_commission': komisi,
 	}
 	return inv_commission
@@ -134,6 +135,7 @@ def calculate_return(sales, percentage, total_return):
 			hasil = 0
 	komisi = (flt(hasil) / 100) * flt(total_return)
 	inv_commission = {
+		'percentage_return_result': hasil,
 		'return_commission': komisi,
 	}
 	return inv_commission
