@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.22.11'
+__version__ = '1.22.12'
 
+# 1.22.12
+#   - Add column Stock Card by Location in Stock Card, #136
+#   - Add collector_name in Invoice Keeptrack, #164
+#   - Add filter in collector, #165
 # 1.22.11
 #   - Update Commission Percentage, #150
 #   - Update Parent Warehouse & Parent Section in Warehouse, #151

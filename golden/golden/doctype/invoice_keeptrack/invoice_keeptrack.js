@@ -2,6 +2,14 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Invoice Keeptrack', {
+	setup: function(frm){
+		frm.set_query('collector', function(doc) {
+			return {
+				query: "golden.golden.doctype.employee_settings.employee_settings.employee_query",
+				filters: { 'department': 'collector' }
+			}
+		});
+	},
 	refresh: function(frm) {
 		frm.events.set_read_only(frm);
 		if(frm.doc.docstatus == 1 && frm.doc.status == "Submitted") {
@@ -42,6 +50,24 @@ frappe.ui.form.on('Invoice Keeptrack', {
 			}
 		})
 	},
+	collector: function(frm){
+		if(frm.doc.collector){
+			frappe.call({
+				method: "frappe.client.get",
+				args: {
+					doctype: "Employee",
+					filters:{
+						name: frm.doc.collector,
+					}
+				},
+				callback: function (data) {
+					frm.set_value("collector_name", data.message.employee_name);
+				}
+			})
+		}else{
+			frm.set_value("collector_name", "");
+		}
+	}
 });
 cur_frm.cscript['Payment Entry'] = function() {
 	frappe.model.open_mapped_doc({
