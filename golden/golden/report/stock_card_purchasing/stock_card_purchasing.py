@@ -82,10 +82,12 @@ def execute(filters=None):
 		else:
 			pl = 0
 
+		loc = "<a href='/desk#query-report/Stock Card by Location?item_code="+cl.item_code+"&location="+cl.warehouse+"' style='border:1px #01DF01 solid; background:#01DF01; color:#FFF'>Stock per Location</a>"
+
 		if vouchers == "All":
-			data.append([cl.date, cl.item_code, cl.item_name, cl.warehouse, qty, stock_all, cl.stock_uom, vt, vn, pl, discount, price_list, customer, pr_rate, pr_disc])
+			data.append([cl.date, cl.item_code, cl.item_name, cl.warehouse, qty, stock_all, cl.stock_uom, vt, vn, pl, discount, price_list, customer, pr_rate, pr_disc, loc])
 		elif vouchers == vt:
-			data.append([cl.date, cl.item_code, cl.item_name, cl.warehouse, qty, stock_all, cl.stock_uom, vt, vn, pl, discount, price_list, customer, pr_rate, pr_disc])
+			data.append([cl.date, cl.item_code, cl.item_name, cl.warehouse, qty, stock_all, cl.stock_uom, vt, vn, pl, discount, price_list, customer, pr_rate, pr_disc, loc])
 
 	return columns, data
 
@@ -108,6 +110,7 @@ def get_columns():
 		_("Customer") + ":Link/Customer:150",
 		_("Incoming Rate") + ":Float:100",
 		_("Discount Buying") + ":Percent:60",
+		_("Stock Card by Location") + "::130",
 	]
 
 	return columns

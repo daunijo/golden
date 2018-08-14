@@ -49,10 +49,12 @@ def execute(filters=None):
 			vt = cl.voucher_type
 			vn = cl.voucher_no
 
+		loc = "<a href='/desk#query-report/Stock Card by Location?item_code="+cl.item_code+"&location="+cl.warehouse+"' style='border:1px #01DF01 solid; background:#01DF01; color:#FFF'>Stock per Location</a>"
+
 		if vouchers == "All":
-			data.append([cl.date, cl.item_code, cl.item_name, cl.warehouse, qty, stock_all, cl.stock_uom, vt, vn])
+			data.append([cl.date, cl.item_code, cl.item_name, cl.warehouse, qty, stock_all, cl.stock_uom, vt, vn, loc])
 		elif vouchers == vt:
-			data.append([cl.date, cl.item_code, cl.item_name, cl.warehouse, qty, stock_all, cl.stock_uom, vt, vn])
+			data.append([cl.date, cl.item_code, cl.item_name, cl.warehouse, qty, stock_all, cl.stock_uom, vt, vn, loc])
 
 	return columns, data
 
@@ -69,6 +71,7 @@ def get_columns():
 		_("Stock UOM") + ":Link/UOM:80",
 		_("Voucher Type") + "::130",
 		_("Voucher #") + ":Dynamic Link/" + _("Voucher Type") + ":100",
+		_("Stock Card by Location") + "::130",
 	]
 
 	return columns
