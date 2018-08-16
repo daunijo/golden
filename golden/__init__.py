@@ -1,8 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.22.12'
+__version__ = '1.22.13'
 
+# 1.22.13
+#   - Add child doctype: Invoice Keeptrack Customer
+#   - Major update Invoice Keeptrack
+#   - Update Sales Invoice Summary
+#   - Add modul: RS for Receiver Staff
+#   - Update Sales Commission
+#   - Update Sales Return
 # 1.22.12
 #   - Add column Stock Card by Location in Stock Card, #136
 #   - Add collector_name in Invoice Keeptrack, #164

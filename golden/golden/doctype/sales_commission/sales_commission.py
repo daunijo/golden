@@ -42,13 +42,12 @@ def get_invoices(sales, sales_target, start_date, end_date):
 @frappe.whitelist()
 def get_returns(sales, sales_target, start_date, end_date):
 	si_list = []
-	std = frappe.db.sql("""select distinct(sr.`name`), sr.posting_date from `tabSales Return` sr inner join `tabSales Return Detail` srd on srd.parent = sr.`name` where sr.docstatus = '1' and srd.sales_person = %s and sr.posting_date >= %s and sr.posting_date <= %s""", (sales, start_date, end_date), as_dict=True)
-	for si in std:
-		amt = frappe.db.sql("""select sum(si_rate * qty) as amount from `tabSales Return Detail` where parent = %s and sales_person = %s""", (si.name, sales))[0][0]
+	sr = frappe.db.sql("""select `name`, posting_date, total_2 from `tabSales Return`where docstatus = '1' and sales_person = %s and posting_date >= %s and posting_date <= %s""", (sales, start_date, end_date), as_dict=True)
+	for si in sr:
 		si_list.append(frappe._dict({
 	        'return_date': si.posting_date,
 	        'sales_return': si.name,
-			'amount': flt(amt)
+			'amount': si.total_2
 	    }))
 	return si_list
 

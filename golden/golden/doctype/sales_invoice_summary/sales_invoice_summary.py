@@ -64,7 +64,13 @@ def get_sales_invoice(customer, start, end, sales):
 			'due_date': d.due_date,
 			'sales_name': d.rss_sales_name
 		}))
-	return_list = frappe.db.sql("""select si.`name` as si_name, si.customer, si.customer_name, si.posting_date, si.total_2 from `tabSales Return` si inner join `tabCustomer` c on c.`name` = si.customer where si.docstatus = '1' and si.sales_invoice_summary is null and si.customer = %s and si.posting_date >= %s and si.posting_date <= %s""", (customer, start, end), as_dict=True)
+	conditions2 = ""
+	conditions2 += " and si.customer = '%s'" % frappe.db.escape(customer)
+	conditions2 += " and si.posting_date >= '%s'" % frappe.db.escape(start)
+	conditions2 += " and si.posting_date <= '%s'" % frappe.db.escape(end)
+	if sales != "":
+		conditions2 += " and si.sales_person = '%s'" % frappe.db.escape(sales)
+	return_list = frappe.db.sql("""select si.`name` as si_name, si.customer, si.customer_name, si.posting_date, si.total_2 from `tabSales Return` si inner join `tabCustomer` c on c.`name` = si.customer where si.docstatus = '1' and si.sales_invoice_summary is null %s""" % conditions2, as_dict=True)
 	for e in return_list:
 		si_list.append(frappe._dict({
 			'customer': e.customer,
