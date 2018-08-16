@@ -10,5 +10,12 @@ def get_data():
 			"icon": "fa fa-rocket",
 			"type": "module",
 			"label": _("Golden")
-		}
+		},
+		{
+			"module_name": "RS",
+			"color": "#4286f4",
+			"icon": "octicon octicon-database",
+			"label": _("Receiver Staff"),
+			"type": "module"
+		},
 	]

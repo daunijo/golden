@@ -12,7 +12,8 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
         inner join `tabSales Invoice` c on b.parent = c.`name`
         where c.docstatus = '1'
             and (a.`name` like %(txt)s or a.item_code like %(txt)s)
-            and c.customer = %(cond)s
+            and c.customer = %(customer)s
+            and c.rss_sales_person = %(sales_person)s
             {mcond}
         limit %(start)s, %(page_len)s""".format(**{
             'key': searchfield,
@@ -22,7 +23,8 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
             '_txt': txt.replace("%", ""),
             'start': start,
             'page_len': page_len,
-            'cond': filters.get("customer")
+            'customer': filters.get("customer"),
+            'sales_person': filters.get("sales")
         })
 
 def default_warehouse(doctype, txt, searchfield, start, page_len, filters):
@@ -47,6 +49,7 @@ def si_query(doctype, txt, searchfield, start, page_len, filters):
             and b.`name` like %(txt)s
             and b.customer = %(customer)s
             and a.item_code = %(item_code)s
+            and b.rss_sales_person = %(sales_person)s
             {mcond}
         limit %(start)s, %(page_len)s""".format(**{
             'key': searchfield,
@@ -57,7 +60,8 @@ def si_query(doctype, txt, searchfield, start, page_len, filters):
             'start': start,
             'page_len': page_len,
             'customer': filters.get("customer"),
-            'item_code': filters.get("item_code")
+            'item_code': filters.get("item_code"),
+            'sales_person': filters.get("sales")
         })
 
 @frappe.whitelist()

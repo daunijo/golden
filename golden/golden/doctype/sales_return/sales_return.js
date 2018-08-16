@@ -13,6 +13,12 @@ frappe.ui.form.on('Sales Return', {
 				]
 			}
 		});
+		frm.set_query('sales_person', function(doc) {
+			return {
+				query: "golden.golden.doctype.employee_settings.employee_settings.employee_query",
+				filters: { 'department': 'sales' }
+			}
+		});
 	},
 	validate: function(frm){
 		frm.clear_table("accounts");
@@ -38,6 +44,22 @@ frappe.ui.form.on('Sales Return', {
 			// frm.refresh_fields("references");
 			frm.events.set_debit_credit_account(frm);
 			frm.events.set_references(frm);
+		}
+	},
+	sales_person: function(frm){
+		if(frm.doc.sales_person){
+			frappe.call({
+				method: "frappe.client.get",
+				args: {
+					doctype: "Employee",
+					name: frm.doc.sales_person
+				},
+				callback: function (data) {
+					frm.set_value("sales_name", data.message.employee_name);
+				}
+			})
+		}else{
+			frm.set_value("sales_name", "");
 		}
 	},
 	set_debit_credit_account: function(frm){
@@ -265,7 +287,8 @@ cur_frm.set_query("item_code", "items", function (doc, cdt, cdn) {
 	return {
 		query: "golden.golden.selling.item_query",
 		filters: {
-			'customer': cur_frm.doc.customer
+			'customer': cur_frm.doc.customer,
+			'sales': cur_frm.doc.sales_person
 		}
 	}
 });
@@ -275,7 +298,8 @@ cur_frm.set_query("sales_invoice", "items",  function (doc, cdt, cdn) {
 		query: "golden.golden.selling.si_query",
 		filters: {
 			'customer': cur_frm.doc.customer,
-			'item_code': c_doc.item_code
+			'item_code': c_doc.item_code,
+			'sales': cur_frm.doc.sales_person
 		}
 	}
 });

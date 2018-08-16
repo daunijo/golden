@@ -2,6 +2,14 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Sales Invoice Summary', {
+	setup: function(frm){
+		frm.set_query('sales', function(doc) {
+			return {
+				query: "golden.golden.doctype.employee_settings.employee_settings.employee_query",
+				filters: { 'department': 'sales' }
+			}
+		});
+	},
 	refresh: function(frm) {
 		frm.events.set_read_only(frm);
 	},
@@ -31,9 +39,14 @@ frappe.ui.form.on('Sales Invoice Summary', {
 					frm.set_value("sales_name", data.message.employee_name);
 				}
 			})
+		}else{
+			frm.set_value("sales_name", "");
 		}
 	},
 	get_sales_invoice: function(frm){
+		frm.clear_table("invoices");
+		frm.events.set_total_invoice(frm);
+		frm.refresh_fields();
 		return frappe.call({
 			method: 'golden.golden.doctype.sales_invoice_summary.sales_invoice_summary.get_sales_invoice',
 			args: {
@@ -44,7 +57,7 @@ frappe.ui.form.on('Sales Invoice Summary', {
 			},
 			callback: function(r, rt) {
 				if(r.message) {
-					frm.clear_table("invoices");
+					// frm.clear_table("invoices");
 					$.each(r.message, function(i, d) {
 						var c = frm.add_child("invoices");
 						c.customer = d.customer;

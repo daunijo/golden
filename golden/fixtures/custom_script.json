@@ -2,6 +2,15 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Script", 
+  "dt": "Warehouse", 
+  "modified": "2018-08-13 12:35:39.485381", 
+  "name": "Warehouse-Client", 
+  "script": "frappe.ui.form.on('Warehouse', {\n\tsetup: function(frm){\n\t\tfrm.set_query(\"parent_section_rss\", function(doc) {\n\t\t\treturn {\n\t\t\t\tfilters: {\n\t\t\t\t\t'is_group': 1,\n\t\t\t\t\t'type': 'Section'\n\t\t\t\t}\n\t\t\t}\n\t\t});\n\t},\n\tparent_section_rss: function(frm){\n\t\tif(frm.doc.parent_section_rss){\n\t\t\tfrappe.call({\n\t\t\t\tmethod: \"frappe.client.get\",\n\t\t\t\targs:{\n\t\t\t\t\tdoctype: \"Warehouse\",\n\t\t\t\t\tfilters:{\n\t\t\t\t\t\tname: frm.doc.parent_section_rss\n\t\t\t\t\t}\n\t\t\t\t},\n\t\t\t\tcallback: function(data){\n\t\t\t\t\tfrm.set_value(\"parent_warehouse_rss\", data.message.parent_warehouse);\n\t\t\t\t}\n\t\t\t});\n\t\t}else{\n\t\t\tfrm.set_value(\"parent_warehouse_rss\", \"\");\n\t\t}\n\t},\n})", 
+  "script_type": "Client"
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Script", 
   "dt": "Sales Order", 
   "modified": "2018-06-19 10:33:02.319783", 
   "name": "Sales Order-Client", 

@@ -17,6 +17,9 @@ frappe.ui.form.on('Invoice Keeptrack', {
 			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 		}
 	},
+	validate: function(frm){
+		frm.clear_table("customer_list");
+	},
 	set_posting_time: function(frm){
 		frm.events.set_read_only(frm);
 	},
@@ -42,6 +45,12 @@ frappe.ui.form.on('Invoice Keeptrack', {
 						var c = frm.add_child("invoices");
 						c.customer = d.customer;
 						c.customer_name = d.customer_name;
+						c.reference_doctype = d.reference_doctype;
+						c.invoice = d.invoice;
+						c.invoice_date = d.invoice_date;
+						c.due_date = d.due_date;
+						c.payment_date = d.payment_date;
+						c.payment_amount = d.payment_amount;
 						c.si_summary = d.si_summary;
 						c.amount = d.amount;
 					})
