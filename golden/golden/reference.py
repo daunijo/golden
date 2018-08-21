@@ -526,16 +526,20 @@ def submit_purchase_invoice_1(doc, method):
 
 def submit_purchase_invoice_2(doc, method):
     if doc.receive_order_1:
-        count1 = frappe.db.sql("""select count(*) from `tabReceive Order Item` where purchase_invoice is not null and `name` = %s""", doc.receive_order_1)[0][0]
-        count2 = frappe.db.sql("""select count(*) from `tabReceive Order Item` where `name` = %s""", doc.receive_order_1)[0][0]
+        count1 = frappe.db.sql("""select count(*) from `tabReceive Order Item` where purchase_invoice is not null and parent = %s""", doc.receive_order_1)[0][0]
+        count2 = frappe.db.sql("""select count(*) from `tabReceive Order Item` where parent = %s""", doc.receive_order_1)[0][0]
         if flt(count1) == flt(count2):
-            frappe.db.sql("""update `tabReceive Order` set is_completed = '1' where name = %s""", doc.receive_order_1)
+            frappe.db.sql("""update `tabReceive Order` set is_completed = '1', status = 'Completed' where name = %s""", doc.receive_order_1)
+        else:
+            frappe.db.sql("""update `tabReceive Order` set is_completed = '0', status = 'Partial Bill' where name = %s""", doc.receive_order_1)
 
     if doc.receive_order_2:
-        count1 = frappe.db.sql("""select count(*) from `tabReceive Order Item` where purchase_invoice is not null and `name` = %s""", doc.receive_order_2)[0][0]
-        count2 = frappe.db.sql("""select count(*) from `tabReceive Order Item` where `name` = %s""", doc.receive_order_2)[0][0]
+        count1 = frappe.db.sql("""select count(*) from `tabReceive Order Item` where purchase_invoice is not null and parent = %s""", doc.receive_order_2)[0][0]
+        count2 = frappe.db.sql("""select count(*) from `tabReceive Order Item` where parent = %s""", doc.receive_order_2)[0][0]
         if flt(count1) == flt(count2):
-            frappe.db.sql("""update `tabReceive Order` set is_completed = '1' where name = %s""", doc.receive_order_2)
+            frappe.db.sql("""update `tabReceive Order` set is_completed = '1', status = 'Completed' where name = %s""", doc.receive_order_2)
+        else:
+            frappe.db.sql("""update `tabReceive Order` set is_completed = '0', status = 'Partial Bill' where name = %s""", doc.receive_order_2)
 
 def cancel_purchase_invoice_1(doc, method):
     for row in doc.items:
@@ -544,9 +548,17 @@ def cancel_purchase_invoice_1(doc, method):
 
 def cancel_purchase_invoice_2(doc, method):
     if doc.receive_order_1:
-        frappe.db.sql("""update `tabReceive Order` set is_completed = '0' where name = %s""", doc.receive_order_1)
+        count1 = frappe.db.sql("""select count(*) from `tabReceive Order Item` where purchase_invoice is not null and parent = %s""", doc.receive_order_1)[0][0]
+        if flt(count1) == 0:
+            frappe.db.sql("""update `tabReceive Order` set is_completed = '0', status = 'Submitted' where name = %s""", doc.receive_order_1)
+        else:
+            frappe.db.sql("""update `tabReceive Order` set is_completed = '0', status = 'Partial Bill' where name = %s""", doc.receive_order_1)
     if doc.receive_order_2:
-        frappe.db.sql("""update `tabReceive Order` set is_completed = '0' where name = %s""", doc.receive_order_2)
+        count1 = frappe.db.sql("""select count(*) from `tabReceive Order Item` where purchase_invoice is not null and parent = %s""", doc.receive_order_2)[0][0]
+        if flt(count1) == 0:
+            frappe.db.sql("""update `tabReceive Order` set is_completed = '0', status = 'Submitted' where name = %s""", doc.receive_order_2)
+        else:
+            frappe.db.sql("""update `tabReceive Order` set is_completed = '0', status = 'Partial Bill' where name = %s""", doc.receive_order_2)
 
 def submit_stock_entry(doc, method):
     if doc.transfer_order:

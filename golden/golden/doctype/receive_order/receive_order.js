@@ -15,6 +15,8 @@ frappe.ui.form.on('Receive Order', {
 				}
 			}
 		});
+		frm.set_indicator_formatter('item_code',
+			function(doc) { return (doc.purchase_invoice) ? "green" : "blue" })
 	},
 	onload: function(frm) {
 		frm.set_query("item_code", "items", function(doc, cdt, cdn) {
