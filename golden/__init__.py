@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.22.15'
+__version__ = '1.22.16'
 
+# 1.22.16
+#   - Add Driver & Helper in Employee Settings, #175
 # 1.22.15
 #   - Add Sales in Customer, #173
 #   - Update filter in item_code Purchase Invoice, #171
