@@ -52,6 +52,25 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
             'page_len': page_len
         })
 
+def pi_item_query(doctype, txt, searchfield, start, page_len, filters):
+    return frappe.db.sql("""select roi.item_code, roi.item_name, concat('<br/>RO: ', ro.`name`), concat('<br/>Qty: ', cast(roi.qty as int), ' ', roi.uom) as ro_item from `tabReceive Order` ro
+inner join `tabReceive Order Item` roi on ro.`name` = roi.parent
+        where ro.docstatus = '1' and ro.`status` in ('Submitted', 'Partial Bill') and roi.purchase_invoice is null
+            and (roi.item_code like %(txt)s or roi.item_name like %(txt)s)
+            and roi.supplier = %(cond)s
+            order by roi.item_code asc
+            {mcond}
+        limit %(start)s, %(page_len)s""".format(**{
+            'key': searchfield,
+            'mcond':get_match_cond(doctype)
+        }), {
+            'txt': "%%%s%%" % txt,
+            '_txt': txt.replace("%", ""),
+            'start': start,
+            'page_len': page_len,
+            'cond': filters.get("supplier")
+        })
+
 @frappe.whitelist()
 def make_material_transfer(source_name, target_doc=None):
     def set_missing_values(source, target):
