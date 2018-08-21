@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.22.13'
+__version__ = '1.22.14'
 
+# 1.22.14
+#   - Multiple Purhcase Invoice for one Receive Order, #174
 # 1.22.13
 #   - Add child doctype: Invoice Keeptrack Customer
 #   - Major update Invoice Keeptrack

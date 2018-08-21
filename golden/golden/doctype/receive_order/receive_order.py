@@ -23,9 +23,11 @@ class ReceiveOrder(Document):
 			self.insert_pr_taxes()
 			self.submit_purchase_receipt()
 			self.update_transaction_date()
+		self.update_status_submitted()
 
 	def on_cancel(self):
 		self.delete_purchase_receipt()
+		self.update_status_cancel()
 
 	def check_item(self):
 		temp = []
@@ -140,6 +142,12 @@ class ReceiveOrder(Document):
 				submit_pr = frappe.get_doc("Purchase Receipt", pr.name)
 				submit_pr.cancel()
 				submit_pr.delete()
+
+	def update_status_submitted(self):
+		self.status = "Submitted"
+
+	def update_status_cancel(self):
+		self.status = "Cancelled"
 
 @frappe.whitelist()
 def get_purchase_order(source_name, target_doc=None):
