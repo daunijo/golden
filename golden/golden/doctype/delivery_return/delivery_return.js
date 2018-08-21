@@ -2,6 +2,20 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Delivery Return', {
+	onload: function(frm){
+		frm.set_query("driver", function(doc) {
+			return {
+				query: "golden.golden.doctype.employee_settings.employee_settings.employee_query",
+				filters: { 'department': 'driver' }
+			}
+		});
+		frm.set_query("helper", function(doc) {
+			return {
+				query: "golden.golden.doctype.employee_settings.employee_settings.employee_query",
+				filters: { 'department': 'helper' }
+			}
+		});
+	},
 	refresh: function(frm) {
 		frm.events.set_read_only(frm);
 		calculate_total_box(frm);
