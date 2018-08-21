@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.22.14'
+__version__ = '1.22.15'
 
+# 1.22.15
+#   - Add Sales in Customer, #173
+#   - Update filter in item_code Purchase Invoice, #171
+#   - Hide table customers in Summary Generator, #168
 # 1.22.14
 #   - Multiple Purhcase Invoice for one Receive Order, #174
 # 1.22.13
