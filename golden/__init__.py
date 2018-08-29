@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.22.16'
+__version__ = '1.22.17'
 
+# 1.22.17
+#   - Stock Card wrong stock value if stock reconciliation, #176
 # 1.22.16
 #   - Add Driver & Helper in Employee Settings, #175
 # 1.22.15

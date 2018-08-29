@@ -13,6 +13,7 @@ from erpnext.stock.get_item_details import get_bin_details, get_default_cost_cen
 
 class SalesReturn(Document):
 	def validate(self):
+		self.check_si_qty_to_qty()
 		self.set_transfer_qty()
 		self.set_actual_qty()
 		self.calculate_rate_and_amount()
@@ -154,6 +155,11 @@ class SalesReturn(Document):
 	def set_total_amount(self):
 		self.total = None
 		self.total = sum([flt(item.amount) for item in self.get("items")])
+
+	def check_si_qty_to_qty(self):
+		for row in self.items:
+			if flt(row.si_qty) < flt(row.qty):
+				frappe.throw(_("Qty Item {0} in row {1} is greater than {2}").format(row.item_code, row.idx, row.si_qty))
 
 	def set_transfer_qty(self):
 		for item in self.get("items"):
@@ -319,10 +325,12 @@ def get_warehouse_details(args):
 @frappe.whitelist()
 def get_item_rate(parent, item_code):
 	sales = frappe.db.get_value("Sales Invoice", parent, "rss_sales_person")
-	rate = frappe.db.sql("""select (rate/conversion_factor) from `tabSales Invoice Item` where parent = %s and item_code = %s""",(parent, item_code))[0][0]
+	rate = frappe.db.sql("""select (rate/conversion_factor) from `tabSales Invoice Item` where parent = %s and item_code = %s""", (parent, item_code))[0][0]
+	qty = frappe.db.get_value("Sales Invoice Item", {"parent": parent, "item_code": item_code}, "qty")
 	si_rate = {
 		'si_rate': flt(rate),
-		'sales_person':sales
+		'sales_person': sales,
+		'si_qty': qty
 	}
 	return si_rate
 
