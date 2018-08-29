@@ -44,6 +44,7 @@ frappe.ui.form.on('Sales Return', {
 			// frm.refresh_fields("references");
 			frm.events.set_debit_credit_account(frm);
 			frm.events.set_references(frm);
+			frm.events.set_sales(frm);
 		}
 	},
 	sales_person: function(frm){
@@ -101,6 +102,29 @@ frappe.ui.form.on('Sales Return', {
 				}
 			}
 		});
+	},
+	set_sales: function(frm){
+		if(frm.doc.customer){
+			frappe.call({
+				method: "frappe.client.get",
+				args: {
+					doctype: "Customer",
+					name: frm.doc.customer
+				},
+				callback: function (data) {
+					if(data.message){
+						frm.set_value("sales_person", data.message.rss_sales_person);
+						frm.set_value("sales_name", data.message.rss_sales_name);
+					}else{
+						frm.set_value("sales_person", "");
+						frm.set_value("sales_name", "");
+					}
+				}
+			})
+		}else{
+			frm.set_value("sales_person", "");
+			frm.set_value("sales_name", "");
+		}
 	},
 	customer_address: function(frm){
 		if(frm.doc.customer_address != undefined){
@@ -213,6 +237,7 @@ frappe.ui.form.on('Sales Return Detail', {
 			})
 		}else{
 			frappe.model.set_value(cdt, cdn, "si_rate", "0");
+			frappe.model.set_value(cdt, cdn, "si_qty", "0");
 		}
 	},
 	qty: function(frm, cdt, cdn){
