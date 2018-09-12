@@ -4,6 +4,9 @@
 frappe.ui.form.on('Sales Return', {
 	refresh: function(frm) {
 		frm.events.set_read_only(frm);
+		frm.toggle_reqd('vat_nominal', false);
+		frm.toggle_reqd('vat_percentage', false);
+		frm.toggle_reqd('vat_account', false);
 	},
 	setup: function(frm){
 		frm.set_query("to_warehouse", function (doc) {
@@ -174,6 +177,40 @@ frappe.ui.form.on('Sales Return', {
 		})
 		frm.refresh_fields("items");
 	},
+	vat_type: function(frm){
+		if(frm.doc.vat_type == "Nominal"){
+			frm.set_value("vat_percentage", "");
+			frm.set_value("total_amount_include_vat", frm.doc.total_amount);
+			frm.toggle_reqd('vat_nominal', true);
+			frm.toggle_reqd('vat_percentage', false);
+			frm.toggle_reqd('vat_account', true);
+		}else if (frm.doc.vat_type == "Percentage") {
+			frm.set_value("vat_nominal", "");
+			frm.set_value("total_amount_include_vat", frm.doc.total_amount);
+			frm.toggle_reqd('vat_nominal', false);
+			frm.toggle_reqd('vat_percentage', true);
+			frm.toggle_reqd('vat_account', true);
+		}else{
+			frm.set_value("total_amount_include_vat", frm.doc.total_amount);
+			frm.toggle_reqd('vat_nominal', false);
+			frm.toggle_reqd('vat_percentage', false);
+			frm.toggle_reqd('vat_account', false);
+		}
+	},
+	vat_nominal: function(frm){
+		if(frm.doc.vat_nominal != 0){
+			var plus_vat = flt(frm.doc.total_amount) + flt(frm.doc.vat_nominal);
+			frm.set_value("total_amount_include_vat", plus_vat);
+			calculate_unallocated_amount(frm);
+		}
+	},
+	vat_percentage: function(frm){
+		if(frm.doc.vat_percentage != 0){
+			var plus_vat = ((flt(frm.doc.vat_percentage) / 100) * flt(frm.doc.total_amount)) + flt(frm.doc.total_amount);
+			frm.set_value("total_amount_include_vat", plus_vat);
+			calculate_unallocated_amount(frm);
+		}
+	}
 });
 //Sales Return Detail (items)
 frappe.ui.form.on('Sales Return Detail', {
@@ -218,6 +255,10 @@ frappe.ui.form.on('Sales Return Detail', {
 					}
 				}
 			});
+		}else{
+			frappe.model.set_value(cdt, cdn, "item_name", "");
+			frappe.model.set_value(cdt, cdn, "uom", "");
+			frappe.model.set_value(cdt, cdn, "qty", "");
 		}
 	},
 	sales_invoice: function(doc, cdt, cdn) {
@@ -254,7 +295,6 @@ frappe.ui.form.on('Sales Return Detail', {
 		d.amount = flt(d.qty) * flt(d.basic_rate);
 		refresh_field('amount', d.name, 'items');
 		calculate_total_quantity(frm, cdt, cdn);
-		// calculate_unallocated_amount(frm, cdt, cdn);
 	},
 	conversion_factor: function(frm, cdt, cdn){
 		d.transfer_qty = flt(d.qty) * flt(d.conversion_factor);
@@ -285,13 +325,14 @@ var calculate_total_quantity = function(frm) {
 			return (flt(i.qty) * flt(i.basic_rate) * flt(i.conversion_factor));
 		})
 	);
-	frm.set_value("total", total_quantity);
-	var total_2 = frappe.utils.sum(
+	frm.set_value("total_cogs", total_quantity);
+	var total_amount = frappe.utils.sum(
 		(frm.doc.items || []).map(function(i) {
 			return (flt(i.qty) * flt(i.si_rate) * flt(i.conversion_factor));
 		})
 	);
-	frm.set_value("total_2", total_2);
+	frm.set_value("total_amount", total_amount);
+	frm.set_value("total_amount_include_vat", total_amount);
 }
 
 cur_frm.set_query("customer_address", function(frm) {
@@ -387,11 +428,7 @@ var calculate_unallocated_amount = function(frm) {
 			return (flt(i.credit_in_account_currency));
 		})
 	);
-	var total_2 = frappe.utils.sum(
-		(frm.doc.items || []).map(function(i) {
-			return (flt(i.qty) * flt(i.si_rate) * flt(i.conversion_factor));
-		})
-	);
+	var total_2 = frm.doc.total_amount_include_vat;
 	var unallocated = flt(total_2) - flt(return_amount);
 	frm.set_value("unallocated_amount", unallocated);
 }

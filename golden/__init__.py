@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.22.17'
+__version__ = '1.22.18'
 
+# 1.22.18
+#   - Automatically fill Collecting Planning if Target Planning is filled and collec planning is null
+#   - Update Sales Return
+#   - Update Payment Entry Receive
 # 1.22.17
 #   - Stock Card wrong stock value if stock reconciliation, #176
 # 1.22.16

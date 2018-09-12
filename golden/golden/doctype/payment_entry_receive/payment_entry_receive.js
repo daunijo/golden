@@ -288,18 +288,40 @@ frappe.ui.form.on('Payment Entry Receive', {
 		}
 	},
 	set_custom_paid_amount: function(frm){
-		frappe.call({
-			method: "frappe.client.get",
+		frm.clear_table("deductions");
+		return frappe.call({
+			method: 'golden.golden.doctype.payment_entry_receive.payment_entry_receive.get_deductions',
 			args: {
-				doctype: "Customer",
-				name: frm.doc.party
+				customer: frm.doc.party
 			},
-			callback: function (data) {
-				var piut = frm.doc.party_balance - data.message.debt_to_this_customer;
-				frm.set_value("paid_amount2", data.message.debt_to_this_customer);
-				frm.set_value("paid_amount", piut);
+			callback: function(r, rt) {
+				if(r.message) {
+					var total_d = 0;
+					$.each(r.message, function(i, d) {
+						var c = frm.add_child("deductions");
+						c.account = d.account;
+						c.cost_center = d.cost_center;
+						c.amount = d.amount;
+						c.journal_entry_detail = d.journal_entry_detail;
+						total_d += d.amount;
+					})
+					frm.set_value("total_deduction", total_d);
+					frm.refresh_fields();
+				}
 			}
 		})
+		// frappe.call({
+		// 	method: "frappe.client.get",
+		// 	args: {
+		// 		doctype: "Customer",
+		// 		name: frm.doc.party
+		// 	},
+		// 	callback: function (data) {
+		// 		var piut = frm.doc.party_balance - data.message.debt_to_this_customer;
+		// 		frm.set_value("paid_amount2", data.message.debt_to_this_customer);
+		// 		frm.set_value("paid_amount", piut);
+		// 	}
+		// })
 	},
 	paid_from: function(frm) {
 		if(frm.set_party_account_based_on_party) return;
@@ -335,6 +357,8 @@ frappe.ui.form.on('Payment Entry Receive', {
 				}
 			}
 		);
+		var selisih = flt(frm.doc.paid_from_account_balance) - flt(frm.doc.total_deduction);
+		frm.set_value("paid_amount", selisih);
 	},
 
 	set_account_currency_and_balance: function(frm, account, currency_field,

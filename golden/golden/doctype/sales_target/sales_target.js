@@ -63,10 +63,16 @@ frappe.ui.form.on('Sales Target', {
 	target_planning: function(frm){
 		frm.events.calculate_percentage_si(frm);
 		frm.events.calculate_percentage_payment(frm);
+		if(!frm.doc.collect_planning){
+			frm.set_value("collect_planning", frm.doc.target_planning);
+		}
 	},
 	target_revision: function(frm){
 		frm.events.calculate_percentage_si(frm);
 		frm.events.calculate_percentage_payment(frm);
+		if(!frm.doc.collect_revision){
+			frm.set_value("collect_revision", frm.doc.target_revision);
+		}
 	},
 	collect_planning: function(frm){
 		frm.events.calculate_percentage_si(frm);
