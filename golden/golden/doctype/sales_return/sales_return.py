@@ -20,29 +20,28 @@ class SalesReturn(Document):
 		self.delete_account()
 		self.set_default_account()
 		self.check_allocated_ref()
+		self.check_unallocated_amount()
 
 	def before_submit(self):
 		self.delete_account()
 		self.copy_references()
 
 	def on_submit(self):
-#		self.check_total_return()
+		self.update_sales_invoice()
 		self.stock_entry_insert()
 		self.journal_entry_insert()
-		self.update_customer()
 
 	def on_cancel(self):
+		self.update_sales_invoice2()
 		self.delete_account()
 		self.stock_entry_cancel()
 		self.journal_entry_cancel()
-		self.update_customer2()
 
 	def delete_account(self):
 		count = frappe.db.sql("""select count(*) from `tabSales Return Account` where parent = %s""", self.name)[0][0]
 		if flt(count) != 0:
 			sra = frappe.get_doc("Sales Return Account", {"parent": self.name})
 			sra.delete()
-		# frappe.db.sql("""delete from `tabSales Return Account` where parent = %s""", self.name)
 
 	def set_default_account(self):
 		if not self.debit_account:
@@ -56,6 +55,10 @@ class SalesReturn(Document):
 		for ref in self.references:
 			if flt(ref.credit_in_account_currency) > flt(ref.outstanding_amount):
 				frappe.throw(_("Allocated amount in row {0} is bigger than Outstanding Amount").format(ref.idx))
+
+	def check_unallocated_amount(self):
+		if flt(self.unallocated_amount) < 0:
+			frappe.throw(_("Unallocated Amount cannot be minus"))
 
 	def get_item_details(self, args=None, for_update=False):
 		item = frappe.db.sql("""select stock_uom, description, image, item_name,
@@ -153,8 +156,8 @@ class SalesReturn(Document):
 				d.valuation_rate = flt(d.basic_rate)
 
 	def set_total_amount(self):
-		self.total = None
-		self.total = sum([flt(item.amount) for item in self.get("items")])
+		self.total_cogs = None
+		self.total_cogs = sum([flt(item.amount) for item in self.get("items")])
 
 	def check_si_qty_to_qty(self):
 		for row in self.items:
@@ -209,17 +212,15 @@ class SalesReturn(Document):
 					"reference_name": d.reference_name,
 					"cost_center": cost_center
 				}).save()
-		# else:
-		# 	self.append("accounts", {
-		# 		"account": self.credit_account,
-		# 		"party_type": "Customer",
-		# 		"party": self.customer,
-		# 		"debit_in_account_currency": 0,
-		# 		"credit_in_account_currency": self.total_2,
-		# 		"debit": 0,
-		# 		"credit": self.total_2,
-		# 		"cost_center": cost_center
-		# 	}).save()
+		tax_nominal = flt(self.total_amount_include_vat) - flt(self.total_amount)
+		if flt(tax_nominal) >= 1:
+			self.append("accounts", {
+				"reference_type": "",
+				"account": self.vat_account,
+				"debit_in_account_currency": tax_nominal,
+				"debit": tax_nominal,
+				"cost_center": cost_center
+			}).save()
 		if flt(self.unallocated_amount) > 0:
 			self.append("accounts", {
 				"reference_type": "",
@@ -228,19 +229,22 @@ class SalesReturn(Document):
 				"credit_in_account_currency": self.unallocated_amount,
 				"debit": 0,
 				"credit": self.unallocated_amount,
-				"cost_center": cost_center
+				"cost_center": cost_center,
+				"customer_code": self.customer
 			}).save()
-		# if self.total_return:
-		# 	total_2 = self.total_return
-		# else:
-		# 	total_2 = self.total_2
 		self.append("accounts", {
 			"reference_type": "",
             "account": self.debit_account,
-            "debit_in_account_currency": self.total_2,
-            "debit": self.total_2,
+            "debit_in_account_currency": self.total_amount,
+            "debit": self.total_amount,
 			"cost_center": cost_center
 		}).save()
+
+	def update_sales_invoice(self):
+		for row in self.items:
+			remaining_qty = frappe.db.sql("""select return_qty from `tabSales Invoice Item` where parent = %s and item_code = %s""", (row.sales_invoice, row.item_code))[0][0]
+			update_return_qty = flt(remaining_qty) + flt(row.qty)
+			frappe.db.sql("""update `tabSales Invoice Item` set return_qty = %s where parent = %s and item_code = %s""", (update_return_qty, row.sales_invoice, row.item_code))
 
 	def stock_entry_insert(self):
 		stock_entry = frappe.get_doc({
@@ -250,9 +254,9 @@ class SalesReturn(Document):
 			"posting_date": self.posting_date,
 			"posting_time": self.posting_time,
 			"to_warehouse": self.to_warehouse,
-			"total_incomig_value": self.total,
-			"value_difference": self.total,
-			"total_amount": self.total,
+			"total_incomig_value": self.total_cogs,
+			"value_difference": self.total_cogs,
+			"total_amount": self.total_cogs,
 			"items": self.items
 		})
 		stock_entry.save()
@@ -275,13 +279,11 @@ class SalesReturn(Document):
 		je = frappe.get_doc("Journal Entry", {"sales_return": self.name})
 		je.submit()
 
-	def update_customer(self):
-		if flt(self.unallocated_amount) > 0:
-			debt = frappe.db.get_value("Customer", self.customer, "debt_to_this_customer")
-			new_debt = flt(debt) + flt(self.unallocated_amount)
-			customer = frappe.get_doc("Customer", self.customer)
-			customer.debt_to_this_customer = new_debt
-			customer.save()
+	def update_sales_invoice2(self):
+		for row in self.items:
+			remaining_qty = frappe.db.sql("""select return_qty from `tabSales Invoice Item` where parent = %s and item_code = %s""", (row.sales_invoice, row.item_code))[0][0]
+			update_return_qty = flt(remaining_qty) - flt(row.qty)
+			frappe.db.sql("""update `tabSales Invoice Item` set return_qty = %s where parent = %s and item_code = %s""", (update_return_qty, row.sales_invoice, row.item_code))
 
 	def stock_entry_cancel(self):
 		se = frappe.get_doc("Stock Entry", {"sales_return": self.name})
@@ -292,14 +294,6 @@ class SalesReturn(Document):
 		je = frappe.get_doc("Journal Entry", {"sales_return": self.name})
 		je.cancel()
 		je.delete()
-
-	def update_customer2(self):
-		if flt(self.unallocated_amount) > 0:
-			debt = frappe.db.get_value("Customer", self.customer, "debt_to_this_customer")
-			new_debt = flt(debt) - flt(self.unallocated_amount)
-			customer = frappe.get_doc("Customer", self.customer)
-			customer.debt_to_this_customer = new_debt
-			customer.save()
 
 @frappe.whitelist()
 def get_warehouse_details(args):
@@ -326,7 +320,7 @@ def get_warehouse_details(args):
 def get_item_rate(parent, item_code):
 	sales = frappe.db.get_value("Sales Invoice", parent, "rss_sales_person")
 	rate = frappe.db.sql("""select (rate/conversion_factor) from `tabSales Invoice Item` where parent = %s and item_code = %s""", (parent, item_code))[0][0]
-	qty = frappe.db.get_value("Sales Invoice Item", {"parent": parent, "item_code": item_code}, "qty")
+	qty = frappe.db.sql("""select sum(qty - return_qty) from `tabSales Invoice Item` where item_code = %s and parent = %s""", (item_code, parent))[0][0]
 	si_rate = {
 		'si_rate': flt(rate),
 		'sales_person': sales,

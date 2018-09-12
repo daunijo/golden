@@ -43,7 +43,7 @@ def default_warehouse(doctype, txt, searchfield, start, page_len, filters):
         })
 
 def si_query(doctype, txt, searchfield, start, page_len, filters):
-    return frappe.db.sql("""select distinct(b.`name`), concat('Price: ', cast(a.rate as int)), concat('<br>Qty: ', cast(qty as decimal(16,0))) from `tabSales Invoice Item` a
+    return frappe.db.sql("""select distinct(b.`name`), concat('Price: ', format(a.rate,0)), concat('<br>Qty: ', format((select sum(c.qty - c.return_qty) from `tabSales Invoice Item` c where c.item_code = %(item_code)s and c.parent = b.`name`), 0)) from `tabSales Invoice Item` a
         inner join `tabSales Invoice` b on a.parent = b.`name`
         where b.docstatus = '1'
             and b.`name` like %(txt)s

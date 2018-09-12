@@ -42,7 +42,7 @@ def get_invoices(sales, sales_target, start_date, end_date):
 @frappe.whitelist()
 def get_returns(sales, sales_target, start_date, end_date):
 	si_list = []
-	sr = frappe.db.sql("""select `name`, posting_date, total_2 from `tabSales Return`where docstatus = '1' and sales_person = %s and posting_date >= %s and posting_date <= %s""", (sales, start_date, end_date), as_dict=True)
+	sr = frappe.db.sql("""select `name`, posting_date, total_2 from `tabSales Return` where docstatus = '1' and sales_person = %s and posting_date >= %s and posting_date <= %s""", (sales, start_date, end_date), as_dict=True)
 	for si in sr:
 		si_list.append(frappe._dict({
 	        'return_date': si.posting_date,

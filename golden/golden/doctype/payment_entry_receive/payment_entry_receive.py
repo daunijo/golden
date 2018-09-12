@@ -12,14 +12,17 @@ class PaymentEntryReceive(Document):
 	def on_submit(self):
 		self.check_reference()
 		self.insert_payment_entry()
-		self.update_piutang_customer()
+		self.add_allocated_amount()
+
+	def on_cancel(self):
+		self.delete_payment_entry()
+		self.rem_allocated_amount()
 
 	def check_reference(self):
 		if self.need_reference:
 			if self.reference_no == None or self.reference_date == None:
 				frappe.throw(_("Check/Reference No and Date is mandatory"))
 
-	@frappe.whitelist()
 	def insert_payment_entry(self):
 		pe = frappe.get_doc({
 			"doctype": "Payment Entry",
@@ -50,27 +53,37 @@ class PaymentEntryReceive(Document):
 			"payment_entry_receive": self.name
 		})
 		pe.save()
-		# pe.submit()
+		pe.submit()
 
-	def update_piutang_customer(self):
-		debt = frappe.db.sql("""select debt_to_this_customer from `tabCustomer` where `name` = %s""", self.party)[0][0]
-		new_debt = flt(debt) - flt(self.total_allocated_amount)
-		customer = frappe.get_doc("Customer", self.party)
-		customer.debt_to_this_customer = new_debt
-		customer.save()
-
-	def on_cancel(self):
-		self.delete_payment_entry()
-		self.update_piutang_customer2()
+	def add_allocated_amount(self):
+		for row in self.deductions:
+			if row.journal_entry_detail:
+				allocated = frappe.db.sql("""select allocated_amount from `tabJournal Entry Account` where `name` = %s""", row.journal_entry_detail)[0][0]
+				update_allocated = flt(allocated) + flt(row.amount)
+				frappe.db.sql("""update `tabJournal Entry Account` set allocated_amount = %s where `name` = %s""", (update_allocated, row.journal_entry_detail))
 
 	def delete_payment_entry(self):
 		pe = frappe.get_doc("Payment Entry", {"payment_entry_receive": self.name})
 		pe.cancel()
 		pe.delete()
 
-	def update_piutang_customer2(self):
-		debt = frappe.db.sql("""select debt_to_this_customer from `tabCustomer` where `name` = %s""", self.party)[0][0]
-		new_debt = flt(debt) + flt(self.total_allocated_amount)
-		customer = frappe.get_doc("Customer", self.party)
-		customer.debt_to_this_customer = new_debt
-		customer.save()
+	def rem_allocated_amount(self):
+		for row in self.deductions:
+			if row.journal_entry_detail:
+				allocated = frappe.db.sql("""select allocated_amount from `tabJournal Entry Account` where `name` = %s""", row.journal_entry_detail)[0][0]
+				update_allocated = flt(allocated) - flt(row.amount)
+				frappe.db.sql("""update `tabJournal Entry Account` set allocated_amount = %s where `name` = %s""", (update_allocated, row.journal_entry_detail))
+
+@frappe.whitelist()
+def get_deductions(customer):
+	si_list = []
+	journal_entry = frappe.db.sql("""select `name`, account, cost_center, credit_in_account_currency, allocated_amount from `tabJournal Entry Account` where docstatus = '1' and customer_code = %s and credit_in_account_currency > allocated_amount""", (customer), as_dict=True)
+	for je in journal_entry:
+		nominal = flt(je.credit_in_account_currency) - flt(je.allocated_amount)
+		si_list.append(frappe._dict({
+	        'account': je.account,
+	        'cost_center': je.cost_center,
+	        'amount': nominal,
+			'journal_entry_detail': je.name
+	    }))
+	return si_list
