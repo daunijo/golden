@@ -99,8 +99,6 @@ frappe.ui.form.on('Sales Return', {
 						c.party = d.party;
 						c.account = d.account;
 					})
-					// calculate_total_return(frm, cdt, cdn);
-					// calculate_unallocated_amount(frm, cdt, cdn);
 					frm.refresh_fields();
 				}
 			}
@@ -319,21 +317,6 @@ frappe.ui.form.on('Sales Return Detail', {
 		}
 	},
 })
-var calculate_total_quantity = function(frm) {
-	var total_quantity = frappe.utils.sum(
-		(frm.doc.items || []).map(function(i) {
-			return (flt(i.qty) * flt(i.basic_rate) * flt(i.conversion_factor));
-		})
-	);
-	frm.set_value("total_cogs", total_quantity);
-	var total_amount = frappe.utils.sum(
-		(frm.doc.items || []).map(function(i) {
-			return (flt(i.qty) * flt(i.si_rate) * flt(i.conversion_factor));
-		})
-	);
-	frm.set_value("total_amount", total_amount);
-	frm.set_value("total_amount_include_vat", total_amount);
-}
 
 cur_frm.set_query("customer_address", function(frm) {
 	return {
@@ -397,7 +380,6 @@ frappe.ui.form.on("Sales Return Reference", {
 			}
 		})
 		calculate_total_return(frm, cdt, cdn);
-		// calculate_unallocated_amount(frm, cdt, cdn);
 	},
 	credit_in_account_currency: function(frm, cdt, cdn) {
 		calculate_total_return(frm, cdt, cdn);
@@ -414,6 +396,21 @@ frappe.ui.form.on("Sales Return Reference", {
 		calculate_unallocated_amount(frm, cdt, cdn);
 	},
 })
+var calculate_total_quantity = function(frm) {
+	var total_quantity = frappe.utils.sum(
+		(frm.doc.items || []).map(function(i) {
+			return (flt(i.qty) * flt(i.basic_rate) * flt(i.conversion_factor));
+		})
+	);
+	frm.set_value("total_cogs", total_quantity);
+	var total_amount = frappe.utils.sum(
+		(frm.doc.items || []).map(function(i) {
+			return (flt(i.qty) * flt(i.si_rate) * flt(i.conversion_factor));
+		})
+	);
+	frm.set_value("total_amount", total_amount);
+	frm.set_value("total_amount_include_vat", total_amount);
+}
 var calculate_total_return = function(frm) {
 	var total_return = frappe.utils.sum(
 		(frm.doc.references || []).map(function(i) {

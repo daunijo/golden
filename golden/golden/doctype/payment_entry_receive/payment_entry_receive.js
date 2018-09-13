@@ -78,13 +78,6 @@ frappe.ui.form.on('Payment Entry Receive', {
 				}else{
 					var doctypes = ["Sales Invoice"];
 				}
-				// var doctypes = ["Sales Order", "Sales Invoice", "Journal Entry"];
-			} else if (frm.doc.party_type=="Supplier") {
-				var doctypes = ["Purchase Order", "Purchase Invoice", "Journal Entry"];
-			} else if (frm.doc.party_type=="Employee") {
-				var doctypes = ["Expense Claim", "Journal Entry"];
-			} else if (frm.doc.party_type=="Student") {
-				var doctypes = ["Fees"];
 			} else {
 				var doctypes = ["Journal Entry"];
 			}
@@ -171,7 +164,7 @@ frappe.ui.form.on('Payment Entry Receive', {
 		frm.set_currency_labels(["base_paid_amount", "base_received_amount", "base_total_allocated_amount",
 			"difference_amount"], company_currency);
 
-		frm.set_currency_labels(["paid_amount", "paid_amount2"], frm.doc.paid_from_account_currency);
+		frm.set_currency_labels(["paid_amount"], frm.doc.paid_from_account_currency);
 		frm.set_currency_labels(["received_amount"], frm.doc.paid_to_account_currency);
 
 		var party_account_currency = frm.doc.payment_type=="Receive" ?
@@ -310,18 +303,6 @@ frappe.ui.form.on('Payment Entry Receive', {
 				}
 			}
 		})
-		// frappe.call({
-		// 	method: "frappe.client.get",
-		// 	args: {
-		// 		doctype: "Customer",
-		// 		name: frm.doc.party
-		// 	},
-		// 	callback: function (data) {
-		// 		var piut = frm.doc.party_balance - data.message.debt_to_this_customer;
-		// 		frm.set_value("paid_amount2", data.message.debt_to_this_customer);
-		// 		frm.set_value("paid_amount", piut);
-		// 	}
-		// })
 	},
 	paid_from: function(frm) {
 		if(frm.set_party_account_based_on_party) return;
@@ -632,20 +613,20 @@ frappe.ui.form.on('Payment Entry Receive', {
 			frm.refresh_fields();
 		}
 	},
-	mode_of_payment: function(frm){
-		frappe.call({
-			method: "frappe.client.get",
-			args: {
-				doctype: "Mode of Payment",
-				filters:{
-					name: frm.doc.mode_of_payment,
-				}
-			},
-			callback: function (data) {
-				frm.set_value("need_reference", data.message.need_reference);
-			}
-		})
-	},
+	// mode_of_payment: function(frm){
+	// 	frappe.call({
+	// 		method: "frappe.client.get",
+	// 		args: {
+	// 			doctype: "Mode of Payment",
+	// 			filters:{
+	// 				name: frm.doc.mode_of_payment,
+	// 			}
+	// 		},
+	// 		callback: function (data) {
+	// 			frm.set_value("need_reference", data.message.need_reference);
+	// 		}
+	// 	})
+	// },
 	allocate_payment_amount: function(frm) {
 		if(frm.doc.payment_type == 'Internal Transfer'){
 			return
@@ -689,8 +670,7 @@ frappe.ui.form.on('Payment Entry Receive', {
 						total_negative_outstanding : remaining_outstanding;
 			}
 
-			// var allocated_positive_outstanding =  paid_amount + allocated_negative_outstanding;
-			var allocated_positive_outstanding =  frm.doc.paid_amount + frm.doc.paid_amount2;
+			var allocated_positive_outstanding =  paid_amount + allocated_negative_outstanding;
 		} else if (in_list(["Customer", "Supplier"], frm.doc.party_type)) {
 			if(paid_amount > total_negative_outstanding) {
 				if(total_negative_outstanding == 0) {

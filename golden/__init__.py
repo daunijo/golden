@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.22.18'
+__version__ = '1.22.19'
 
+# 1.22.19
+#   - Update Purchase Return
+#   - Update Payment Entry Pay
 # 1.22.18
-#   - Automatically fill Collecting Planning if Target Planning is filled and collec planning is null
+#   - Automatically fill Collecting Planning if Target Planning is filled and collect planning is null
 #   - Update Sales Return
 #   - Update Payment Entry Receive
 # 1.22.17

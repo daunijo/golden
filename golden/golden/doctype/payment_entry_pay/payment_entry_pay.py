@@ -12,6 +12,11 @@ class PaymentEntryPay(Document):
 	def on_submit(self):
 		self.check_reference()
 		self.insert_payment_entry()
+		self.add_allocated_amount()
+
+	def on_cancel(self):
+		self.delete_payment_entry()
+		self.rem_allocated_amount()
 
 	def check_reference(self):
 		if self.need_reference:
@@ -50,10 +55,35 @@ class PaymentEntryPay(Document):
 		pe.save()
 		pe.submit()
 
-	def on_cancel(self):
-		self.delete_payment_entry()
+	def add_allocated_amount(self):
+		for row in self.deductions:
+			if row.journal_entry_detail:
+				allocated = frappe.db.sql("""select allocated_amount from `tabJournal Entry Account` where `name` = %s""", row.journal_entry_detail)[0][0]
+				update_allocated = flt(allocated) + (flt(row.amount) * -1)
+				frappe.db.sql("""update `tabJournal Entry Account` set allocated_amount = %s where `name` = %s""", (update_allocated, row.journal_entry_detail))
 
 	def delete_payment_entry(self):
 		pe = frappe.get_doc("Payment Entry", {"payment_entry_pay": self.name})
 		pe.cancel()
 		pe.delete()
+
+	def rem_allocated_amount(self):
+		for row in self.deductions:
+			if row.journal_entry_detail:
+				allocated = frappe.db.sql("""select allocated_amount from `tabJournal Entry Account` where `name` = %s""", row.journal_entry_detail)[0][0]
+				update_allocated = flt(allocated) - (flt(row.amount) * -1)
+				frappe.db.sql("""update `tabJournal Entry Account` set allocated_amount = %s where `name` = %s""", (update_allocated, row.journal_entry_detail))
+
+@frappe.whitelist()
+def get_deductions(supplier):
+	pi_list = []
+	journal_entry = frappe.db.sql("""select `name`, account, cost_center, debit_in_account_currency, allocated_amount from `tabJournal Entry Account` where docstatus = '1' and supplier_code = %s and debit_in_account_currency > allocated_amount""", (supplier), as_dict=True)
+	for je in journal_entry:
+		nominal = (flt(je.debit_in_account_currency) - flt(je.allocated_amount)) * -1
+		pi_list.append(frappe._dict({
+	        'account': je.account,
+	        'cost_center': je.cost_center,
+	        'amount': nominal,
+			'journal_entry_detail': je.name
+	    }))
+	return pi_list

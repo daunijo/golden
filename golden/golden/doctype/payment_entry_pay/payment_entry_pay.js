@@ -72,24 +72,12 @@ frappe.ui.form.on('Payment Entry Pay', {
 		});
 
 		frm.set_query("reference_doctype", "references", function() {
-			if (frm.doc.party_type=="Customer") {
-				if (frm.doc.with_so){
-					var doctypes = ["Sales Order", "Sales Invoice"];
-				}else{
-					var doctypes = ["Sales Invoice"];
-				}
-				// var doctypes = ["Sales Order", "Sales Invoice", "Journal Entry"];
-			} else if (frm.doc.party_type=="Supplier") {
+			if (frm.doc.party_type=="Supplier") {
 				if (frm.doc.with_so){
 					var doctypes = ["Purchase Order", "Purchase Invoice"];
 				}else{
 					var doctypes = ["Purchase Invoice"];
 				}
-				// var doctypes = ["Purchase Order", "Purchase Invoice", "Journal Entry"];
-			} else if (frm.doc.party_type=="Employee") {
-				var doctypes = ["Expense Claim", "Journal Entry"];
-			} else if (frm.doc.party_type=="Student") {
-				var doctypes = ["Fees"];
 			} else {
 				var doctypes = ["Journal Entry"];
 			}
@@ -124,7 +112,7 @@ frappe.ui.form.on('Payment Entry Pay', {
 		erpnext.hide_company();
 		frm.events.hide_unhide_fields(frm);
 		frm.events.set_dynamic_labels(frm);
-		frm.events.show_general_ledger(frm);
+		// frm.events.show_general_ledger(frm);
 	},
 
 	company: function(frm) {
@@ -203,20 +191,20 @@ frappe.ui.form.on('Payment Entry Pay', {
 		frm.refresh_fields();
 	},
 
-	show_general_ledger: function(frm) {
-		if(frm.doc.docstatus==1) {
-			frm.add_custom_button(__('Ledger'), function() {
-				frappe.route_options = {
-					"voucher_no": frm.doc.name,
-					"from_date": frm.doc.posting_date,
-					"to_date": frm.doc.posting_date,
-					"company": frm.doc.company,
-					group_by_voucher: 0
-				};
-				frappe.set_route("query-report", "General Ledger");
-			}, "fa fa-table");
-		}
-	},
+	// show_general_ledger: function(frm) {
+	// 	if(frm.doc.docstatus==1) {
+	// 		frm.add_custom_button(__('Ledger'), function() {
+	// 			frappe.route_options = {
+	// 				"voucher_no": frm.doc.name,
+	// 				"from_date": frm.doc.posting_date,
+	// 				"to_date": frm.doc.posting_date,
+	// 				"company": frm.doc.company,
+	// 				group_by_voucher: 0
+	// 			};
+	// 			frappe.set_route("query-report", "General Ledger");
+	// 		}, "fa fa-table");
+	// 	}
+	// },
 
 	payment_type: function(frm) {
 		if(frm.doc.payment_type == "Internal Transfer") {
@@ -284,6 +272,7 @@ frappe.ui.form.on('Payment Entry Pay', {
 							() => frm.events.get_outstanding_documents(frm),
 							() => frm.events.hide_unhide_fields(frm),
 							() => frm.events.set_dynamic_labels(frm),
+							() => frm.events.set_custom_paid_amount(frm),
 							() => { frm.set_party_account_based_on_party = false; }
 						]);
 					}
@@ -291,7 +280,30 @@ frappe.ui.form.on('Payment Entry Pay', {
 			});
 		}
 	},
-
+	set_custom_paid_amount: function(frm){
+		frm.clear_table("deductions");
+		return frappe.call({
+			method: 'golden.golden.doctype.payment_entry_pay.payment_entry_pay.get_deductions',
+			args: {
+				supplier: frm.doc.party
+			},
+			callback: function(r, rt) {
+				if(r.message) {
+					var total_d = 0;
+					$.each(r.message, function(i, d) {
+						var c = frm.add_child("deductions");
+						c.account = d.account;
+						c.cost_center = d.cost_center;
+						c.amount = d.amount;
+						c.journal_entry_detail = d.journal_entry_detail;
+						total_d += (d.amount * -1);
+					})
+					frm.set_value("total_deduction", total_d);
+					frm.refresh_fields();
+				}
+			}
+		})
+	},
 	paid_from: function(frm) {
 		if(frm.set_party_account_based_on_party) return;
 
@@ -304,8 +316,12 @@ frappe.ui.form.on('Payment Entry Pay', {
 				}
 			}
 		);
+		frm.events.set_selisih(frm);
 	},
-
+	set_selisih: function(frm){
+		var selisih = (flt(frm.doc.paid_to_account_balance) + flt(frm.doc.total_deduction)) *-1;
+		frm.set_value("paid_amount", selisih);
+	},
 	paid_to: function(frm) {
 		if(frm.set_party_account_based_on_party) return;
 
@@ -580,6 +596,7 @@ frappe.ui.form.on('Payment Entry Pay', {
 
 				frm.events.allocate_party_amount_against_ref_docs(frm,
 					(frm.doc.payment_type=="Receive" ? frm.doc.paid_amount : frm.doc.received_amount));
+				frm.events.set_selisih(frm);
 			}
 		});
 	},
@@ -599,6 +616,20 @@ frappe.ui.form.on('Payment Entry Pay', {
 			frm.refresh_fields();
 		}
 	},
+	// mode_of_payment: function(frm){
+	// 	frappe.call({
+	// 		method: "frappe.client.get",
+	// 		args: {
+	// 			doctype: "Mode of Payment",
+	// 			filters:{
+	// 				name: frm.doc.mode_of_payment,
+	// 			}
+	// 		},
+	// 		callback: function (data) {
+	// 			frm.set_value("need_reference", data.message.need_reference);
+	// 		}
+	// 	})
+	// },
 	allocate_payment_amount: function(frm) {
 		if(frm.doc.payment_type == 'Internal Transfer'){
 			return
@@ -823,7 +854,20 @@ frappe.ui.form.on('Payment Entry Pay', {
 
 						if (!write_off_row.length) {
 							var row = frm.add_child("deductions");
-							row.account = r.message[account];
+							// row.account = r.message[account];
+							frappe.call({
+								method: "frappe.client.get",
+								args: {
+									doctype: "Company",
+									filters:{
+										name: frm.doc.company,
+									}
+								},
+								callback: function (data) {
+									row.account = data.message.default_purchase_return_write_off_account;
+								}
+							})
+
 							row.cost_center = r.message["cost_center"];
 						} else {
 							var row = write_off_row[0];

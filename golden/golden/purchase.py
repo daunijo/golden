@@ -43,25 +43,6 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
             'supplier': filters.get("supplier")
         })
 
-def pi_query(doctype, txt, searchfield, start, page_len, filters):
-    return frappe.db.sql("""select distinct(b.`name`), concat('Date: ', b.posting_date), concat('<br>Price: ', cast((a.rate / a.conversion_factor) as int)), concat('<br>Qty: ', cast(qty as decimal(16,0))) from `tabPurchase Invoice Item` a inner join `tabPurchase Invoice` b on a.parent = b.`name`
-        where b.docstatus = '1'
-            and b.`name` like %(txt)s
-            and b.supplier = %(supplier)s
-            and a.item_code = %(item_code)s
-            {mcond}
-        limit %(start)s, %(page_len)s""".format(**{
-            'key': searchfield,
-            'mcond':get_match_cond(doctype)
-        }), {
-            'txt': "%%%s%%" % txt,
-            '_txt': txt.replace("%", ""),
-            'start': start,
-            'page_len': page_len,
-            'supplier': filters.get("supplier"),
-            'item_code': filters.get("item_code")
-        })
-
 def receive_order_query(doctype, txt, searchfield, start, page_len, filters):
     return frappe.db.sql("""select distinct(ro.`name`), ro.expedition from `tabReceive Order` ro inner join `tabReceive Order Item` roi on ro.`name` = roi.parent inner join `tabPurchase Order` po on roi.purchase_order = po.`name`
         where ro.docstatus = '1' and ro.is_completed = '0'
