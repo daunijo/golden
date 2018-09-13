@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.22.19'
+__version__ = '1.22.20'
 
+# 1.22.20
+#   - Add report: Dynamic Item Report - Purchase
 # 1.22.19
 #   - Update Purchase Return
 #   - Update Payment Entry Pay
