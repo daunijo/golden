@@ -170,6 +170,12 @@ def get_data():
 				},
 				{
 					"type": "report",
+					"name": "Dynamic Item Report - Purchase",
+					"doctype": "Item",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
 					"name": "Purchase Analysis",
 					"doctype": "Item",
 					"is_query_report": True
