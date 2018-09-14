@@ -94,21 +94,30 @@ def calculate_invoice(sales, percentage, total_invoice):
 		if flt(check2) == 1:
 			cp = frappe.db.sql("""select `name` from `tabCommission Percentage` where docstatus = '1' and commission_type = 'SELL' and sales = %s and disabled = '0'""", sales)[0][0]
 			cpd = frappe.db.sql("""select percentage from `tabCommission Percentage Detail` where parent = %s and from_range <= %s and to_range >= %s""", (cp, percent_round, percent_round))[0][0]
+			from_range = frappe.db.sql("""select format(from_range,0) from `tabCommission Percentage Detail` where parent = %s and from_range <= %s and to_range >= %s""", (cp, percent_round, percent_round))[0][0]
+			to_range = frappe.db.sql("""select format(to_range,0) from `tabCommission Percentage Detail` where parent = %s and from_range <= %s and to_range >= %s""", (cp, percent_round, percent_round))[0][0]
 			hasil = cpd
+			sra = from_range+"% - "+to_range+"%"
 		else:
 			hasil = 0
+			sra = "Out of range"
 	else:
 		check2 = frappe.db.sql("""select count(*) from `tabCommission Percentage` where docstatus = '1' and commission_type = 'SELL' and sales is null and disabled = '0'""")[0][0]
 		if flt(check2) == 1:
 			cp = frappe.db.sql("""select `name` from `tabCommission Percentage` where docstatus = '1' and commission_type = 'SELL' and sales is null and disabled = '0'""")[0][0]
 			cpd = frappe.db.sql("""select percentage from `tabCommission Percentage Detail` where parent = %s and from_range <= %s and to_range >= %s""", (cp, percent_round, percent_round))[0][0]
+			from_range = frappe.db.sql("""select format(from_range,0) from `tabCommission Percentage Detail` where parent = %s and from_range <= %s and to_range >= %s""", (cp, percent_round, percent_round))[0][0]
+			to_range = frappe.db.sql("""select format(to_range,0) from `tabCommission Percentage Detail` where parent = %s and from_range <= %s and to_range >= %s""", (cp, percent_round, percent_round))[0][0]
 			hasil = cpd
+			sra = from_range+"% - "+to_range+"%"
 		else:
 			hasil = 0
+			sra = "Out of range"
 	komisi = (flt(hasil) / 100) * flt(total_invoice)
 	inv_commission = {
 		'percentage_invoice_result': hasil,
 		'invoice_commission': komisi,
+		'sales_range_achievement': sra
 	}
 	return inv_commission
 
@@ -121,20 +130,29 @@ def calculate_return(sales, percentage, total_return):
 		if flt(check2) == 1:
 			cp = frappe.db.sql("""select `name` from `tabCommission Percentage` where docstatus = '1' and commission_type = 'RETURN' and sales = %s and disabled = '0'""", sales)[0][0]
 			cpd = frappe.db.sql("""select percentage from `tabCommission Percentage Detail` where parent = %s and from_range <= %s and to_range >= %s""", (cp, percent_round, percent_round))[0][0]
+			from_range = frappe.db.sql("""select format(from_range,0) from `tabCommission Percentage Detail` where parent = %s and from_range <= %s and to_range >= %s""", (cp, percent_round, percent_round))[0][0]
+			to_range = frappe.db.sql("""select format(to_range,0) from `tabCommission Percentage Detail` where parent = %s and from_range <= %s and to_range >= %s""", (cp, percent_round, percent_round))[0][0]
 			hasil = cpd
+			sra = from_range+"% - "+to_range+"%"
 		else:
 			hasil = 0
+			sra = "Out of range"
 	else:
 		check2 = frappe.db.sql("""select count(*) from `tabCommission Percentage` where docstatus = '1' and commission_type = 'RETURN' and sales is null and disabled = '0'""")[0][0]
 		if flt(check2) == 1:
 			cp = frappe.db.sql("""select `name` from `tabCommission Percentage` where docstatus = '1' and commission_type = 'RETURN' and sales is null and disabled = '0'""")[0][0]
 			cpd = frappe.db.sql("""select percentage from `tabCommission Percentage Detail` where parent = %s and from_range <= %s and to_range >= %s""", (cp, percent_round, percent_round))[0][0]
+			from_range = frappe.db.sql("""select format(from_range,0) from `tabCommission Percentage Detail` where parent = %s and from_range <= %s and to_range >= %s""", (cp, percent_round, percent_round))[0][0]
+			to_range = frappe.db.sql("""select format(to_range,0) from `tabCommission Percentage Detail` where parent = %s and from_range <= %s and to_range >= %s""", (cp, percent_round, percent_round))[0][0]
 			hasil = cpd
+			sra = from_range+"% - "+to_range+"%"
 		else:
 			hasil = 0
+			sra = "Out of range"
 	komisi = (flt(hasil) / 100) * flt(total_return)
 	inv_commission = {
 		'percentage_return_result': hasil,
 		'return_commission': komisi,
+		'return_range_achievement': sra
 	}
 	return inv_commission

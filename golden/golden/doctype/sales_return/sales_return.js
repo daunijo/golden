@@ -4,9 +4,9 @@
 frappe.ui.form.on('Sales Return', {
 	refresh: function(frm) {
 		frm.events.set_read_only(frm);
-		frm.toggle_reqd('vat_nominal', false);
-		frm.toggle_reqd('vat_percentage', false);
-		frm.toggle_reqd('vat_account', false);
+		frm.toggle_reqd(["vat_nominal", "vat_percentage", "vat_account"], false);
+		// var sales_invoice = frappe.meta.get_docfield("Sales Return Detail", "sales_invoice", frm.doc.name);
+		// sales_invoice.read_only = 0;
 	},
 	setup: function(frm){
 		frm.set_query("to_warehouse", function (doc) {
@@ -20,6 +20,22 @@ frappe.ui.form.on('Sales Return', {
 			return {
 				query: "golden.golden.doctype.employee_settings.employee_settings.employee_query",
 				filters: { 'department': 'sales' }
+			}
+		});
+		frm.set_query("item_code", "items", function (doc, cdt, cdn) {
+			var c_doc = locals[cdt][cdn];
+			if(frm.doc.show_all_items){
+				return {
+					query: "golden.golden.selling.all_item_query"
+				}
+			}else{
+				return {
+					query: "golden.golden.selling.item_query",
+					filters: {
+						'customer': frm.doc.customer,
+						'sales': frm.doc.sales_person
+					}
+				}
 			}
 		});
 	},
@@ -179,20 +195,16 @@ frappe.ui.form.on('Sales Return', {
 		if(frm.doc.vat_type == "Nominal"){
 			frm.set_value("vat_percentage", "");
 			frm.set_value("total_amount_include_vat", frm.doc.total_amount);
-			frm.toggle_reqd('vat_nominal', true);
+			frm.toggle_reqd(["vat_nominal", "vat_account"], true);
 			frm.toggle_reqd('vat_percentage', false);
-			frm.toggle_reqd('vat_account', true);
 		}else if (frm.doc.vat_type == "Percentage") {
 			frm.set_value("vat_nominal", "");
 			frm.set_value("total_amount_include_vat", frm.doc.total_amount);
+			frm.toggle_reqd(["vat_percentage", "vat_account"], true);
 			frm.toggle_reqd('vat_nominal', false);
-			frm.toggle_reqd('vat_percentage', true);
-			frm.toggle_reqd('vat_account', true);
 		}else{
 			frm.set_value("total_amount_include_vat", frm.doc.total_amount);
-			frm.toggle_reqd('vat_nominal', false);
-			frm.toggle_reqd('vat_percentage', false);
-			frm.toggle_reqd('vat_account', false);
+			frm.toggle_reqd(["vat_nominal", "vat_percentage", "vat_account"], false);
 		}
 	},
 	vat_nominal: function(frm){
@@ -208,7 +220,18 @@ frappe.ui.form.on('Sales Return', {
 			frm.set_value("total_amount_include_vat", plus_vat);
 			calculate_unallocated_amount(frm);
 		}
-	}
+	},
+	// show_all_items: function(frm){
+	// 	if(frm.doc.show_all_items){
+	// 		var sales_invoice = frappe.meta.get_docfield("Sales Return Detail", "sales_invoice", frm.doc.name);
+	// 		sales_invoice.read_only = 1;
+	// 		frm.refresh_fields("items");
+	// 	}else{
+	// 		var sales_invoice = frappe.meta.get_docfield("Sales Return Detail", "sales_invoice", frm.doc.name);
+	// 		sales_invoice.read_only = 0;
+	// 		frm.refresh_fields("items");
+	// 	}
+	// }
 });
 //Sales Return Detail (items)
 frappe.ui.form.on('Sales Return Detail', {
@@ -275,11 +298,20 @@ frappe.ui.form.on('Sales Return Detail', {
 				}
 			})
 		}else{
-			frappe.model.set_value(cdt, cdn, "si_rate", "0");
+			// frappe.model.set_value(cdt, cdn, "si_rate", "0");
 			frappe.model.set_value(cdt, cdn, "si_qty", "0");
 		}
 	},
 	qty: function(frm, cdt, cdn){
+		var d = locals[cdt][cdn];
+		d.amount = flt(d.qty) * flt(d.basic_rate);
+		d.transfer_qty = flt(d.qty) * flt(d.conversion_factor);
+		refresh_field('amount', d.name, 'items');
+		refresh_field('transfer_qty', d.name, 'items');
+		calculate_total_quantity(frm, cdt, cdn);
+		calculate_unallocated_amount(frm, cdt, cdn);
+	},
+	si_rate: function(frm, cdt, cdn){
 		var d = locals[cdt][cdn];
 		d.amount = flt(d.qty) * flt(d.basic_rate);
 		d.transfer_qty = flt(d.qty) * flt(d.conversion_factor);
@@ -329,16 +361,6 @@ cur_frm.set_query("customer_address", function(frm) {
 cur_frm.set_query("debit_account", function(frm) {
 	return {
 		query: "erpnext.controllers.queries.get_expense_account",
-	}
-});
-cur_frm.set_query("item_code", "items", function (doc, cdt, cdn) {
-	var c_doc= locals[cdt][cdn];
-	return {
-		query: "golden.golden.selling.item_query",
-		filters: {
-			'customer': cur_frm.doc.customer,
-			'sales': cur_frm.doc.sales_person
-		}
 	}
 });
 cur_frm.set_query("sales_invoice", "items",  function (doc, cdt, cdn) {
