@@ -1,8 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.22.20'
+__version__ = '1.22.21'
 
+# 1.22.21
+#   - Add field: show_all_items in Sales Return. #182
+#   - Update json, js & py Sales Return
+#   - Add field: account_currency in Sales Return. #143
+#   - Update overlappping value in Commission Percentage. #145
+#   - Update Sales Commission field #149 & #148
 # 1.22.20
 #   - Add report: Dynamic Item Report - Purchase
 # 1.22.19

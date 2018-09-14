@@ -161,8 +161,9 @@ class SalesReturn(Document):
 
 	def check_si_qty_to_qty(self):
 		for row in self.items:
-			if flt(row.si_qty) < flt(row.qty):
-				frappe.throw(_("Qty Item {0} in row {1} is greater than {2}").format(row.item_code, row.idx, row.si_qty))
+			if row.sales_invoice:
+				if flt(row.si_qty) < flt(row.qty):
+					frappe.throw(_("Qty Item {0} in row {1} is greater than {2}").format(row.item_code, row.idx, row.si_qty))
 
 	def set_transfer_qty(self):
 		for item in self.get("items"):
@@ -242,9 +243,10 @@ class SalesReturn(Document):
 
 	def update_sales_invoice(self):
 		for row in self.items:
-			remaining_qty = frappe.db.sql("""select return_qty from `tabSales Invoice Item` where parent = %s and item_code = %s""", (row.sales_invoice, row.item_code))[0][0]
-			update_return_qty = flt(remaining_qty) + flt(row.qty)
-			frappe.db.sql("""update `tabSales Invoice Item` set return_qty = %s where parent = %s and item_code = %s""", (update_return_qty, row.sales_invoice, row.item_code))
+			if row.sales_invoice:
+				remaining_qty = frappe.db.sql("""select return_qty from `tabSales Invoice Item` where parent = %s and item_code = %s""", (row.sales_invoice, row.item_code))[0][0]
+				update_return_qty = flt(remaining_qty) + flt(row.qty)
+				frappe.db.sql("""update `tabSales Invoice Item` set return_qty = %s where parent = %s and item_code = %s""", (update_return_qty, row.sales_invoice, row.item_code))
 
 	def stock_entry_insert(self):
 		stock_entry = frappe.get_doc({
@@ -281,9 +283,10 @@ class SalesReturn(Document):
 
 	def update_sales_invoice2(self):
 		for row in self.items:
-			remaining_qty = frappe.db.sql("""select return_qty from `tabSales Invoice Item` where parent = %s and item_code = %s""", (row.sales_invoice, row.item_code))[0][0]
-			update_return_qty = flt(remaining_qty) - flt(row.qty)
-			frappe.db.sql("""update `tabSales Invoice Item` set return_qty = %s where parent = %s and item_code = %s""", (update_return_qty, row.sales_invoice, row.item_code))
+			if row.sales_invoice:
+				remaining_qty = frappe.db.sql("""select return_qty from `tabSales Invoice Item` where parent = %s and item_code = %s""", (row.sales_invoice, row.item_code))[0][0]
+				update_return_qty = flt(remaining_qty) - flt(row.qty)
+				frappe.db.sql("""update `tabSales Invoice Item` set return_qty = %s where parent = %s and item_code = %s""", (update_return_qty, row.sales_invoice, row.item_code))
 
 	def stock_entry_cancel(self):
 		se = frappe.get_doc("Stock Entry", {"sales_return": self.name})

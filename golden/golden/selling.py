@@ -27,6 +27,21 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
             'sales_person': filters.get("sales")
         })
 
+def all_item_query(doctype, txt, searchfield, start, page_len, filters):
+    return frappe.db.sql("""select a.`name`, a.item_group from `tabItem` a
+        where a.disabled = '0' and a.is_stock_item = '1'
+            and (a.`name` like %(txt)s or a.item_code like %(txt)s)
+            {mcond}
+        limit %(start)s, %(page_len)s""".format(**{
+            'key': searchfield,
+            'mcond':get_match_cond(doctype)
+        }), {
+            'txt': "%%%s%%" % txt,
+            '_txt': txt.replace("%", ""),
+            'start': start,
+            'page_len': page_len
+        })
+
 def default_warehouse(doctype, txt, searchfield, start, page_len, filters):
     return frappe.db.sql("""select `name` from `tabWarehouse`
         where docstatus = '0' and is_group = '1' and type = 'Warehouse'

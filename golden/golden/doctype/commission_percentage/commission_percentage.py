@@ -14,11 +14,24 @@ class CommissionPercentage(Document):
 			start = 0
 			end = 0
 			for row in self.details:
-				if flt(start) != 0 and flt(end) != 0:
+				if row.from_range > row.to_range:
+					frappe.throw(_("From Range is bigger than To Range in row {0}").format(row.idx))
+				if row.idx >= 2:
 					if start <= row.from_range <= end:
 						frappe.throw(_("From Range in row {0} is overlap").format(row.idx))
 				start = row.from_range
 				end = row.to_range
+		if self.collects:
+			start = 0
+			end = 0
+			for row in self.collects:
+				if row.from_day > row.to_day:
+					frappe.throw(_("From Day is bigger than To Day in row {0}").format(row.idx))
+				if row.idx >= 2:
+					if start <= row.from_day <= end:
+						frappe.throw(_("From Day in row {0} is overlap").format(row.idx))
+				start = row.from_day
+				end = row.to_day
 
 	def on_submit(self):
 		self.update_other_doc()
