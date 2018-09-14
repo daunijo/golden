@@ -9,6 +9,7 @@ __version__ = '1.22.21'
 #   - Add field: account_currency in Sales Return. #143
 #   - Update overlappping value in Commission Percentage. #145
 #   - Update Sales Commission field #149 & #148
+#   - Fix bug Dynamic Item Report - Purchase. #157
 # 1.22.20
 #   - Add report: Dynamic Item Report - Purchase
 # 1.22.19
