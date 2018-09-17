@@ -46,7 +46,7 @@ frappe.query_reports["Dynamic Item Report - Purchase"] = {
 				return {
 					"doctype": "Price List",
 					"filters": {
-						"buying": 1
+						"selling": 1
 					}
 				}
 			}

@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe.utils import nowdate, cstr, flt, now, getdate, add_months
+from frappe.utils import cstr, flt
 from frappe import msgprint, _
 from frappe.model.mapper import get_mapped_doc
 
@@ -31,7 +31,7 @@ class InvoiceKeeptrack(Document):
 
 	def on_submit(self):
 		# self.make_payment()
-		self.check_related_document()
+		# self.check_related_document()
 		self.update_related_document()
 		self.insert_customer_list()
 
@@ -52,9 +52,9 @@ class InvoiceKeeptrack(Document):
 
 	def update_related_document(self):
 		for row in self.invoices:
-			if row.si_summary:
-				frappe.db.sql("""update `tabSales Invoice Summary` set status = 'Completed', invoice_keeptrack = %s where `name` = %s""", (self.name, row.si_summary))
-			if row.reference_doctype == "Sales Invoice":
+			if row.reference_doctype == "Sales Invoice Summary":
+				frappe.db.sql("""update `tabSales Invoice Summary` set status = 'Completed', invoice_keeptrack = %s where `name` = %s""", (self.name, row.invoice))
+			elif row.reference_doctype == "Sales Invoice":
 				frappe.db.sql("""update `tabSales Invoice` set invoice_keeptrack = %s where `name` = %s""", (self.name, row.invoice))
 			elif row.reference_doctype == "Sales Return":
 				frappe.db.sql("""update `tabSales Return` set invoice_keeptrack = %s where `name` = %s""", (self.name, row.invoice))
@@ -75,14 +75,28 @@ class InvoiceKeeptrack(Document):
 
 	def on_cancel(self):
 		self.check_payment()
-		# self.delete_payment()
 		for row in self.invoices:
-			if row.si_summary:
-				frappe.db.sql("""update `tabSales Invoice Summary` set status = 'Submitted', invoice_keeptrack = null where `name` = %s""", row.si_summary)
+			if row.reference_doctype == "Sales Invoice Summary":
+				check_other_sk = frappe.db.sql("""select count(*) from `tabInvoice Keeptrack Detail` where docstatus = '1' and parent != %s and reference_doctype = 'Sales Invoice Summary' and invoice = %s""", (self.name, row.invoice))[0][0]
+				if flt(check_other_sk) >= 1:
+					sk = frappe.db.sql("""select parent from `tabInvoice Keeptrack Detail` where docstatus = '1' and parent != %s and reference_doctype = 'Sales Invoice Summary' and invoice = %s order by parent desc limit 1""", (self.name, row.invoice))[0][0]
+					frappe.db.sql("""update `tabSales Invoice Summary` set status = 'Submitted', invoice_keeptrack = %s where `name` = %s""", (sk, row.invoice))
+				else:
+					frappe.db.sql("""update `tabSales Invoice Summary` set status = 'Submitted', invoice_keeptrack = null where `name` = %s""", row.invoice)
 			if row.reference_doctype == "Sales Invoice":
-				frappe.db.sql("""update `tabSales Invoice` set invoice_keeptrack = null where `name` = %s""", row.invoice)
+				check_other_si = frappe.db.sql("""select count(*) from `tabInvoice Keeptrack Detail` where docstatus = '1' and parent != %s and reference_doctype = 'Sales Invoice' and invoice = %s""", (self.name, row.invoice))[0][0]
+				if flt(check_other_si) >= 1:
+					sk = frappe.db.sql("""select parent from `tabInvoice Keeptrack Detail` where docstatus = '1' and parent != %s and reference_doctype = 'Sales Invoice' and invoice = %s order by parent desc limit 1""", (self.name, row.invoice))[0][0]
+					frappe.db.sql("""update `tabSales Invoice` set invoice_keeptrack = %s where `name` = %s""", (sk, row.invoice))
+				else:
+					frappe.db.sql("""update `tabSales Invoice` set invoice_keeptrack = null where `name` = %s""", row.invoice)
 			elif row.reference_doctype == "Sales Return":
-				frappe.db.sql("""update `tabSales Return` set invoice_keeptrack = null where `name` = %s""", row.invoice)
+				check_other_sr = frappe.db.sql("""select count(*) from `tabInvoice Keeptrack Detail` where docstatus = '1' and parent != %s and reference_doctype = 'Sales Return' and invoice = %s""", (self.name, row.invoice))[0][0]
+				if flt(check_other_sr) >= 1:
+					sk = frappe.db.sql("""select parent from `tabInvoice Keeptrack Detail` where docstatus = '1' and parent != %s and reference_doctype = 'Sales Return' and invoice = %s order by parent desc limit 1""", (self.name, row.invoice))[0][0]
+					frappe.db.sql("""update `tabSales Return` set invoice_keeptrack = %s where `name` = %s""", (sk, row.invoice))
+				else:
+					frappe.db.sql("""update `tabSales Return` set invoice_keeptrack = null where `name` = %s""", row.invoice)
 
 	# def on_trash(self):
 	# 	frappe.db.sql("""update `tabSales Invoice Summary` set invoice_keeptrack = null where invoice_keeptrack = %s""", self.name)
@@ -116,6 +130,103 @@ class InvoiceKeeptrack(Document):
 		for row in pe:
 			payment_entry = frappe.get_doc("Payment Entry Receive", row.name)
 			payment_entry.delete()
+
+@frappe.whitelist()
+def get_sales_invoice2(source_name, target_doc=None):
+	def update_item(source, target, source_parent):
+		customer, customer_name, invoice, posting_date, due_date, grand_total = frappe.db.get_value("Sales Invoice", source.parent, ["customer", "customer_name", "name", "posting_date", "due_date", "grand_total"])
+		count_pe = frappe.db.sql("""select count(*) from `tabPayment Entry Reference` a inner join `tabPayment Entry` b on a.parent = b.`name` where b.docstatus = '1' and a.reference_name =  %s""", source.parent)[0][0]
+		if flt(count_pe) != 0:
+			pe_date = frappe.db.sql("""select b.posting_date from `tabPayment Entry Reference` a inner join `tabPayment Entry` b on a.parent = b.`name` where b.docstatus = '1' and a.reference_name = %s order by b.posting_date desc limit 1""", source.parent)
+			pe_amount = frappe.db.sql("""select sum(a.total_amount) from `tabPayment Entry Reference` a inner join `tabPayment Entry` b on a.parent = b.`name` where b.docstatus = '1' and a.reference_name = %s""", source.parent)
+		else:
+			pe_date = ""
+			pe_amount = ""
+		target.customer = customer
+		target.customer_name = customer_name
+		target.reference_doctype = "Sales Invoice"
+		target.invoice = invoice
+		target.invoice_date = posting_date
+		target.due_date = due_date
+		target.amount = grand_total
+		target.payment_date = pe_date
+		target.payment_amount = pe_amount
+		target.get_from = "Sales Invoice"
+		target.get_from_doc = source.parent
+
+	doc = get_mapped_doc("Sales Invoice", source_name, {
+		"Sales Invoice": {
+			"doctype": "Invoice Keeptrack",
+			"validation": {
+				"docstatus": ["=", 1]
+			},
+			"field_no_map": ["customer", "grand_total", "invoice_keeptrack", "total_invoice"]
+		},
+		"Sales Invoice Item": {
+			"doctype": "Invoice Keeptrack Detail",
+			"condition": lambda doc: doc.idx == 1,
+			"postprocess": update_item
+		}
+	}, target_doc)
+	return doc
+
+@frappe.whitelist()
+def get_si_summary(source_name, target_doc=None):
+	def update_item(source, target, source_parent):
+		invoice, posting_date, total_invoice = frappe.db.get_value("Sales Invoice Summary", source.parent, ["name", "posting_date", "total_invoice"])
+		target.reference_doctype = "Sales Invoice Summary"
+		target.invoice = invoice
+		target.invoice_date = posting_date
+		target.amount = total_invoice
+		target.get_from = "Sales Invoice Summary"
+		target.get_from_doc = source.parent
+
+	doc = get_mapped_doc("Sales Invoice Summary", source_name, {
+		"Sales Invoice Summary": {
+			"doctype": "Invoice Keeptrack",
+			"validation": {
+				"docstatus": ["=", 1]
+			},
+			"field_no_map": ["customer", "grand_total", "invoice_keeptrack", "total_invoice"]
+		},
+		"Sales Invoice Summary Detail": {
+			"doctype": "Invoice Keeptrack Detail",
+			"condition": lambda doc: doc.idx == 1,
+			"field_no_map": ["reference_doctype", "reference_name", "due_date"],
+			"postprocess": update_item
+		}
+	}, target_doc)
+	return doc
+
+@frappe.whitelist()
+def get_sales_return(source_name, target_doc=None):
+	def update_item(source, target, source_parent):
+		customer, customer_name, invoice, posting_date, total_amount = frappe.db.get_value("Sales Return", source.parent, ["customer", "customer_name", "name", "posting_date", "total_amount_include_vat"])
+		target.customer = customer
+		target.customer_name = customer_name
+		target.reference_doctype = "Sales Return"
+		target.invoice = invoice
+		target.invoice_date = posting_date
+		target.amount = total_amount
+		target.get_from = "Sales Return"
+		target.get_from_doc = source.parent
+
+	doc = get_mapped_doc("Sales Return", source_name, {
+		"Sales Return": {
+			"doctype": "Invoice Keeptrack",
+			"validation": {
+				"docstatus": ["=", 1]
+			},
+			"field_no_map": ["customer", "grand_total", "invoice_keeptrack", "total_invoice"]
+		},
+		"Sales Return Detail": {
+			"doctype": "Invoice Keeptrack Detail",
+			"condition": lambda doc: doc.idx == 1,
+			"field_no_map": ["reference_doctype", "reference_name", "due_date", "amount"],
+			"postprocess": update_item
+		}
+	}, target_doc)
+	return doc
 
 @frappe.whitelist()
 def get_sales_invoice(docstatus):

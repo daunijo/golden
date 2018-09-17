@@ -10,6 +10,16 @@ from frappe import msgprint, _
 
 class CommissionPercentage(Document):
 	def validate(self):
+		self.check_overlapping_value()
+		self.check_duplicate_doc()
+
+	def on_submit(self):
+		self.update_other_doc()
+
+	def on_update_after_submit(self):
+		self.update_other_doc()
+
+	def check_overlapping_value(self):
 		if self.details:
 			start = 0
 			end = 0
@@ -33,14 +43,20 @@ class CommissionPercentage(Document):
 				start = row.from_day
 				end = row.to_day
 
-	def on_submit(self):
-		self.update_other_doc()
+	def check_duplicate_doc(self):
+		if self.sales:
+			doc = frappe.db.sql("""select count(*) from `tabCommission Percentage` where docstatus= '1' and commission_type = %s and disabled = %s and sales = %s""", (self.commission_type, self.disabled, self.sales))[0][0]
+			if flt(doc) >= 1:
+				cp = frappe.db.sql("""select `name` from `tabCommission Percentage` where docstatus= '1' and commission_type = %s and disabled = %s and sales = %s order by `name` desc limit 1""", (self.commission_type, self.disabled, self.sales))[0][0]
+				frappe.throw(_("Document is duplicated with Commission Percentage {0}").format(cp))
+		else:
+			doc = frappe.db.sql("""select count(*) from `tabCommission Percentage` where docstatus= '1' and commission_type = %s and disabled = %s and sales is null""", (self.commission_type, self.disabled))[0][0]
+			if flt(doc) >= 1:
+				cp = frappe.db.sql("""select `name` from `tabCommission Percentage` where docstatus= '1' and commission_type = %s and disabled = %s and sales is null order by `name` desc limit 1""", (self.commission_type, self.disabled))[0][0]
+				frappe.throw(_("Document is duplicated with Commission Percentage {0}").format(cp))
 
 	def update_other_doc(self):
 		if not self.sales:
 			frappe.db.sql("""update `tabCommission Percentage` set disabled = '1' where docstatus = '1' and `name` != %s and sales is null and commission_type = %s""", (self.name, self.commission_type))
 		else:
 			frappe.db.sql("""update `tabCommission Percentage` set disabled = '1' where docstatus = '1' and `name` != %s and sales = %s and commission_type = %s""", (self.name, self.sales, self.commission_type))
-
-	def on_update_after_submit(self):
-		self.update_other_doc()
