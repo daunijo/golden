@@ -16,6 +16,76 @@ frappe.ui.form.on('Invoice Keeptrack', {
 			cur_frm.add_custom_button(__('Payment Entry'), cur_frm.cscript['Payment Entry'], __("Make"));
 			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 		}
+		if(frm.doc.docstatus == 0 || frm.doc.__islocal){
+			frm.add_custom_button(__('Sales Invoice'), function() {
+				items = $.map(frm.doc.invoices, function(item,idx) {
+					if(item.reference_doctype == 'Sales Invoice'){
+						return item.invoice
+					}
+				})
+				added_items = items.join(",")
+				erpnext.utils.map_current_doc({
+					method: "golden.golden.doctype.invoice_keeptrack.invoice_keeptrack.get_sales_invoice2",
+					source_doctype: "Sales Invoice",
+					date_field: "posting_date",
+					target: frm,
+					setters: {
+						customer: frm.doc.customer || undefined,
+						grand_total: frm.doc.grand_total || undefined,
+						invoice_keeptrack: frm.doc.invoice_keeptrack || undefined
+					},
+					get_query_filters: {
+						docstatus: 1,
+						name: ["not in", added_items]
+					}
+				})
+			}, __("Get invoice from"));
+			frm.add_custom_button(__('Sales Invoice Summary'), function() {
+				items = $.map(frm.doc.invoices, function(item,idx) {
+					if(item.reference_doctype == 'Sales Invoice Summary'){
+						return item.invoice
+					}
+				})
+				added_items = items.join(",")
+				erpnext.utils.map_current_doc({
+					method: "golden.golden.doctype.invoice_keeptrack.invoice_keeptrack.get_si_summary",
+					source_doctype: "Sales Invoice Summary",
+					date_field: "posting_date",
+					target: frm,
+					setters: {
+						customer: frm.doc.customer || undefined,
+						total_invoice: frm.doc.total_invoice || undefined,
+						invoice_keeptrack: frm.doc.invoice_keeptrack || undefined
+					},
+					get_query_filters: {
+						docstatus: 1,
+						name: ["not in", added_items]
+					}
+				})
+			}, __("Get invoice from"));
+			frm.add_custom_button(__('Sales Return'), function() {
+				items = $.map(frm.doc.invoices, function(item,idx) {
+					if(item.reference_doctype == 'Sales Return'){
+						return item.invoice
+					}
+				})
+				added_items = items.join(",")
+				erpnext.utils.map_current_doc({
+					method: "golden.golden.doctype.invoice_keeptrack.invoice_keeptrack.get_sales_return",
+					source_doctype: "Sales Return",
+					date_field: "posting_date",
+					target: frm,
+					setters: {
+						customer: frm.doc.customer || undefined,
+						invoice_keeptrack: frm.doc.invoice_keeptrack || undefined
+					},
+					get_query_filters: {
+						docstatus: 1,
+						name: ["not in", added_items]
+					}
+				})
+			}, __("Get invoice from"));
+		}
 	},
 	validate: function(frm){
 		frm.clear_table("customer_list");

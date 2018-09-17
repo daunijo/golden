@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.22.21'
+__version__ = '1.22.22'
 
+# 1.22.22
+#   - Fix duplicate document in Commission Percentages
+#   - Update Invoice Keeptrack
 # 1.22.21
 #   - Add field: show_all_items in Sales Return. #182
 #   - Update json, js & py Sales Return
