@@ -1,0 +1,26 @@
+{
+ "content": null, 
+ "creation": "2018-09-18 12:43:49.648711", 
+ "docstatus": 0, 
+ "doctype": "Page", 
+ "idx": 0, 
+ "modified": "2018-09-18 12:44:06.248335", 
+ "modified_by": "Administrator", 
+ "module": "Golden", 
+ "name": "sales-analytics-sp", 
+ "owner": "Administrator", 
+ "page_name": "sales-analytics-sp", 
+ "roles": [
+  {
+   "role": "Administrator"
+  }, 
+  {
+   "role": "System Manager"
+  }
+ ], 
+ "script": null, 
+ "standard": "Yes", 
+ "style": null, 
+ "system_page": 0, 
+ "title": "Sales Analytics - Sales Person"
+}

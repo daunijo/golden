@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.22.22'
+__version__ = '1.22.23'
 
+# 1.22.23
+#   - Update on_submit Receive Order, purchase receipt date follows date from receive order. #179
+#   - Update tree warehouse detail. #151
+#   - Add link Receive Order in Purchase Invoice Item. #192
 # 1.22.22
 #   - Fix duplicate document in Commission Percentages
 #   - Update Invoice Keeptrack

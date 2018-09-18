@@ -61,7 +61,7 @@ class ReceiveOrder(Document):
 				"rss_po": po.po_name,
             	"posting_date": self.posting_date,
 				"posting_time": self.posting_time,
-				"set_posting_time": self.set_posting_time,
+				"set_posting_time": "1",
 				"taxes_and_charges": source.taxes_and_charges,
 				"apply_discount_on": source.apply_discount_on,
 				"additional_discount_percentage": source.additional_discount_percentage,
@@ -293,9 +293,9 @@ def get_picking_items(supplier, ro):
 	si_list = []
 	if ro.count('||') == 1:
 		a,b = ro.split("||")
-		items = frappe.db.sql("""select roi.item_code, roi.item_name, roi.po_detail, roi.qty, roi.po_uom, roi.stock_uom, roi.purchase_order, ro.accepted_location, roi.`name`, roi.po_detail from `tabReceive Order` ro inner join `tabReceive Order Item` roi on ro.`name` = roi.parent inner join `tabPurchase Order` po on roi.purchase_order = po.`name` where ro.docstatus = '1' and po.supplier = %s and (ro.`name` = %s or ro.`name` = %s) and roi.purchase_invoice is null order by po.`name` asc""", (supplier, a, b), as_dict=1)
+		items = frappe.db.sql("""select roi.item_code, roi.item_name, roi.po_detail, roi.qty, roi.po_uom, roi.stock_uom, roi.purchase_order, ro.accepted_location, roi.`name`, ro.`name` as rec_order from `tabReceive Order` ro inner join `tabReceive Order Item` roi on ro.`name` = roi.parent inner join `tabPurchase Order` po on roi.purchase_order = po.`name` where ro.docstatus = '1' and po.supplier = %s and (ro.`name` = %s or ro.`name` = %s) and roi.purchase_invoice is null order by po.`name` asc""", (supplier, a, b), as_dict=1)
 	else:
-		items = frappe.db.sql("""select roi.item_code, roi.item_name, roi.po_detail, roi.qty, roi.po_uom, roi.stock_uom, roi.purchase_order, ro.accepted_location, roi.`name`, roi.po_detail from `tabReceive Order` ro inner join `tabReceive Order Item` roi on ro.`name` = roi.parent inner join `tabPurchase Order` po on roi.purchase_order = po.`name` where ro.docstatus = '1' and po.supplier = %s and ro.`name` = %s and roi.purchase_invoice is null order by po.`name` asc""", (supplier, ro), as_dict=1)
+		items = frappe.db.sql("""select roi.item_code, roi.item_name, roi.po_detail, roi.qty, roi.po_uom, roi.stock_uom, roi.purchase_order, ro.accepted_location, roi.`name`, ro.`name` as rec_order from `tabReceive Order` ro inner join `tabReceive Order Item` roi on ro.`name` = roi.parent inner join `tabPurchase Order` po on roi.purchase_order = po.`name` where ro.docstatus = '1' and po.supplier = %s and ro.`name` = %s and roi.purchase_invoice is null order by po.`name` asc""", (supplier, ro), as_dict=1)
 	for row in items:
 		description = frappe.db.get_value("Purchase Order Item", row.po_detail, "description")
 		rate = frappe.db.get_value("Purchase Order Item", row.po_detail, "rate")
@@ -312,6 +312,7 @@ def get_picking_items(supplier, ro):
 			'warehouse': row.accepted_location,
 			'amount': amount,
 			'po_detail': row.po_detail,
+			'receive_order': row.rec_order,
 			'ro_detail': row.name
 	    }))
 	return si_list

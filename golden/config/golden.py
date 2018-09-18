@@ -199,6 +199,12 @@ def get_data():
 					"is_query_report": True
 				},
 				{
+					"type": "page",
+					"name": "sales-analytics-sp",
+					"label": _("Sales Analytics - Sales Person"),
+					"icon": "fa fa-bar-chart",
+				},
+				{
 					"type": "report",
 					"name": "Stock Card",
 					"doctype": "Stock Ledger Entry",
