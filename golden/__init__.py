@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.22.23'
+__version__ = '1.22.24'
 
+# 1.22.24
+#   - Hilangkan Receiver Staff di module. #185
+#   - Write Off Account di Sales Return sekarang mandatory. #182
+#   - Fix double Parent Warehouse. #151
 # 1.22.23
 #   - Update on_submit Receive Order, purchase receipt date follows date from receive order. #179
 #   - Update tree warehouse detail. #151

@@ -566,15 +566,24 @@ def submit_stock_entry(doc, method):
         frappe.db.sql("""update `tabTransfer Order` set status = 'Completed' where `name` = %s""", doc.transfer_order)
 
 def validate_warehouse(doc, method):
+    if doc.type == "Section":
+        if not doc.parent_warehouse_rss:
+            frappe.throw(_("Parent Warehouse is mandatory"))
+    elif doc.type == "Location":
+        if not doc.parent_warehouse_rss:
+            frappe.throw(_("Parent Warehouse is mandatory"))
+        if not doc.parent_section_rss:
+            frappe.throw(_("Parent Section is mandatory"))
+
+def update_warehouse(doc, method):
     if not doc.parent_warehouse:
         if doc.type != "Warehouse":
             frappe.throw(_("Type must be <b>Warehouse</b>"))
         if doc.is_group == 0 and doc.type == "Warehouse":
             frappe.throw(_("<b>Is Group</b> is mandatory"))
 
-def validate_warehouse_2(doc, method):
+def update_warehouse_2(doc, method):
     if doc.type == "Section":
-        doc.parent_warehouse = doc.parent_warehouse_rss
-        doc.parent_section_rss = None
+        frappe.db.sql("""update `tabWarehouse` set parent_warehouse = %s, parent_section_rss = null where `name` = %s""", (doc.parent_warehouse_rss, doc.name))
     elif doc.type == "Location":
-        doc.parent_warehouse = doc.parent_section_rss
+        frappe.db.sql("""update `tabWarehouse` set parent_warehouse = %s where `name` = %s""", (doc.parent_section_rss, doc.name))
