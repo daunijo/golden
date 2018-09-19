@@ -14,6 +14,7 @@ from erpnext.stock.get_item_details import get_bin_details, get_default_cost_cen
 class SalesReturn(Document):
 	def validate(self):
 		self.check_si_qty_to_qty()
+		self.check_write_off_account()
 		self.set_transfer_qty()
 		self.set_actual_qty()
 		self.calculate_rate_and_amount()
@@ -164,6 +165,11 @@ class SalesReturn(Document):
 			if row.sales_invoice:
 				if flt(row.si_qty) < flt(row.qty):
 					frappe.throw(_("Qty Item {0} in row {1} is greater than {2}").format(row.item_code, row.idx, row.si_qty))
+
+	def check_write_off_account(self):
+		if flt(self.unallocated_amount) != 0:
+			if not self.write_off_account:
+				frappe.throw(_("Write Off Account is mandatory if Unallocated Amount not 0"))
 
 	def set_transfer_qty(self):
 		for item in self.get("items"):

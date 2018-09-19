@@ -220,7 +220,7 @@ frappe.ui.form.on('Sales Return', {
 			frm.set_value("total_amount_include_vat", plus_vat);
 			calculate_unallocated_amount(frm);
 		}
-	},
+	}
 	// show_all_items: function(frm){
 	// 	if(frm.doc.show_all_items){
 	// 		var sales_invoice = frappe.meta.get_docfield("Sales Return Detail", "sales_invoice", frm.doc.name);
