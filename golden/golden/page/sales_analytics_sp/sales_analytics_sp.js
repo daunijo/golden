@@ -74,9 +74,8 @@ erpnext.SalesAnalyticsSP = frappe.views.TreeGridReport.extend({
 			},
 			"Employee": {
 				label: __("Employee"),
-				show: true,
+				show: false,
 				item_key: "employee",
-				parent_field: "parent_company",
 				formatter: function(item) {
 					return item.name;
 				}
@@ -140,7 +139,7 @@ erpnext.SalesAnalyticsSP = frappe.views.TreeGridReport.extend({
 				name: "Not Set",
 				parent_customer_group: "All Customer Groups",
 				parent_territory: "All Territories",
-				parent_company: "GOLDEN TRADING",
+				// company: "GOLDEN TRADING",
 				id: "Not Set",
 			});
 
@@ -150,11 +149,10 @@ erpnext.SalesAnalyticsSP = frappe.views.TreeGridReport.extend({
 				id: "Not Set",
 			});
 
-			// frappe.report_dump.data["Employee"].push({
-			// 	name: __("Not Set"),
-			// 	parent_company: "GOLDEN TRADING",
-			// 	id: "Not Set",
-			// });
+			frappe.report_dump.data["Employee"].push({
+				name: __("Not Set"),
+				id: "Not Set",
+			});
 		}
 
 		if (!this.tl || !this.tl[this.based_on]) {
@@ -164,7 +162,7 @@ erpnext.SalesAnalyticsSP = frappe.views.TreeGridReport.extend({
 		if(!this.data || me.item_type != me.tree_type) {
 			if(me.tree_type=='Customer') {
 				var items = frappe.report_dump.data["Customer"];
-			} if(me.tree_type=='Customer Group') {
+			} else if(me.tree_type=='Customer Group') {
 				var items = this.prepare_tree("Customer", "Customer Group");
 			} else if(me.tree_type=="Item Group") {
 				var items = this.prepare_tree("Item", "Item Group");
@@ -173,7 +171,7 @@ erpnext.SalesAnalyticsSP = frappe.views.TreeGridReport.extend({
 			} else if(me.tree_type=="Territory") {
 				var items = this.prepare_tree("Customer", "Territory");
 			} else if(me.tree_type=="Employee") {
-				var items = this.prepare_tree("Employee", "Company");
+				var items = frappe.report_dump.data["Employee"];
 			}
 
 			me.item_type = me.tree_type

@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.22.24'
+__version__ = '1.22.25'
 
+# 1.22.25
+#   - Update Balance Qty in Stock Card, Stock Card Sales & Stock Card Purchasing. #181
+#   - Update warehouse_tree.
+#   - Add due_date_base_on in Purchase Invoice. #7
 # 1.22.24
 #   - Hilangkan Receiver Staff di module. #185
 #   - Write Off Account di Sales Return sekarang mandatory. #182

@@ -9,6 +9,7 @@ from frappe.utils import nowdate, cstr, flt
 from frappe import msgprint, _
 from frappe.model.mapper import get_mapped_doc
 from frappe.desk.reportview import get_match_cond, get_filters_cond
+from datetime import timedelta
 
 class ReceiveOrder(Document):
 	def validate(self):
@@ -287,6 +288,35 @@ def get_items_for_pi(source_name, target_doc=None):
 	}, target_doc, set_missing_values)
 
 	return doclist
+
+@frappe.whitelist()
+def get_po_due_date(supplier, ro, based_on):
+	if ro.count('||') == 1:
+		a,b = ro.split("||")
+		ro_date = frappe.db.sql("""select posting_date from `tabReceive Order` where docstatus = '1' and (`name` = %s or `name` = %s) order by posting_date desc limit 1""", (a, b))[0][0]
+		po_date = frappe.db.sql("""select po.transaction_date from `tabReceive Order` ro inner join `tabReceive Order Item` roi on ro.`name` = roi.parent inner join `tabPurchase Order` po on po.`name` = roi.purchase_order where ro.docstatus = '1' and (ro.`name` = %s or ro.`name` = %s) order by po.transaction_date desc limit 1""", (a, b))[0][0]
+		po = frappe.db.sql("""select po.`name` from `tabReceive Order` ro inner join `tabReceive Order Item` roi on ro.`name` = roi.parent inner join `tabPurchase Order` po on po.`name` = roi.purchase_order where ro.docstatus = '1' and (ro.`name` = %s or ro.`name` = %s) order by po.transaction_date desc limit 1""", (a, b))[0][0]
+	else:
+		ro_date = frappe.db.sql("""select posting_date from `tabReceive Order` where docstatus = '1' and `name` = %s order by posting_date desc limit 1""", ro)[0][0]
+		po_date = frappe.db.sql("""select po.transaction_date from `tabReceive Order` ro inner join `tabReceive Order Item` roi on ro.`name` = roi.parent inner join `tabPurchase Order` po on po.`name` = roi.purchase_order where ro.docstatus = '1' and ro.`name` = %s order by po.transaction_date desc limit 1""", ro)[0][0]
+		po = frappe.db.sql("""select po.`name` from `tabReceive Order` ro inner join `tabReceive Order Item` roi on ro.`name` = roi.parent inner join `tabPurchase Order` po on po.`name` = roi.purchase_order where ro.docstatus = '1' and ro.`name` = %s order by po.transaction_date desc limit 1""", ro)[0][0]
+	po_due_date = frappe.db.get_value("Payment Schedule", {"parent": po}, "due_date")
+	selisih_hari = frappe.db.sql("""select datediff(%s, %s)""", (po_due_date, po_date))[0][0]
+	if based_on == "Purchase Order":
+		end_date = po_date + timedelta(days=selisih_hari)
+		ptt = None
+	elif based_on == "Receive Order":
+		end_date = ro_date + timedelta(days=selisih_hari)
+		ptt = None
+	else:
+		end_date = nowdate()
+		pt = frappe.db.get_value("Payment Schedule", {"parent": po}, "payment_term")
+		ptt = frappe.db.get_value("Payment Terms Template Detail", {"payment_term": pt}, "parent")
+	aa = {
+		'due_date': end_date,
+		'payment_terms_template': ptt
+	}
+	return aa
 
 @frappe.whitelist()
 def get_picking_items(supplier, ro):
