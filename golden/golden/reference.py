@@ -570,10 +570,11 @@ def validate_warehouse(doc, method):
         if not doc.parent_warehouse_rss:
             frappe.throw(_("Parent Warehouse is mandatory"))
     elif doc.type == "Location":
-        if not doc.parent_warehouse_rss:
-            frappe.throw(_("Parent Warehouse is mandatory"))
         if not doc.parent_section_rss:
             frappe.throw(_("Parent Section is mandatory"))
+        if not doc.parent_warehouse_rss:
+            doc.parent_warehouse_rss = frappe.db.get_value("Warehouse", doc.parent_section_rss, "parent_warehouse")
+            # frappe.throw(_("Parent Warehouse is mandatory"))
 
 def update_warehouse(doc, method):
     if not doc.parent_warehouse:

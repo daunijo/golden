@@ -15,11 +15,13 @@ def execute(filters=None):
 	stock_fil = get_stock(filters)
 	stock_all = 0
 	stock_all = flt(stock_all) + flt(stock_fil)
-	sl_entries = frappe.db.sql("""select concat_ws(" ",sle.posting_date,sle.posting_time) as date, sle.item_code, i.item_name, sle.voucher_type, sle.voucher_no, sle.actual_qty, sle.qty_after_transaction, sle.warehouse, sle.stock_uom from `tabStock Ledger Entry` sle inner join `tabItem` i on i.item_code = sle.item_code where sle.docstatus = '1' %s order by date asc""" % conditions, as_dict=1)
+	sl_entries = frappe.db.sql("""select concat_ws(" ",sle.posting_date,sle.posting_time) as date, sle.item_code, i.item_name, sle.voucher_type, sle.voucher_no, sle.actual_qty, sle.qty_after_transaction, sle.warehouse, sle.stock_uom, sle.stock_value_difference, sle.valuation_rate from `tabStock Ledger Entry` sle inner join `tabItem` i on i.item_code = sle.item_code where sle.docstatus = '1' %s order by date asc""" % conditions, as_dict=1)
 	for cl in sl_entries:
 		if cl.voucher_type == "Stock Reconciliation":
 			qty = cl.qty_after_transaction
-			stock_all = flt(cl.qty_after_transaction)
+			qty_diff = flt(cl.stock_value_difference) / flt(cl.valuation_rate)
+			stock_all = flt(stock_all) + flt(qty_diff)
+			# stock_all = flt(cl.qty_after_transaction)
 		else:
 			qty = cl.actual_qty
 			stock_all = flt(stock_all) + flt(cl.actual_qty)
