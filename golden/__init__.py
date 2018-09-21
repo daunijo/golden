@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.22.25'
+__version__ = '1.22.26'
 
+# 1.22.26
+#   - Replace City & Region in Summary Generator, Customer. #189
+#   - Update status in Receive Order. #195
 # 1.22.25
 #   - Update Balance Qty in Stock Card, Stock Card Sales & Stock Card Purchasing. #181
 #   - Update warehouse_tree.
