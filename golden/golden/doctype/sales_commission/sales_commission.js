@@ -193,7 +193,7 @@ frappe.ui.form.on('Sales Commission', {
 			(frm.doc.returns || []).map(function(i) {
 				return (flt(i.amount));
 			})
-		);
+		) || 0;
 		frm.set_value("total_return", total_returns);
 	},
 	calculate_percentage_invoice: function(frm){
@@ -226,7 +226,7 @@ frappe.ui.form.on('Sales Commission', {
 			args:{
 				sales: frm.doc.sales,
 				percentage: frm.doc.percentage_return || 0,
-				total_return: frm.doc.total_return
+				total_return: frm.doc.total_return || 0
 			},
 			callback: function (r) {
 				if(r.message) {

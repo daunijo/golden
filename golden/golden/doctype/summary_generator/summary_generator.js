@@ -3,19 +3,7 @@
 
 frappe.ui.form.on('Summary Generator', {
 	setup: function(frm) {
-		frm.set_query('city', function(doc) {
-			return {
-				filters: { 'disabled': 0 }
-			}
-		});
-		frm.set_query('region', function(doc) {
-			return {
-				filters: {
-					'disabled': 0,
-					'city': doc.city
-				}
-			}
-		});
+
 	},
 	refresh: function(frm) {
 		frm.events.set_read_only(frm);
@@ -42,8 +30,7 @@ frappe.ui.form.on('Summary Generator', {
 			args: {
 				start: frm.doc.start_date,
 				end: frm.doc.end_date,
-				city: frm.doc.city || "",
-				region: frm.doc.region || ""
+				territory: frm.doc.territory || ""
 			},
 			callback: function(r, rt) {
 				if(r.message) {
@@ -65,8 +52,7 @@ frappe.ui.form.on('Summary Generator', {
 			args: {
 				start: frm.doc.start_date,
 				end: frm.doc.end_date,
-				city: frm.doc.city || "",
-				region: frm.doc.region || ""
+				territory: frm.doc.territory || ""
 			},
 			callback: function(r, rt) {
 				if(r.message) {

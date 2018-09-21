@@ -16,6 +16,9 @@ class ReceiveOrder(Document):
 		self.check_item()
 		self.update_stock_qty()
 
+	def before_submit(self):
+		self.update_status_submitted()
+
 	def on_submit(self):
 		if not self.from_stock_reconciliation:
 			self.check_packaging()
@@ -24,7 +27,6 @@ class ReceiveOrder(Document):
 			self.insert_pr_taxes()
 			self.submit_purchase_receipt()
 			self.update_transaction_date()
-		self.update_status_submitted()
 
 	def on_cancel(self):
 		self.delete_purchase_receipt()

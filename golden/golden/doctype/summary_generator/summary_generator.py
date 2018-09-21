@@ -82,16 +82,14 @@ class SummaryGenerator(Document):
 			si_summary.delete()
 
 @frappe.whitelist()
-def get_customers(start, end, city, region):
+def get_customers(start, end, territory):
 	temp = []
 	customer_list = []
 	conditions = ""
 	conditions += " and si.posting_date >= '%s'" % frappe.db.escape(start)
 	conditions += " and si.posting_date <= '%s'" % frappe.db.escape(end)
-	if city != "":
-		conditions += " and c.rss_city = '%s'" % frappe.db.escape(city)
-	if region != "":
-		conditions += " and c.rss_region = '%s'" % frappe.db.escape(region)
+	if territory != "":
+		conditions += " and c.territory = '%s'" % frappe.db.escape(territory)
 	invoice_list = frappe.db.sql("""select distinct(si.customer), si.customer_name from `tabSales Invoice` si inner join `tabCustomer` c on c.`name` = si.customer where si.docstatus = '1' and si.`status` != 'Paid' and si.sales_invoice_summary is null %s""" % conditions, as_dict=True)
 	for d in invoice_list:
 		if d.customer not in temp:
@@ -111,15 +109,13 @@ def get_customers(start, end, city, region):
 	return customer_list
 
 @frappe.whitelist()
-def get_details(start, end, city, region):
+def get_details(start, end, territory):
 	si_list = []
 	conditions = ""
 	conditions += " and si.posting_date >= '%s'" % frappe.db.escape(start)
 	conditions += " and si.posting_date <= '%s'" % frappe.db.escape(end)
-	if city != "":
-		conditions += " and c.rss_city = '%s'" % frappe.db.escape(city)
-	if region != "":
-		conditions += " and c.rss_region = '%s'" % frappe.db.escape(region)
+	if territory != "":
+		conditions += " and c.territory = '%s'" % frappe.db.escape(territory)
 	invoice_list = frappe.db.sql("""select si.`name` as si_name, si.customer, si.customer_name, si.posting_date, si.grand_total, si.due_date, si.rss_sales_name from `tabSales Invoice` si inner join `tabCustomer` c on c.`name` = si.customer where si.docstatus = '1' and si.`status` != 'Paid' and si.sales_invoice_summary is null %s""" % conditions, as_dict=True)
 	for d in invoice_list:
 		# count_payment = frappe.db.sql("""select count(*) from `tabPayment Entry Reference` where docstatus = '1' and reference_name = %s""", d.name)[0][0]
