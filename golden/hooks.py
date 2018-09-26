@@ -93,6 +93,9 @@ website_context = {
 # has_permission = {
 # 	"Event": "frappe.desk.doctype.event.event.has_permission",
 # }
+on_login = "golden.golden.reference.login_action"
+
+dump_report_map = "golden.golden.report_data_map.data_map"
 
 # Document Events
 # ---------------

@@ -588,3 +588,14 @@ def update_warehouse_2(doc, method):
         frappe.db.sql("""update `tabWarehouse` set parent_warehouse = %s, parent_section_rss = null where `name` = %s""", (doc.parent_warehouse_rss, doc.name))
     elif doc.type == "Location":
         frappe.db.sql("""update `tabWarehouse` set parent_warehouse = %s where `name` = %s""", (doc.parent_section_rss, doc.name))
+
+def login_action():
+    sales_order = frappe.db.sql("""select `name`, rss_sales_person from `tabSales Order` where docstatus != '2' and employee is null and rss_sales_person is not null""", as_dict=1)
+    for so in sales_order:
+        frappe.db.sql("""update `tabSales Order` set employee = %s where `name` = %s""", (so.rss_sales_person, so.name))
+    delivery_note = frappe.db.sql("""select `name`, rss_sales_person from `tabDelivery Note` where docstatus != '2' and employee is null and rss_sales_person is not null""", as_dict=1)
+    for dn in delivery_note:
+        frappe.db.sql("""update `tabDelivery Note` set employee = %s where `name` = %s""", (dn.rss_sales_person, dn.name))
+    sales_invoice = frappe.db.sql("""select `name`, rss_sales_person from `tabSales Invoice` where docstatus != '2' and employee is null and rss_sales_person is not null""", as_dict=1)
+    for si in sales_invoice:
+        frappe.db.sql("""update `tabSales Invoice` set employee = %s where `name` = %s""", (si.rss_sales_person, si.name))

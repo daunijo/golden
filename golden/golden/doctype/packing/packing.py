@@ -69,7 +69,8 @@ class Packing(Document):
 			"posting_date": self.posting_date,
 			"posting_time": self.posting_time,
 			"set_posting_time": self.set_posting_time,
-			"taxes_and_charges": self.taxes_and_charges
+			"taxes_and_charges": self.taxes_and_charges,
+			"employee": so.rss_sales_person
 		})
 		delivery_note.save()
 		dn = frappe.get_doc("Delivery Note", delivery_note.name)
