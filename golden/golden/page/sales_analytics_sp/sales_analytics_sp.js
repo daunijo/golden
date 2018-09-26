@@ -21,7 +21,7 @@ erpnext.SalesAnalyticsSP = frappe.views.TreeGridReport.extend({
 			title: __("Sales Analytics - Sales Person"),
 			parent: $(wrapper).find('.layout-main'),
 			page: wrapper.page,
-			doctypes: ["Item", "Item Group", "Customer", "Customer Group", "Company", "Territory",
+			doctypes: ["Item", "Item Group", "Customer", "Customer Group", "Company", "Territory", "Employee",
 				"Fiscal Year", "Sales Invoice", "Sales Invoice Item",
 				"Sales Order", "Sales Order Item[Sales Analytics]",
 				"Delivery Note", "Delivery Note Item[Sales Analytics]"],
@@ -72,7 +72,7 @@ erpnext.SalesAnalyticsSP = frappe.views.TreeGridReport.extend({
 					return item.customer_name? item.customer_name + " (" + item.name + ")" : item.name;
 				}
 			},
-			"Employee": {
+			"Sales Person": {
 				label: __("Employee"),
 				show: false,
 				item_key: "employee",
@@ -99,7 +99,7 @@ erpnext.SalesAnalyticsSP = frappe.views.TreeGridReport.extend({
 	},
 	filters: [
 		{fieldtype:"Select", fieldname: "tree_type", label: __("Tree Type"), options:["Customer Group", "Customer",
-			"Item Group", "Item", "Territory", "Employee"],
+			"Item Group", "Item", "Territory", "Sales Person"],
 			filter: function(val, item, opts, me) {
 				return me.apply_zero_filter(val, item, opts, me);
 			}},
@@ -139,7 +139,6 @@ erpnext.SalesAnalyticsSP = frappe.views.TreeGridReport.extend({
 				name: "Not Set",
 				parent_customer_group: "All Customer Groups",
 				parent_territory: "All Territories",
-				// company: "GOLDEN TRADING",
 				id: "Not Set",
 			});
 
@@ -148,9 +147,9 @@ erpnext.SalesAnalyticsSP = frappe.views.TreeGridReport.extend({
 				parent_item_group: "All Item Groups",
 				id: "Not Set",
 			});
-
+			
 			frappe.report_dump.data["Employee"].push({
-				name: __("Not Set"),
+				name: "Not Set",
 				id: "Not Set",
 			});
 		}
@@ -170,7 +169,7 @@ erpnext.SalesAnalyticsSP = frappe.views.TreeGridReport.extend({
 				var items = frappe.report_dump.data["Item"];
 			} else if(me.tree_type=="Territory") {
 				var items = this.prepare_tree("Customer", "Territory");
-			} else if(me.tree_type=="Employee") {
+			} else if(me.tree_type=="Sales Person") {
 				var items = frappe.report_dump.data["Employee"];
 			}
 

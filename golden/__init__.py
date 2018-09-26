@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.22.27'
+__version__ = '1.22.28'
 
+# 1.22.28
+#   - Add report_data_map.py in golden folder
+#   - Fix Sales Analysis - Sales Person. #154
+#   - Add function on_login in hooks.py to fill empty employee in SO, DN & SI
+#   - Update Custom Script: Sales Order & Sales Invoice
 # 1.22.27
 #   - Hide Region & City in Summary Generator. #189
 # 1.22.26
