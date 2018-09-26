@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.22.26'
+__version__ = '1.22.27'
 
+# 1.22.27
+#   - Hide Region & City in Summary Generator. #189
 # 1.22.26
 #   - Replace City & Region in Summary Generator, Customer. #189
 #   - Update status in Receive Order. #195
