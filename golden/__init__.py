@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.22.28'
+__version__ = '1.22.29'
 
+# 1.22.29
+#   - Add filter employee in Sales Analysis. #154
+#   - Hide City/Town in Expedition. #189
+#   - Add field: collect_in_range & collect_out_range in Sales Commission. #148
 # 1.22.28
 #   - Add report_data_map.py in golden folder
 #   - Fix Sales Analysis - Sales Person. #154

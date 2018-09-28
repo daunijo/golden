@@ -77,7 +77,7 @@ erpnext.SalesAnalyticsSP = frappe.views.TreeGridReport.extend({
 				show: false,
 				item_key: "employee",
 				formatter: function(item) {
-					return item.name;
+					return item.employee_name? item.employee_name + " (" + item.name + ")" : item.name;
 				}
 			}
 		}
@@ -147,7 +147,7 @@ erpnext.SalesAnalyticsSP = frappe.views.TreeGridReport.extend({
 				parent_item_group: "All Item Groups",
 				id: "Not Set",
 			});
-			
+
 			frappe.report_dump.data["Employee"].push({
 				name: "Not Set",
 				id: "Not Set",
