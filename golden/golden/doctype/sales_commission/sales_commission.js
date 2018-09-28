@@ -242,6 +242,22 @@ frappe.ui.form.on('Sales Commission', {
 			})
 		);
 		frm.set_value("payment_commission", total_payment_commission);
+		var total_collect_inrange = frappe.utils.sum(
+			(frm.doc.payments || []).map(function(i) {
+				if(flt(i.payment_commission) >= 1){
+					return (flt(i.payment_amount));
+				}
+			})
+		);
+		frm.set_value("collect_in_range", total_collect_inrange);
+		var total_collect_outrange = frappe.utils.sum(
+			(frm.doc.payments || []).map(function(i) {
+				if(flt(i.payment_commission) == 0){
+					return (flt(i.payment_amount));
+				}
+			})
+		);
+		frm.set_value("collect_out_range", total_collect_outrange);
 	},
 	invoice_commission: function(frm){
 		frm.events.calculate_total_commission(frm);

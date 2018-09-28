@@ -2,8 +2,8 @@ from __future__ import unicode_literals
 
 data_map = {
 	"Employee": {
-		"columns": ["name"],
-		"conditions": ["status = 'Active'"],
+		"columns": ["name", "employee_name"],
+		"conditions": ["status = 'Active'", "is_sales=1"],
 		"order_by": "name"
 	},
 	"Sales Invoice": {
