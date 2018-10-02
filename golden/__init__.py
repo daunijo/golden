@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.22.29'
+__version__ = '1.22.30'
 
+# 1.22.30
+#   - Add doctype Sales Commission Collect.
+#   - Update Sales Commission.
 # 1.22.29
 #   - Add filter employee in Sales Analysis. #154
 #   - Hide City/Town in Expedition. #189

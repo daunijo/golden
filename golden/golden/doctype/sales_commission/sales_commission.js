@@ -88,6 +88,7 @@ frappe.ui.form.on('Sales Commission', {
 		frm.events.get_invoices(frm);
 		frm.events.get_returns(frm);
 		frm.events.get_payments(frm);
+		frm.events.calculate_bonus(frm);
 	},
 	get_invoices: function(frm){
 		frm.clear_table("invoices");
@@ -175,6 +176,7 @@ frappe.ui.form.on('Sales Commission', {
 					frm.events.calculate_return_commission(frm);
 					frm.events.calculate_total_payment_commission(frm);
 					// frm.events.calculate_total_commission(frm);
+					// frm.evets.calculate_bonus(frm);
 					frm.refresh_fields();
 				}
 			}
@@ -231,6 +233,26 @@ frappe.ui.form.on('Sales Commission', {
 			callback: function (r) {
 				if(r.message) {
 					frm.set_value( r.message);
+				}
+			}
+		})
+	},
+	calculate_bonus: function(frm){
+		return frappe.call({
+			method: "golden.golden.doctype.sales_commission.sales_commission.calculate_bonus",
+			args:{
+				sales: frm.doc.sales
+			},
+			callback: function(r, rt) {
+				if(r.message) {
+					$.each(r.message, function(i, d) {
+						var c = frm.add_child("bonus_collect");
+						c.range = d.range;
+						c.commission_percengate = d.commission_percengate;
+						c.total_collect = d.total_collect;
+						c.bonus_amount = d.bonus_amount;
+					})
+					frm.refresh_fields();
 				}
 			}
 		})
