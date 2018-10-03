@@ -156,3 +156,69 @@ def calculate_return(sales, percentage, total_return):
 		'return_range_achievement': sra
 	}
 	return inv_commission
+
+@frappe.whitelist()
+def calculate_bonus(sales):
+	si_list = []
+	check1 = frappe.db.sql("""select count(*) from `tabCommission Percentage` where docstatus = '1' and commission_type = 'COLLECT' and sales = %s and disabled = '0'""", sales)[0][0]
+	if flt(check1) == 1:
+		check2 = frappe.db.sql("""select count(*) from `tabCommission Percentage` where docstatus = '1' and commission_type = 'COLLECT' and sales = %s and disabled = '0'""", sales)[0][0]
+		if flt(check2) == 1:
+			cp = frappe.db.sql("""select `name` from `tabCommission Percentage` where docstatus = '1' and commission_type = 'COLLECT' and sales = %s and disabled = '0'""", sales)[0][0]
+			cpd = frappe.db.sql("""select * from `tabCommission Percentage Collect` where parent = %s order by idx asc""", cp, as_dict=1)
+			last_day = 0
+			for has in cpd:
+				total_collect = frappe.db.sql("""select sum(a.allocated_amount) from `tabPayment Entry Receive Reference` a inner join `tabPayment Entry Receive` b on b.`name` = a.parent inner join `tabSales Target Detail` c on c.sales_invoice = a.reference_name where b.docstatus = '1' and b.collector = %s and datediff(b.posting_date,c.sales_invoice_date) >= %s and datediff(b.posting_date,c.sales_invoice_date) <= %s""", (sales, has.from_day, has.to_day))[0][0]
+				bonus_amount = (flt(has.percentage) / 100) * flt(total_collect)
+				last_day = has.to_day
+				si_list.append(frappe._dict({
+			        'range': "{0} - {1} Days".format(has.from_day, has.to_day),
+			        'commission_percengate': has.percentage,
+					'total_collect': total_collect,
+			        'bonus_amount': bonus_amount
+			    }))
+			total_collect = frappe.db.sql("""select sum(a.allocated_amount) from `tabPayment Entry Receive Reference` a inner join `tabPayment Entry Receive` b on b.`name` = a.parent inner join `tabSales Target Detail` c on c.sales_invoice = a.reference_name where b.docstatus = '1' and b.collector = %s and datediff(b.posting_date,c.sales_invoice_date) > %s""", (sales, last_day))[0][0]
+			si_list.append(frappe._dict({
+				'range': "Out of range",
+			    'commission_percengate': 0,
+				'total_collect': total_collect,
+				'bonus_amount': 0
+			}))
+		else:
+			si_list.append(frappe._dict({
+		        'range': "Out of range",
+		        'commission_percengate': 0,
+				'total_collect': 0,
+		        'bonus_amount': 0
+		    }))
+	else:
+		check2 = frappe.db.sql("""select count(*) from `tabCommission Percentage` where docstatus = '1' and commission_type = 'COLLECT' and sales is null and disabled = '0'""")[0][0]
+		if flt(check2) == 1:
+			cp = frappe.db.sql("""select `name` from `tabCommission Percentage` where docstatus = '1' and commission_type = 'COLLECT' and sales is null and disabled = '0'""")[0][0]
+			cpd = frappe.db.sql("""select * from `tabCommission Percentage Collect` where parent = %s order by idx asc""", cp, as_dict=1)
+			last_day = 0
+			for has in cpd:
+				total_collect = frappe.db.sql("""select sum(a.allocated_amount) from `tabPayment Entry Receive Reference` a inner join `tabPayment Entry Receive` b on b.`name` = a.parent inner join `tabSales Target Detail` c on c.sales_invoice = a.reference_name where b.docstatus = '1' and b.collector = %s and datediff(b.posting_date,c.sales_invoice_date) >= %s and datediff(b.posting_date,c.sales_invoice_date) <= %s""", (sales, has.from_day, has.to_day))[0][0]
+				bonus_amount = (flt(has.percentage) / 100) * flt(total_collect)
+				last_day = has.to_day
+				si_list.append(frappe._dict({
+			        'range': "{0} - {1} Days".format(has.from_day, has.to_day),
+			        'commission_percengate': has.percentage,
+					'total_collect': total_collect,
+			        'bonus_amount': bonus_amount
+			    }))
+			total_collect = frappe.db.sql("""select sum(a.allocated_amount) from `tabPayment Entry Receive Reference` a inner join `tabPayment Entry Receive` b on b.`name` = a.parent inner join `tabSales Target Detail` c on c.sales_invoice = a.reference_name where b.docstatus = '1' and b.collector = %s and datediff(b.posting_date,c.sales_invoice_date) > %s""", (sales, last_day))[0][0]
+			si_list.append(frappe._dict({
+				'range': "Out of range",
+			    'commission_percengate': 0,
+				'total_collect': total_collect,
+				'bonus_amount': 0
+			}))
+		else:
+			si_list.append(frappe._dict({
+		        'range': "Out of range",
+		        'commission_percengate': 0,
+				'total_collect': 0,
+		        'bonus_amount': 0
+		    }))
+	return si_list
