@@ -85,6 +85,7 @@ def get_items_from_dn(sales_order):
     si_list = []
     for d in dn:
         item = frappe.db.get_value("Item", d.item_code, ["income_account", "expense_account"], as_dict=1)
+        picking_order = frappe.db.get_value("Sales Order Item", d.so_detail, "picking_order")
         si_list.append(frappe._dict({
             'rss_item_code': d.rss_item_code,
             'item_code': d.item_code,
@@ -114,6 +115,7 @@ def get_items_from_dn(sales_order):
             'sales_order': d.against_sales_order,
             'so_detail': d.so_detail,
             'delivery_note': d.parent,
-            'dn_detail': d.name
+            'dn_detail': d.name,
+            'picking_order': picking_order
         }))
     return si_list

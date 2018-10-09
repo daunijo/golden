@@ -19,7 +19,8 @@ def execute(filters=None):
 	for cl in sl_entries:
 		if cl.voucher_type == "Stock Reconciliation":
 			qty = cl.qty_after_transaction
-			qty_diff = flt(cl.stock_value_difference) / flt(cl.valuation_rate)
+			# qty_diff = flt(cl.stock_value_difference) / flt(cl.valuation_rate)
+			qty_diff = flt(cl.actual_qty)
 			stock_all = flt(stock_all) + flt(qty_diff)
 			# stock_all = flt(cl.qty_after_transaction)
 		else:

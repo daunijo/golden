@@ -77,6 +77,7 @@ def submit_sales_order_2(doc, method):
         item = frappe.db.sql("""select * from `tabSales Order Item` where parent = %s and default_section = %s order by idx asc""", (doc.name, picking.section), as_dict=1)
         for row in item:
             picking_item = frappe.get_doc("Picking Order", picking.name)
+            frappe.db.sql("""update `tabSales Order Item` set picking_order = %s where `name` = %s""", (picking.name, row.name))
             picking_item.append("items", {
     			"item_code": row.item_code,
     			"item_name": row.item_name,
@@ -116,6 +117,7 @@ def submit_sales_order_2(doc, method):
         item = frappe.db.sql("""select * from `tabSales Order Item` where parent = %s and default_section is null order by idx asc""", doc.name, as_dict=1)
         for row in item:
             picking_item = frappe.get_doc("Picking Order", picking.name)
+            frappe.db.sql("""update `tabSales Order Item` set picking_order = %s where `name` = %s""", (picking.name, row.name))
             picking_item.append("items", {
     			"item_code": row.item_code,
     			"item_name": row.item_name,
@@ -397,6 +399,7 @@ def cancel_sales_order_3(doc, method):
     if flt(count_ito) == 1:
         ito_id = frappe.db.sql("""select `name` from `tabTransfer Order` where docstatus = '0' and action = 'Auto'""")[0][0]
         for row in doc.items:
+            frappe.db.sql("""update `tabSales Order Item` set picking_order = null where `name` = %s""", row.name)
             count_ito_det = frappe.db.sql("""select count(*) from `tabTransfer Order Item Detail` where docstatus = '0' and so_detail = %s""", row.name)[0][0]
             if flt(count_ito_det) != 0:
                 qty = 0
@@ -415,6 +418,7 @@ def cancel_sales_order_3(doc, method):
                     frappe.db.sql("""update `tabBin` set ito_qty = %s where item_code = %s and warehouse = %s""", (b, row.item_code, row.default_location))
     else:
         for row in doc.items:
+            frappe.db.sql("""update `tabSales Order Item` set picking_order = null where `name` = %s""", row.name)
             bin = frappe.db.get_value("Bin", {"item_code": row.item_code, "warehouse": row.default_location}, ["name", "ito_qty"], as_dict=1)
             if bin:
                 a = flt(bin.ito_qty) - flt(row.stock_qty)
