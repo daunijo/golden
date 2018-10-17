@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.22.31'
+__version__ = '1.22.32'
 
+# 1.22.32
+#   - Update report: Stock Card, Stock Card Sales & Stock Card Purchasing. #196
 # 1.22.31
 #   - Update report: Stock Card, Stock Card Sales & Stock Card Purchasing. #196
 #   - Add field: picking_order in Sales Order Item. #194

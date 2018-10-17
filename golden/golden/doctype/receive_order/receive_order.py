@@ -23,7 +23,7 @@ class ReceiveOrder(Document):
 		if not self.from_stock_reconciliation:
 			self.check_packaging()
 			self.create_purchase_receipt()
-			self.insert_pr_item()
+			# self.insert_pr_item()
 			self.insert_pr_taxes()
 			self.submit_purchase_receipt()
 			self.update_transaction_date()
@@ -56,21 +56,64 @@ class ReceiveOrder(Document):
 		purchase_order = frappe.db.sql("""select distinct(purchase_order) as po_name from `tabReceive Order Item` where parent = %s and qty != 0""", self.name, as_dict=1)
 		for po in purchase_order:
 			source = frappe.db.get_value("Purchase Order", po.po_name, ["supplier", "supplier_name", "taxes_and_charges", "apply_discount_on", "additional_discount_percentage", "base_discount_amount", "discount_amount"], as_dict=1)
-			pr = frappe.get_doc({
-            	"doctype": "Purchase Receipt",
-            	"supplier": source.supplier,
-				"supplier_name": source.supplier_name,
-				"receive_order": self.name,
-				"rss_po": po.po_name,
-            	"posting_date": self.posting_date,
-				"posting_time": self.posting_time,
-				"set_posting_time": "1",
-				"taxes_and_charges": source.taxes_and_charges,
-				"apply_discount_on": source.apply_discount_on,
-				"additional_discount_percentage": source.additional_discount_percentage,
-				"base_discount_amount": source.base_discount_amount,
-				"discount_amount": source.discount_amount
-            })
+			# pr = frappe.get_doc({
+            # 	"doctype": "Purchase Receipt",
+            # 	"supplier": source.supplier,
+			# 	"supplier_name": source.supplier_name,
+			# 	"receive_order": self.name,
+			# 	"rss_po": po.po_name,
+            # 	"posting_date": self.posting_date,
+			# 	"posting_time": self.posting_time,
+			# 	"set_posting_time": "1",
+			# 	"taxes_and_charges": source.taxes_and_charges,
+			# 	"apply_discount_on": source.apply_discount_on,
+			# 	"additional_discount_percentage": source.additional_discount_percentage,
+			# 	"base_discount_amount": source.base_discount_amount,
+			# 	"discount_amount": source.discount_amount
+            # })
+			# pr.save()
+			pr = frappe.new_doc("Purchase Receipt")
+			pr.supplier = source.supplier
+			pr.supplier_name = source.supplier_name
+			pr.receive_order = self.name
+			pr.rss_po = po.po_name
+			pr.posting_date = self.posting_date
+			pr.posting_time = self.posting_time
+			pr.set_posting_time = 1
+			pr.taxes_and_charges = source.taxes_and_charges
+			pr.apply_discount_on = source.apply_discount_on
+			pr.additional_discount_percentage = source.additional_discount_percentage
+			pr.base_discount_amount = source.base_discount_amount
+			pr.discount_amount = source.discount_amount
+			for row in self.items:
+				if flt(row.qty) >= 1:
+					poi = frappe.db.get_value("Purchase Order Item", row.po_detail, ["price_list_rate", "rate"], as_dict=1)
+					if row.uom == row.po_uom:
+						final_qty = flt(row.qty)
+						pr_uom = row.uom
+					elif row.stock_uom == row.po_uom:
+						final_qty = flt(row.qty) * flt(row.conversion_factor)
+						pr_uom = row.stock_uom
+					else:
+						final_qty = flt(row.qty) * flt(row.conversion_factor)
+						pr_uom = row.stock_uom
+					pr.append("items", {
+						"rss_item_code": row.item_code,
+						"item_code": row.item_code,
+						"item_name": row.item_name,
+						"description": row.description,
+						"qty": final_qty,
+						"uom": pr_uom,
+						"stock_uom": row.stock_uom,
+						"conversion_factor": row.conversion_factor,
+						"warehouse": self.accepted_location,
+						"purchase_order": row.purchase_order,
+						"purchase_order_item": row.po_detail,
+						"schedule_date": po.schedule_date,
+						"stock_qty": row.qty,
+						"price_list_rate": poi.price_list_rate,
+						"rate": poi.rate
+					})
 			pr.save()
 
 	def insert_pr_item(self):
@@ -112,7 +155,7 @@ class ReceiveOrder(Document):
 		for po in purchase_order:
 			taxes = frappe.db.get_value("Purchase Order", po.po_name, "total_taxes_and_charges")
 			if flt(taxes) != 0:
-				tc = frappe.db.sql("""select * from `tabPurchase Taxes and Charges` where parent = %s""", po.po_name, as_dict=1)
+				tc = frappe.db.sql("""select category, add_deduct_tax, charge_type, account_head, cost_center, description, rate from `tabPurchase Taxes and Charges` where parent = %s""", po.po_name, as_dict=1)
 				for tax in tc:
 					pr = frappe.get_doc("Purchase Receipt", {"receive_order": self.name, "rss_po": po.po_name})
 					pr.append("taxes", {
@@ -127,9 +170,9 @@ class ReceiveOrder(Document):
 					pr.save()
 
 	def submit_purchase_receipt(self):
-		count = frappe.db.sql("""select count(*) from `tabPurchase Receipt` where docstatus = '0' and receive_order = %s""", self.name)[0][0]
+		count = frappe.db.sql("""select count(`name`) from `tabPurchase Receipt` where docstatus = '0' and receive_order = %s""", self.name)[0][0]
 		if flt(count) >= 1:
-			purchase_receipt = frappe.db.sql("""select * from `tabPurchase Receipt` where docstatus = '0' and receive_order = %s""", self.name, as_dict=1)
+			purchase_receipt = frappe.db.sql("""select `name` from `tabPurchase Receipt` where docstatus = '0' and receive_order = %s""", self.name, as_dict=1)
 			for pr in purchase_receipt:
 				submit_pr = frappe.get_doc("Purchase Receipt", pr.name)
 				submit_pr.submit()
@@ -138,9 +181,9 @@ class ReceiveOrder(Document):
 		self.transaction_date = self.posting_date
 
 	def delete_purchase_receipt(self):
-		count = frappe.db.sql("""select count(*) from `tabPurchase Receipt` where docstatus = '1' and receive_order = %s""", self.name)[0][0]
+		count = frappe.db.sql("""select count(`name`) from `tabPurchase Receipt` where docstatus = '1' and receive_order = %s""", self.name)[0][0]
 		if flt(count) >= 1:
-			purchase_receipt = frappe.db.sql("""select * from `tabPurchase Receipt` where docstatus = '1' and receive_order = %s""", self.name, as_dict=1)
+			purchase_receipt = frappe.db.sql("""select `name` from `tabPurchase Receipt` where docstatus = '1' and receive_order = %s""", self.name, as_dict=1)
 			for pr in purchase_receipt:
 				submit_pr = frappe.get_doc("Purchase Receipt", pr.name)
 				submit_pr.cancel()
