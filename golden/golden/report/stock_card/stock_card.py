@@ -19,9 +19,8 @@ def execute(filters=None):
 	for cl in sl_entries:
 		if cl.voucher_type == "Stock Reconciliation":
 			qty = cl.qty_after_transaction
-			# qty_diff = flt(cl.stock_value_difference) / flt(cl.valuation_rate)
-			stock_all = flt(stock_all) + flt(qty)
-			# stock_all = flt(cl.qty_after_transaction)
+			qty2 = frappe.db.get_value("Stock Reconciliation Item", {"parent": cl.voucher_no, "item_code": cl.item_code}, "quantity_difference")
+			stock_all = flt(stock_all) + flt(qty2)
 		else:
 			qty = cl.actual_qty
 			stock_all = flt(stock_all) + flt(cl.actual_qty)
