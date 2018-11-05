@@ -16,8 +16,8 @@ fixtures = ["Custom Script", "Custom Field"]
 # ------------------
 
 # include js, css files in header of desk.html
-# app_include_css = "/assets/golden/css/golden.css"
-app_include_css = "/files/custom.css"
+app_include_css = "/assets/golden/css/golden.css"
+#app_include_css = "/files/custom.css"
 # app_include_js = "/assets/golden/js/golden.js"
 
 # include js, css files in header of web template
