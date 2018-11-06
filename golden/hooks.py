@@ -17,7 +17,7 @@ fixtures = ["Custom Script", "Custom Field"]
 
 # include js, css files in header of desk.html
 # app_include_css = "/assets/golden/css/golden.css"
-app_include_css = "/files/custom.css"
+app_include_css = "/assets/golden/css/custom.css"
 # app_include_js = "/assets/golden/js/golden.js"
 
 # include js, css files in header of web template
@@ -31,13 +31,15 @@ app_include_css = "/files/custom.css"
 doctype_js = {
 	"Journal Entry": "public/js/journal_entry.js",
 	"Warehouse": "public/js/warehouse.js",
-	"Purchase Order": "public/js/purchase_order.js",
-	"Purchase Receipt": "public/js/purchase_receipt.js",
-	"Sales Order": "public/js/sales_order.js",
-	"Delivery Note": "public/js/delivery_note.js",
 	"Stock Entry": "public/js/stock_entry.js",
 	"Stock Reconciliation": "public/js/stock_reconciliation.js",
 	"Item": "public/js/item.js",
+	"Purchase Order": "public/js/purchase_order.js",
+	"Purchase Receipt": "public/js/purchase_receipt.js",
+	"Purchase Invoice": "public/js/purchase_invoice.js",
+	"Sales Order": "public/js/sales_order.js",
+	"Delivery Note": "public/js/delivery_note.js",
+	"Sales Invoice": "public/js/sales_invoice.js"
 }
 # doctype_js = {"doctype" : "public/js/doctype.js"}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}

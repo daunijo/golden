@@ -1,8 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.22.33'
+__version__ = '1.22.34'
 
+# 1.22.34
+#   - Add field: default_purchase_return_write_off_account in Company. #202
+#   - Checking uom base on item_code in SO, Packing, TO, SI, PO, RO, PI, Sales Return, . #200
+#   - Hide Move % Add button in Item through css. #199
+#   - Pindahkan Custom Script to public/js/ folder
+#   - Update packing. #198
 # 1.22.33
 #   - Update report: Stock Card, Stock Card Sales & Stock Card Purchasing. #196
 # 1.22.32

@@ -54,24 +54,9 @@ class ReceiveOrder(Document):
 
 	def create_purchase_receipt(self):
 		purchase_order = frappe.db.sql("""select distinct(purchase_order) as po_name from `tabReceive Order Item` where parent = %s and qty != 0""", self.name, as_dict=1)
+		temp = []
 		for po in purchase_order:
 			source = frappe.db.get_value("Purchase Order", po.po_name, ["supplier", "supplier_name", "taxes_and_charges", "apply_discount_on", "additional_discount_percentage", "base_discount_amount", "discount_amount"], as_dict=1)
-			# pr = frappe.get_doc({
-            # 	"doctype": "Purchase Receipt",
-            # 	"supplier": source.supplier,
-			# 	"supplier_name": source.supplier_name,
-			# 	"receive_order": self.name,
-			# 	"rss_po": po.po_name,
-            # 	"posting_date": self.posting_date,
-			# 	"posting_time": self.posting_time,
-			# 	"set_posting_time": "1",
-			# 	"taxes_and_charges": source.taxes_and_charges,
-			# 	"apply_discount_on": source.apply_discount_on,
-			# 	"additional_discount_percentage": source.additional_discount_percentage,
-			# 	"base_discount_amount": source.base_discount_amount,
-			# 	"discount_amount": source.discount_amount
-            # })
-			# pr.save()
 			pr = frappe.new_doc("Purchase Receipt")
 			pr.supplier = source.supplier
 			pr.supplier_name = source.supplier_name
@@ -116,39 +101,39 @@ class ReceiveOrder(Document):
 					})
 			pr.save()
 
-	def insert_pr_item(self):
-		for row in self.items:
-			if flt(row.qty) >= 1:
-				pr = frappe.get_doc("Purchase Receipt", {"receive_order": self.name, "rss_po": row.purchase_order})
-				po = frappe.db.get_value("Purchase Order", row.purchase_order, ["schedule_date"], as_dict=1)
-				poi = frappe.db.get_value("Purchase Order Item", row.po_detail, ["price_list_rate", "rate"], as_dict=1)
-				if row.uom == row.po_uom:
-					final_qty = flt(row.qty)
-					pr_uom = row.uom
-				elif row.stock_uom == row.po_uom:
-					final_qty = flt(row.qty) * flt(row.conversion_factor)
-					pr_uom = row.stock_uom
-				else:
-					final_qty = flt(row.qty) * flt(row.conversion_factor)
-					pr_uom = row.stock_uom
-				pr.append("items", {
-					"rss_item_code": row.item_code,
-					"item_code": row.item_code,
-					"item_name": row.item_name,
-					"description": row.description,
-					"qty": final_qty,
-					"uom": pr_uom,
-					"stock_uom": row.stock_uom,
-					"conversion_factor": row.conversion_factor,
-					"warehouse": self.accepted_location,
-					"purchase_order": row.purchase_order,
-					"purchase_order_item": row.po_detail,
-					"schedule_date": po.schedule_date,
-					"stock_qty": row.qty,
-					"price_list_rate": poi.price_list_rate,
-					"rate": poi.rate
-				})
-				pr.save()
+	# def insert_pr_item(self):
+	# 	for row in self.items:
+	# 		if flt(row.qty) >= 1:
+	# 			pr = frappe.get_doc("Purchase Receipt", {"receive_order": self.name, "rss_po": row.purchase_order})
+	# 			po = frappe.db.get_value("Purchase Order", row.purchase_order, ["schedule_date"], as_dict=1)
+	# 			poi = frappe.db.get_value("Purchase Order Item", row.po_detail, ["price_list_rate", "rate"], as_dict=1)
+	# 			if row.uom == row.po_uom:
+	# 				final_qty = flt(row.qty)
+	# 				pr_uom = row.uom
+	# 			elif row.stock_uom == row.po_uom:
+	# 				final_qty = flt(row.qty) * flt(row.conversion_factor)
+	# 				pr_uom = row.stock_uom
+	# 			else:
+	# 				final_qty = flt(row.qty) * flt(row.conversion_factor)
+	# 				pr_uom = row.stock_uom
+	# 			pr.append("items", {
+	# 				"rss_item_code": row.item_code,
+	# 				"item_code": row.item_code,
+	# 				"item_name": row.item_name,
+	# 				"description": row.description,
+	# 				"qty": final_qty,
+	# 				"uom": pr_uom,
+	# 				"stock_uom": row.stock_uom,
+	# 				"conversion_factor": row.conversion_factor,
+	# 				"warehouse": self.accepted_location,
+	# 				"purchase_order": row.purchase_order,
+	# 				"purchase_order_item": row.po_detail,
+	# 				"schedule_date": po.schedule_date,
+	# 				"stock_qty": row.qty,
+	# 				"price_list_rate": poi.price_list_rate,
+	# 				"rate": poi.rate
+	# 			})
+	# 			pr.save()
 
 	def insert_pr_taxes(self):
 		purchase_order = frappe.db.sql("""select distinct(purchase_order) as po_name from `tabReceive Order Item` where parent = %s and qty != 0""", self.name, as_dict=1)

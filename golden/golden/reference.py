@@ -390,7 +390,9 @@ def cancel_sales_order(doc, method):
 def cancel_sales_order_2(doc, method):
     pick = frappe.db.sql("""select `name` from `tabPicking Order` where docstatus = '1' and sales_order = %s""", doc.name, as_dict=1)
     for picking in pick:
+        frappe.db.set_value("Sales Order Item", {"picking_order": picking.name, "parent": doc.name}, "picking_order", None)
     	cancel_picking = frappe.get_doc("Picking Order", picking.name)
+        cancel_picking.flags.ignore_permissions = True
     	cancel_picking.cancel()
     	cancel_picking.delete()
 
