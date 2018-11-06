@@ -39,6 +39,15 @@ frappe.ui.form.on('Sales Return', {
 			}
 		});
 	},
+	onload: function(frm){
+		frm.set_query("uom", "items", function(doc, cdt, cdn) {
+			var row = locals[cdt][cdn];
+			return {
+				query: "golden.golden.stock.uom_query",
+				filters: { 'item_code': row.item_code }
+			}
+		});
+	},
 	validate: function(frm){
 		frm.clear_table("accounts");
 		frm.events.set_expense_account(frm);

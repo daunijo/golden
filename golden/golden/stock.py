@@ -71,6 +71,23 @@ inner join `tabReceive Order Item` roi on ro.`name` = roi.parent
             'cond': filters.get("supplier")
         })
 
+def uom_query(doctype, txt, searchfield, start, page_len, filters):
+    return frappe.db.sql("""select uom from `tabUOM Conversion Detail`
+        where docstatus = '0' and parent = %(cond)s
+            and uom like %(txt)s
+            order by idx asc
+            {mcond}
+        limit %(start)s, %(page_len)s""".format(**{
+            'key': searchfield,
+            'mcond':get_match_cond(doctype)
+        }), {
+            'txt': "%%%s%%" % txt,
+            '_txt': txt.replace("%", ""),
+            'start': start,
+            'page_len': page_len,
+            'cond': filters.get("item_code")
+        })
+
 @frappe.whitelist()
 def make_material_transfer(source_name, target_doc=None):
     def set_missing_values(source, target):

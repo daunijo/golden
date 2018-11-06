@@ -1,58 +1,56 @@
-frappe.ui.form.on('Stock Reconciliation', {
-	 	refresh: function(frm) {
-			frm.fields_dict['items'].grid.get_field("default_gudang").get_query = function(frm,cdt,cdn) {
-				var d = locals[cdt][cdn];
-				return {
-					filters: {
-						"is_group": 1,
-						"type": "warehouse",
-					}
+cur_frm.set_query("default_gudang", "items",  function (doc, cdt, cdn) {
+	var c_doc= locals[cdt][cdn];
+	return {
+	//	query: "golden.golden.stock.default_gudang"
+		filters: {
+			'is_group': 1,
+			'type': 'Warehouse',
+			'disabled': 0
+		}
+	}
+});
+/*
+cur_frm.set_query("default_section", "items",  function (doc, cdt, cdn) {
+	var c_doc= locals[cdt][cdn];
+	return {
+		filters: {
+			'is_group': 1,
+			'type': 'Section',
+			'parent': c_doc.default_gudang
+		}
+	}
+});
+*/
+frappe.ui.form.on('Stock Reconciliation Item', {
+	default_location: function(frm, cdt, cdn){
+		var d = locals[cdt][cdn];
+		frappe.model.set_value(cdt, cdn, "warehouse", d.default_location);
+		frappe.call({
+			method: "frappe.client.get",
+			args:{
+				doctype: "Warehouse",
+				filters:{
+					name: d.default_location
 				}
 			},
-			frm.fields_dict['items'].grid.get_field("default_section").get_query = function(frm,cdt,cdn) {
-				var d = locals[cdt][cdn];
-				return {
-					filters: {
-						"is_group": 1,
-						"type": "section",
-						"parent_warehouse": d.default_gudang
-					}
+			callback: function(data){
+				frappe.model.set_value(cdt, cdn, "default_section", data.message.parent_warehouse);
+			}
+		});
+	},
+	default_section: function(frm, cdt, cdn){
+		row = locals[cdt][cdn];
+		frappe.call({
+			method: "frappe.client.get",
+			args:{
+				doctype: "Warehouse",
+				filters:{
+					name: row.default_section
 				}
 			},
-			frm.fields_dict['items'].grid.get_field("default_location").get_query = function(frm,cdt,cdn) {
-				var d = locals[cdt][cdn];
-				return {
-					filters: {
-						"is_group": 0,
-						"type": "location",
-						"parent_warehouse": d.default_section
-					}
-				}
-			},
-
-			frm.fields_dict['items'].grid.get_field("warehouse").get_query = function(frm,cdt,cdn) {
-				var d = locals[cdt][cdn];
-				return {
-					filters: {
-						"is_group": 0,
-						"type": "location",
-						"parent_warehouse": d.default_section
-					}
-				}
-			},
-
-      frm.trigger("toggle_fields");
-  		if(frm.doc.docstatus == 1) {
-  			frm.add_custom_button(__('Stock Card'), function() {
-  				frappe.route_options = {
-  					voucher_no: frm.doc.name,
-  					from_date: frm.doc.posting_date,
-  					to_date: frm.doc.posting_date,
-  					company: frm.doc.company,
-  					group_by_voucher: false
-  				};
-  				frappe.set_route("query-report", "Stock Card");
-  			}, __("View"));
-  		}
-		},
+			callback: function(data){
+				frappe.model.set_value(cdt, cdn, "default_gudang", data.message.parent_warehouse);
+			}
+		});
+	}
 })

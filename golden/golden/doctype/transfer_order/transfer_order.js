@@ -17,6 +17,13 @@ frappe.ui.form.on('Transfer Order', {
 		});
 	},
 	refresh: function(frm) {
+		frm.set_query("transfer_uom", "items", function(doc, cdt, cdn) {
+			var row = locals[cdt][cdn];
+			return {
+				query: "golden.golden.stock.uom_query",
+				filters: { 'item_code': row.item_code }
+			}
+		});
 	},
 });
 frappe.ui.form.on('Transfer Order Item', {

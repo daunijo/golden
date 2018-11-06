@@ -52,6 +52,13 @@ frappe.ui.form.on('Packing', {
 				}
 			}
 		});
+		frm.set_query("uom", "items", function(doc, cdt, cdn) {
+			var row = locals[cdt][cdn];
+			return {
+				query: "golden.golden.stock.uom_query",
+				filters: { 'item_code': row.item_code }
+			}
+		});
 		frm.set_query('expense_account', 'items', function(doc, cdt, cdn) {
 			if (erpnext.is_perpetual_inventory_enabled(doc.company)) {
 				return {
@@ -308,8 +315,8 @@ frappe.ui.form.on("Packing Item", {
 				var arr = row.box.split(',');
 				maks = 0;
 				maks = arr[0];
-				for(nn=1; nn<=banyak; nn++){
-					if(arr[nn] >= maks){
+				for(nn=0; nn<=banyak; nn++){
+					if(flt(arr[nn]) >= maks){
 						maks = arr[nn];
 					}
 				}

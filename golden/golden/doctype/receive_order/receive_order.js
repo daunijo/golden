@@ -34,6 +34,13 @@ frappe.ui.form.on('Receive Order', {
 				}
 			}
 		});
+		frm.set_query("uom", "items", function(doc, cdt, cdn) {
+			var row = locals[cdt][cdn];
+			return {
+				query: "golden.golden.stock.uom_query",
+				filters: { 'item_code': row.item_code }
+			}
+		});
 	},
 	refresh: function(frm) {
 		if(frm.doc.docstatus == 0 || frm.doc.__islocal) {
