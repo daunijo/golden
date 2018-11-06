@@ -23,7 +23,6 @@ class ReceiveOrder(Document):
 		if not self.from_stock_reconciliation:
 			self.check_packaging()
 			self.create_purchase_receipt()
-			# self.insert_pr_item()
 			self.insert_pr_taxes()
 			self.submit_purchase_receipt()
 			self.update_transaction_date()
@@ -71,7 +70,7 @@ class ReceiveOrder(Document):
 			pr.base_discount_amount = source.base_discount_amount
 			pr.discount_amount = source.discount_amount
 			for row in self.items:
-				if flt(row.qty) >= 1:
+				if flt(row.qty) >= 1 and row.purchase_order == po.po_name:
 					poi = frappe.db.get_value("Purchase Order Item", row.po_detail, ["price_list_rate", "rate"], as_dict=1)
 					if row.uom == row.po_uom:
 						final_qty = flt(row.qty)
@@ -99,41 +98,8 @@ class ReceiveOrder(Document):
 						"price_list_rate": poi.price_list_rate,
 						"rate": poi.rate
 					})
+			pr.flags.ignore_permissions = True
 			pr.save()
-
-	# def insert_pr_item(self):
-	# 	for row in self.items:
-	# 		if flt(row.qty) >= 1:
-	# 			pr = frappe.get_doc("Purchase Receipt", {"receive_order": self.name, "rss_po": row.purchase_order})
-	# 			po = frappe.db.get_value("Purchase Order", row.purchase_order, ["schedule_date"], as_dict=1)
-	# 			poi = frappe.db.get_value("Purchase Order Item", row.po_detail, ["price_list_rate", "rate"], as_dict=1)
-	# 			if row.uom == row.po_uom:
-	# 				final_qty = flt(row.qty)
-	# 				pr_uom = row.uom
-	# 			elif row.stock_uom == row.po_uom:
-	# 				final_qty = flt(row.qty) * flt(row.conversion_factor)
-	# 				pr_uom = row.stock_uom
-	# 			else:
-	# 				final_qty = flt(row.qty) * flt(row.conversion_factor)
-	# 				pr_uom = row.stock_uom
-	# 			pr.append("items", {
-	# 				"rss_item_code": row.item_code,
-	# 				"item_code": row.item_code,
-	# 				"item_name": row.item_name,
-	# 				"description": row.description,
-	# 				"qty": final_qty,
-	# 				"uom": pr_uom,
-	# 				"stock_uom": row.stock_uom,
-	# 				"conversion_factor": row.conversion_factor,
-	# 				"warehouse": self.accepted_location,
-	# 				"purchase_order": row.purchase_order,
-	# 				"purchase_order_item": row.po_detail,
-	# 				"schedule_date": po.schedule_date,
-	# 				"stock_qty": row.qty,
-	# 				"price_list_rate": poi.price_list_rate,
-	# 				"rate": poi.rate
-	# 			})
-	# 			pr.save()
 
 	def insert_pr_taxes(self):
 		purchase_order = frappe.db.sql("""select distinct(purchase_order) as po_name from `tabReceive Order Item` where parent = %s and qty != 0""", self.name, as_dict=1)
@@ -353,9 +319,9 @@ def get_picking_items(supplier, ro):
 	si_list = []
 	if ro.count('||') == 1:
 		a,b = ro.split("||")
-		items = frappe.db.sql("""select roi.item_code, roi.item_name, roi.po_detail, roi.qty, roi.po_uom, roi.stock_uom, roi.purchase_order, ro.accepted_location, roi.`name`, ro.`name` as rec_order from `tabReceive Order` ro inner join `tabReceive Order Item` roi on ro.`name` = roi.parent inner join `tabPurchase Order` po on roi.purchase_order = po.`name` where ro.docstatus = '1' and po.supplier = %s and (ro.`name` = %s or ro.`name` = %s) and roi.purchase_invoice is null order by po.`name` asc""", (supplier, a, b), as_dict=1)
+		items = frappe.db.sql("""select roi.item_code, roi.item_name, roi.po_detail, roi.qty, roi.si_qty, roi.po_uom, roi.stock_uom, roi.purchase_order, ro.accepted_location, roi.`name`, ro.`name` as rec_order from `tabReceive Order` ro inner join `tabReceive Order Item` roi on ro.`name` = roi.parent inner join `tabPurchase Order` po on roi.purchase_order = po.`name` where ro.docstatus = '1' and po.supplier = %s and (ro.`name` = %s or ro.`name` = %s) and roi.si_qty < roi.qty order by po.`name` asc""", (supplier, a, b), as_dict=1)
 	else:
-		items = frappe.db.sql("""select roi.item_code, roi.item_name, roi.po_detail, roi.qty, roi.po_uom, roi.stock_uom, roi.purchase_order, ro.accepted_location, roi.`name`, ro.`name` as rec_order from `tabReceive Order` ro inner join `tabReceive Order Item` roi on ro.`name` = roi.parent inner join `tabPurchase Order` po on roi.purchase_order = po.`name` where ro.docstatus = '1' and po.supplier = %s and ro.`name` = %s and roi.purchase_invoice is null order by po.`name` asc""", (supplier, ro), as_dict=1)
+		items = frappe.db.sql("""select roi.item_code, roi.item_name, roi.po_detail, roi.qty, roi.si_qty, roi.po_uom, roi.stock_uom, roi.purchase_order, ro.accepted_location, roi.`name`, ro.`name` as rec_order from `tabReceive Order` ro inner join `tabReceive Order Item` roi on ro.`name` = roi.parent inner join `tabPurchase Order` po on roi.purchase_order = po.`name` where ro.docstatus = '1' and po.supplier = %s and ro.`name` = %s and roi.si_qty < roi.qty order by po.`name` asc""", (supplier, ro), as_dict=1)
 	for row in items:
 		description = frappe.db.get_value("Purchase Order Item", row.po_detail, "description")
 		rate = frappe.db.get_value("Purchase Order Item", row.po_detail, "rate")
@@ -364,7 +330,7 @@ def get_picking_items(supplier, ro):
 	        'item_code': row.item_code,
 			'item_name': row.item_name,
 			'description': description,
-			'qty': row.qty,
+			'qty': flt(row.qty) - flt(row.si_qty),
 			'uom': row.po_uom,
 			'stock_uom': row.stock_uom,
 			'rate': rate,

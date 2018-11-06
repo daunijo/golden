@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.22.34'
+__version__ = '1.22.35'
 
+# 1.22.35
+#   - Fix get remaining item RO in PI. #203
 # 1.22.34
 #   - Add field: default_purchase_return_write_off_account in Company. #202
 #   - Checking uom base on item_code in SO, Packing, TO, SI, PO, RO, PI, Sales Return, . #200
