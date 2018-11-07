@@ -11,6 +11,32 @@ from num2words import num2words
 def change_sales_order(doc, method):
     if doc.rss_warehouse:
         for row in doc.items:
+            location_list = frappe.db.sql("""select w.`name`, w.parent_warehouse_rss, w.parent_section_rss, b.projected_qty from `tabWarehouse` w inner join `tabBin` b on w.`name` = b.warehouse where w.disabled = '0' and w.parent_warehouse_rss = %s and w.type = 'Location' and b.item_code = %s order by b.projected_qty asc""", (doc.rss_warehouse, row.item_code), as_dict=1)
+            count = 0
+            for a in location_list:
+                if flt(a.projected_qty) >= flt(row.stock_qty) and flt(count) == 0:
+                    count += 1
+                    row.default_gudang = a.parent_warehouse_rss
+                    row.default_section = a.parent_section_rss
+                    row.default_location = a.name
+                    row.warehouse = a.name
+            if flt(count) == 0:
+                check = frappe.db.sql("""select count(*) from `tabWarehouse` w inner join `tabBin` b on w.`name` = b.warehouse where w.disabled = '0' and w.parent_warehouse_rss = %s and w.type = 'Location' and b.item_code = %s  and b.projected_qty <= %s""", (doc.rss_warehouse, row.item_code, row.stock_qty))[0][0]
+                if flt(check) != 0:
+                    wh = frappe.db.sql("""select w.`name` from `tabWarehouse` w inner join `tabBin` b on w.`name` = b.warehouse where w.disabled = '0' and w.parent_warehouse_rss = %s and w.type = 'Location' and b.item_code = %s and b.projected_qty <= %s order by b.projected_qty desc limit 1""", (doc.rss_warehouse, row.item_code, row.stock_qty))[0][0]
+                    wh_detail = frappe.db.get_value("Warehouse", wh, ["parent_warehouse_rss", "parent_section_rss"], as_dict=1)
+                    row.default_gudang = wh_detail.parent_warehouse_rss
+                    row.default_section = wh_detail.parent_section_rss
+                    row.default_location = wh
+                    row.warehouse = wh
+                else:
+                    row.default_gudang = doc.rss_warehouse
+                    row.default_section = None
+                    row.default_location = None
+
+def change_sales_order_old(doc, method):
+    if doc.rss_warehouse:
+        for row in doc.items:
             count_qty = frappe.db.sql("""select count(*) from `tabWarehouse` w1 inner join `tabWarehouse` w2 on w1.`name` = w2.parent_warehouse inner join `tabWarehouse` w3 on w2.`name` = w3.parent_warehouse inner join `tabBin` b on w3.`name` = b.warehouse where w1.`name` = %s and w3.disabled = '0' and b.item_code = %s""", (doc.rss_warehouse, row.item_code))[0][0]
             if flt(count_qty) >= 1:
                 count_projected = frappe.db.sql("""select count(*) from `tabWarehouse` w1 inner join `tabWarehouse` w2 on w1.`name` = w2.parent_warehouse inner join `tabWarehouse` w3 on w2.`name` = w3.parent_warehouse inner join `tabBin` b on w3.`name` = b.warehouse where w1.`name` = %s and w3.disabled = '0' and b.item_code = %s and b.projected_qty >= %s order by b.projected_qty asc limit 1""", (doc.rss_warehouse, row.item_code, row.stock_qty))[0][0]
@@ -30,7 +56,6 @@ def change_sales_order(doc, method):
                 row.default_gudang = doc.rss_warehouse
                 row.default_section = None
                 row.default_location = None
-            #     frappe.throw(_("Item <b>{0}</b> has never been transaction in warehouse <b>{1}</b>").format(row.item_code, doc.rss_warehouse))
 
 def validate_sales_order(doc, method):
     if doc.allow_double_order == 0:

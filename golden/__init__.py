@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.22.35'
+__version__ = '1.22.36'
 
+# 1.22.36
+#   - Fix cannot save SO if item have 2 stock in one warehouse.
 # 1.22.35
 #   - Fix get remaining item RO in PI. #203
 # 1.22.34
