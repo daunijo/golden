@@ -53,6 +53,34 @@ frappe.ui.form.on("Sales Order", {
 				filters: { 'department': 'sales' }
 			}
 		});
+		frm.set_query("default_gudang", "items", function(doc, cdt, cdn) {
+			var d = locals[cdt][cdn];
+			return {
+				filters: [
+					['is_group', '=', 1]
+				]
+			}
+		});
+		frm.set_query("default_section", "items", function (doc, cdt, cdn) {
+			var row = locals[cdt][cdn];
+			return {
+				filters: {
+					'is_group': 1,
+					'type': 'Section',
+					'parent': row.default_gudang
+				}
+			}
+		});
+		frm.set_query("default_location", "items", function (doc, cdt, cdn) {
+			var row = locals[cdt][cdn];
+			return {
+				filters: {
+					'is_group': 0,
+					'type': 'Location',
+					'parent': row.default_section
+				}
+			}
+		});
 	},
 	validate: function(frm){
 		frm.doc.title = frm.doc.customer
@@ -193,34 +221,6 @@ frappe.ui.form.on('Sales Order Item', {
 		});
 	}
 })
-cur_frm.set_query("default_gudang", "items", function(doc, cdt, cdn) {
-	var d = locals[cdt][cdn];
-	return {
-		filters: [
-			['is_group', '=', 1]
-		]
-	}
-});
-cur_frm.set_query("default_section", "items", function (doc, cdt, cdn) {
-	var row = locals[cdt][cdn];
-	return {
-		filters: {
-			'is_group': 1,
-			'type': 'Section',
-			'parent': row.default_gudang
-		}
-	}
-});
-cur_frm.set_query("default_location", "items", function (doc, cdt, cdn) {
-	var row = locals[cdt][cdn];
-	return {
-		filters: {
-			'is_group': 0,
-			'type': 'Location',
-			'parent': row.default_section
-		}
-	}
-});
 cur_frm.cscript['Make Packing'] = function() {
 	frappe.model.open_mapped_doc({
 		method: "golden.golden.stock.make_packing_list",

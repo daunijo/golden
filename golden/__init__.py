@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.22.36'
+__version__ = '1.22.37'
 
+# 1.22.37
+#   - Add ignore_permissions=True when cancel Payment Entry Receive and Payment Entry Pay in order to cancel Payment Entry
 # 1.22.36
 #   - Fix cannot save SO if item have 2 stock in one warehouse.
 # 1.22.35

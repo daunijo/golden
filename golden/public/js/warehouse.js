@@ -50,6 +50,13 @@ frappe.ui.form.on('Warehouse', {
 			frm.set_df_property("parent_warehouse_rss", "read_only", 1);
 		}
 		frm.toggle_reqd(['parent_warehouse_rss', 'parent_section_rss'], false);
+		frm.set_query("parent_section_rss",  function (doc) {
+				return {
+		        filters: [
+		            ['old_parent', '=', frm.doc.parent_warehouse_rss]
+		        ],
+				}
+		});
 	},
 	parent_warehouse_rss: function(frm){
 		if(frm.doc.type == "Section"){
@@ -75,7 +82,7 @@ frappe.ui.form.on('Warehouse', {
 			frm.refresh_fields();
 		}else{
 			frm.toggle_reqd(['parent_warehouse_rss', 'parent_section_rss'], false);
-		}		
+		}
 	},
 	parent_section_rss: function(frm){
 		frm.set_value("parent_warehouse", frm.doc.parent_section_rss);
@@ -96,11 +103,3 @@ frappe.ui.form.on('Warehouse', {
 	},
 
 })
-
-cur_frm.set_query("parent_section_rss",  function (frm) {
-		return {
-        filters: [
-            ['old_parent', '=', cur_frm.doc.parent_warehouse_rss]
-        ],
-		}
-});

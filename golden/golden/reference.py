@@ -450,6 +450,7 @@ def cancel_sales_order_3(doc, method):
             if bin:
                 a = flt(bin.ito_qty) - flt(row.stock_qty)
                 frappe.db.sql("""update `tabBin` set ito_qty = %s where `name` = %s""", (a, bin.name))
+    doc.reload()
 
 def cancel_sales_order_4(doc, method):
     count_ito = frappe.db.sql("""select count(*) from `tabTransfer Order` where docstatus = '0' and action = 'Auto'""")[0][0]
@@ -461,7 +462,8 @@ def cancel_sales_order_4(doc, method):
             delete_ito.delete()
 
 def cancel_sales_order_5(doc, method):
-	frappe.db.sql("""update `tabSales Order` set golden_status = 'Cancelled' where `name` = %s""", doc.name)
+    frappe.db.set_value("Sales Order", doc.name, "golden_status", "Cancelled")
+    doc.reload()
 
 def submit_delivery_note(doc, method):
     for row in doc.items:
