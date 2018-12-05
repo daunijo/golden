@@ -15,6 +15,33 @@ frappe.ui.form.on('Item', {
   		}, __("View"));
   	}
 	},
+	onload: function(frm){
+		frm.set_query("default_gudang", function(doc) {
+			return {
+				filters: {
+					'is_group': 1,
+					'type': 'Warehouse'
+				}
+			}
+		});
+		frm.set_query("default_section", function(doc) {
+			return {
+				filters: {
+					'is_group': 1,
+					'type': 'Section',
+					'parent': frm.doc.default_gudang
+				}
+			}
+		});
+		frm.set_query("default_location", function(doc) {
+			return {
+				filters: {
+					'is_group': 0,
+					'type': 'Location'
+				}
+			}
+		});
+	},
 	item_group: function(frm){
 		if(frm.doc.item_group){
 			frappe.call({
@@ -61,28 +88,3 @@ frappe.ui.form.on('Item', {
 		});
 	}
 })
-cur_frm.set_query("default_gudang", function(frm) {
-	return {
-		filters: {
-			'is_group': 1,
-			'type': 'Warehouse'
-		}
-	}
-});
-cur_frm.set_query("default_section", function(frm) {
-	return {
-		filters: {
-			'is_group': 1,
-			'type': 'Section',
-			'parent': frm.doc.default_gudang
-		}
-	}
-});
-cur_frm.set_query("default_location", function(frm) {
-	return {
-		filters: {
-			'is_group': 0,
-			'type': 'Location'
-		}
-	}
-});

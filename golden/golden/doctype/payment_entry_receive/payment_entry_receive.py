@@ -64,8 +64,8 @@ class PaymentEntryReceive(Document):
 
 	def delete_payment_entry(self):
 		pe = frappe.get_doc("Payment Entry", {"payment_entry_receive": self.name})
-		pe.cancel()
-		pe.delete()
+		pe.cancel(ignore_permissions=True)
+		pe.delete(ignore_permissions=True)
 
 	def rem_allocated_amount(self):
 		for row in self.deductions:

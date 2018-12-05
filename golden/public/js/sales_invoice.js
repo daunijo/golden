@@ -1,10 +1,10 @@
 frappe.ui.form.on("Sales Invoice", {
 	refresh: function(frm){
 		frm.clear_custom_button();
-		cur_frm.set_df_property("project", "read_only", 1);
-		cur_frm.set_df_property("is_pos", "hidden", 1);
-		cur_frm.set_df_property("update_stock", "hidden", 1);
-		var df = frappe.meta.get_docfield("Sales Invoice Item", "barcode", cur_frm.doc.name);
+		frm.set_df_property("project", "read_only", 1);
+		frm.set_df_property("is_pos", "hidden", 1);
+		frm.set_df_property("update_stock", "hidden", 1);
+		var df = frappe.meta.get_docfield("Sales Invoice Item", "barcode", frm.doc.name);
 		df.hidden = 1;
 	},
 	onload: function(frm){
